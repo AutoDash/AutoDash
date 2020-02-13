@@ -1,0 +1,2 @@
+firebase-admin==3.2.1
+google-cloud-firestore==1.6.2
