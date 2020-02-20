@@ -8,16 +8,18 @@ class MetaDataItem:
         self.collision_type = collision_type
         self.description = description
         self.location = location
-
-    def to_json(self) -> str:
-        obj = {
+        self.obj = {
             'title': self.title,
             'url': self.url,
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location
         }
+
+    def to_json_str(self) -> str:
+        return json.dumps(self.obj, sort_keys=True, indent=2)
+    
+    def to_file(self):
         # Write the output to disk
         with open(self.id + '_metadata.json', 'w') as outfile:
-            json.dump(obj, outfile, sort_keys=True, indent=4)
-        return obj
+            json.dump(self.obj, outfile, sort_keys=True, indent=2)
