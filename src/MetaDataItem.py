@@ -9,6 +9,9 @@ class MetaDataItem:
         self.description = description
         self.location = location
 
+    def __repr__(self) -> str:
+        return self.to_json_str()
+
     def to_json(self) -> dict:
         return {
             'title': self.title,
