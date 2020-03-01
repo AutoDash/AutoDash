@@ -6,6 +6,8 @@ import firebase_admin
 from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
+from src.data.MetaDataItem import MetaDataItem
+
 
 def setup():
     dirname, filename = os.path.split(os.path.abspath(sys.argv[0]))
@@ -26,6 +28,9 @@ def all_videos_reference():
 
 def excluded_videos_reference():
     return db.reference('excluded_videos')
+
+def metadata_reference():
+    return db.reference('metadata')
 
 
 async def query_list(ref: Reference) -> List[str]:
@@ -67,3 +72,41 @@ async def add_excluded_video(url: str) -> str:
 async def fetch_excluded_video_list() -> List[str]:
     excluded_ref = excluded_videos_reference()
     return await query_list(excluded_ref)
+
+
+async def fetch_newest_videos(last_id: str) -> List[MetaDataItem]:
+    metadata_ref = metadata_reference()
+    vals = metadata_ref.get()
+    if vals is None:
+        return []
+
+    result = []
+    for key, val in vals.items():
+        result.append(val)
+
+
+async def publish_metadata(metadata: MetaDataItem) -> str:
+    metadata_ref = metadata_reference()
+
+    # TODO: convert MetaDataItem to dict
+    item_dict = {}
+    metadata_ref.child(metadata.id).update(metadata.to_dict())
+
+    return metadata.id
+
+
+async def fetch_metadata(id: str) -> MetaDataItem:
+    metadata_ref = metadata_reference()
+    item_dict = metadata_ref.get(id)
+
+    # TODO: convert dict to metadataitem
+    return MetaDataItem()
+
+
+
+async def test():
+    print(await add_excluded_video('hello2'))
+    print(await fetch_excluded_video_list())
+
+setup()
+asyncio.run(test())
