@@ -28,3 +28,14 @@ class MetaDataItem:
         # Write the output to disk
         with open(self.id + '_metadata.json', 'w') as outfile:
             json.dump(self.to_json, outfile, sort_keys=True, indent=2)
+
+
+def create_metadata(id: str, variables: dict) -> MetaDataItem:
+    metadata = MetaDataItem(id,
+                            variables['title'],
+                            variables['url'],
+                            variables['collision_type'],
+                            variables['description'],
+                            variables['location'])
+    return metadata
+

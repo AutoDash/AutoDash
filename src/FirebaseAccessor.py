@@ -1,12 +1,11 @@
 import os, sys
 from typing import List
 
-import asyncio
 import firebase_admin
 from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
-from src.data.MetaDataItem import MetaDataItem
+from src.data.MetaDataItem import MetaDataItem, create_metadata
 
 
 def setup():
@@ -21,13 +20,6 @@ def setup():
         }
     })
 
-
-def all_videos_reference():
-    return db.reference('all_videos')
-
-
-def excluded_videos_reference():
-    return db.reference('excluded_videos')
 
 def metadata_reference():
     return db.reference('metadata')
@@ -44,34 +36,27 @@ async def query_list(ref: Reference) -> List[str]:
     return result
 
 
-async def add_video_url(url: str) -> str:
-    # Check that the video isn't already in the list
-    video_ref = all_videos_reference()
-    existing_list = await query_list(video_ref)
-    if url in existing_list:
-        return ""
+async def query_keys(ref: Reference) -> List[str]:
+    vals = ref.get()
+    if vals is None:
+        return []
 
-    return video_ref.push(url).key
-
-
-async def fetch_video_list():
-    video_ref = all_videos_reference()
-    return await query_list(video_ref)
+    keys = []
+    for key, val in vals.items():
+        keys.append(key)
+    return keys
 
 
-async def add_excluded_video(url: str) -> str:
-    # Check that the video isn't already in the list
-    excluded_ref = excluded_videos_reference()
-    existing_list = await query_list(excluded_ref)
-    if url in existing_list:
-        return ""
-
-    return excluded_ref.push(url).key
+async def fetch_video_url_list() -> List[str]:
+    ref = metadata_reference()
+    metadata_list = await query_list(ref)
+    urls = map(lambda metadata: metadata['url'], metadata_list)
+    return list(urls)
 
 
-async def fetch_excluded_video_list() -> List[str]:
-    excluded_ref = excluded_videos_reference()
-    return await query_list(excluded_ref)
+async def fetch_video_id_list() -> List[str]:
+    ref = metadata_reference()
+    return await query_keys(ref)
 
 
 async def fetch_newest_videos(last_id: str) -> List[MetaDataItem]:
@@ -81,32 +66,39 @@ async def fetch_newest_videos(last_id: str) -> List[MetaDataItem]:
         return []
 
     result = []
-    for key, val in vals.items():
-        result.append(val)
+    for key, val in reversed(vals.items()):
+        if key == last_id:
+            break
+        result.append(create_metadata(key, val))
+
+    return result
 
 
-async def publish_metadata(metadata: MetaDataItem) -> str:
-    metadata_ref = metadata_reference()
+async def publish_new_metadata(metadata: MetaDataItem) -> str:
+    ref = metadata_reference()
 
-    # TODO: convert MetaDataItem to dict
-    item_dict = {}
-    metadata_ref.child(metadata.id).update(metadata.to_dict())
+    # Check that the video isn't already in the list by seeing if its url is already in the list
+    existing_list = await fetch_video_url_list()
+    if metadata.url in existing_list:
+        return "Error, video url already in list"
 
-    return metadata.id
+    return ref.push(metadata.to_json()).key
+
+
+# Returns 1 on Success and 0 on Failure
+async def update_metadata(metadata: MetaDataItem) -> int:
+    ref = metadata_reference()
+
+    existing_ids = await query_keys(ref)
+    if metadata.id not in existing_ids:
+        return 0
+
+    ref.child(metadata.id).update(metadata.to_dict())
+    return 1
 
 
 async def fetch_metadata(id: str) -> MetaDataItem:
     metadata_ref = metadata_reference()
     item_dict = metadata_ref.get(id)
 
-    # TODO: convert dict to metadataitem
-    return MetaDataItem()
-
-
-
-async def test():
-    print(await add_excluded_video('hello2'))
-    print(await fetch_excluded_video_list())
-
-setup()
-asyncio.run(test())
+    return create_metadata(id, dict(item_dict))
