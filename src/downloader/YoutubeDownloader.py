@@ -15,7 +15,7 @@ class YoutubeDownloader(iDownloader):
     async def download(self, link:str) -> VideoItem:
         self.ydl.download([link])
         if self.file_name is None:
-            raise DownloadException()
+            raise DownloadException("Failed to download youtube link " + link)
         return VideoItem(self.file_name)
 
     def on_download_callback(self, download):
