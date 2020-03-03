@@ -21,7 +21,18 @@ def setup():
     })
 
 def create_metadata(id: str, var_dict: dict) -> MetaDataItem:
+    # Find all needed variables of MetadataItem
+    empty_item = MetaDataItem(None, None, None, None, None, None)
+    all_vars = empty_item.to_json().keys()
+
     var_dict['id'] = id
+    defined_vars = var_dict.keys()
+
+    for var in all_vars:
+        if var not in defined_vars:
+            var_dict[var] = None
+
+
     return MetaDataItem(**var_dict)
 
 
@@ -65,10 +76,14 @@ async def fetch_video_id_list() -> List[str]:
 
 async def fetch_newest_videos(last_id: str) -> List[MetaDataItem]:
     metadata_ref = metadata_reference()
-    vals = metadata_ref.get()
+
+    # Keys are timestamp based and therefore ordering them by key gets them in the order they were added
+    vals = metadata_ref.order_by_key().get()
     if vals is None:
         return []
 
+    # Reversing this ordered list will put the newest items first, and therefore
+    # all the items seen before the recognized last item are new
     result = []
     for key, val in reversed(vals.items()):
         if key == last_id:
@@ -97,12 +112,11 @@ async def update_metadata(metadata: MetaDataItem) -> int:
     if metadata.id not in existing_ids:
         return 0
 
-    ref.child(metadata.id).update(metadata.to_dict())
+    ref.child(metadata.id).update(metadata.to_json())
     return 1
 
 
 async def fetch_metadata(id: str) -> MetaDataItem:
     metadata_ref = metadata_reference()
-    item_dict = metadata_ref.get(id)
-
+    item_dict = metadata_ref.child(id).get()
     return create_metadata(id, dict(item_dict))
