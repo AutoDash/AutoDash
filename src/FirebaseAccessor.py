@@ -5,7 +5,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
-from src.data.MetaDataItem import MetaDataItem, create_metadata
+from src.data.MetaDataItem import MetaDataItem
 
 
 def setup():
@@ -19,6 +19,10 @@ def setup():
             'uid': 'pipeline-worker'
         }
     })
+
+def create_metadata(id: str, var_dict: dict) -> MetaDataItem:
+    var_dict['id'] = id
+    return MetaDataItem(**var_dict)
 
 
 def metadata_reference():
