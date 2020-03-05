@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-
-from src.data.MetaDataItem import MetaDataItem
-from src.FirebaseAccessor import fetch_video_url_list
+from data.MetaDataItem import MetaDataItem
+from FirebaseAccessor import fetch_video_url_list
 
 class CrawlerException(Exception):
     '''Raise on inability to find next downloadable'''
