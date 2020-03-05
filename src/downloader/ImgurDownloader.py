@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from src.downloader.iDownloader import iDownloader
-from src.data.VideoItem import VideoItem
+from abc import ABC
+from iDownloader import iDownloader
+from data.VideoItem import VideoItem
 from imgur_downloader import ImgurDownloader as imgur
 
 class ImgurDownloader(iDownloader):
