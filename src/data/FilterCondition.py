@@ -53,14 +53,6 @@ class FilterCondition(object):
         unenclosed_paren_count = 0
         
         for ch in filter_string:
-            if ch == '"' or ch == "'":
-                if not in_quoted_string:
-                    in_quoted_string = True
-                    quote_type = ch
-                elif ch == quote_type:
-                    in_quoted_string = False
-                    quote_type = None
-                
             if not in_quoted_string:
                 if ch in self.OPERATORS:
                     op_token = ch
@@ -85,6 +77,15 @@ class FilterCondition(object):
                     tokens.append(self.get_validated_token(curr_token))
                     curr_token = ""
                     continue
+                    
+                    
+            if ch == '"' or ch == "'":
+                if not in_quoted_string:
+                    in_quoted_string = True
+                    quote_type = ch
+                elif ch == quote_type:
+                    in_quoted_string = False
+                    quote_type = None
                    
             
             curr_token += ch
