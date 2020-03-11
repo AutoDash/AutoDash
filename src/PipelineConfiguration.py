@@ -9,10 +9,14 @@ Usage:
     reddit_dl = RedditDownloader(source)
     imgur_dl = ImgurDownloader(source)
 
+    ...
+
     admin = Administrator(youtube_dl, reddit_dl, imgur_dl)
 
     dashcam_filter = DashcamFilter(admin)
     accident_filter = AccidentFilter(admin)
+
+    ...
 
     acceptor = Acceptor(dashcam_filter, accident_filter)
 
