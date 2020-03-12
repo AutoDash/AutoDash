@@ -1,10 +1,20 @@
-import shlex
+
+import re
 from MetaDataItem import MetaDataItem
 
-def is_string(token):
-    return (token[0] == '"' and token[-1] == '"') or (token[0] == "'" and token[-1] == "'")
+single_quote_str_regex = re.compile(r'\'([^\\\']|\\.)*\'')
+double_quote_str_regex = re.compile(r'"([^\\"]|\\.)*"')
 
-def is_number(token):
+def is_string_token(token):
+    if token[0] == "'":
+        match = single_quote_str_regex.match(token)
+    elif token[0] == '"':
+        match = double_quote_str_regex.match(token)
+    else:
+        return False
+    return match is not None and match.group(0) == token
+
+def is_number_token(token):
     try:
         float(token)
     except ValueError:
@@ -28,16 +38,19 @@ class FilterCondition(object):
     VALID_ATTRS = MetaDataItem.attributes()
 
     def __init__(self, filter_string):
+        self.filter_string = filter_string
         tokens = self.tokenize(filter_string)
 
         self.filter_func = eval('lambda v: ' + " ".join(tokens))
         self.validate_filter()
-        
+    
+    def __repr__(self) -> str:
+        return f"FilterCondition({self.filter_string})"
         
     def get_validated_token(self, token):
         if token in self.VALID_ATTRS:
             return "v['" + token + "']"
-        elif not token or token in self.OPERATORS or is_string(token) or is_number(token):
+        elif not token or token in self.OPERATORS or is_string_token(token) or is_number_token(token):
             return token
         raise SyntaxError("Invalid ID token: " + token)
 
@@ -100,7 +113,7 @@ class FilterCondition(object):
 
 
     def validate_filter(self):
-        # Do a test filter to catch any syntax errors not captured by tokenizations
+        # Do a test filter to catch any syntax/type errors not captured by tokenization
         data = {}
         for attr in self.VALID_ATTRS:
             data[attr] = self.VALID_ATTRS[attr]();
@@ -114,6 +127,23 @@ class FilterCondition(object):
                 filtered_items.append(item)
         return filtered_items
         
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
         
