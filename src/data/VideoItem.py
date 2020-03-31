@@ -8,7 +8,7 @@ class VideoItem:
         self.time = time
         self.rgb = rgb
         self.meta_data = meta_data
-        
+
     def encode(self):
         return self.meta_data.encode()
 
