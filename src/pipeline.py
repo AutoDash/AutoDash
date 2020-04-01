@@ -39,8 +39,8 @@ def main():
     args = parser.parse_args()
 
     hostname = gethostname()
-    context = { 
-        **vars(args), 
+    context = {
+        **vars(args),
         'work_queue': Queue(),
         'hostname': hostname
     }

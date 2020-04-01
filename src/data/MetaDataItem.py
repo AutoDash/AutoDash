@@ -1,4 +1,4 @@
-import json
+import json, hashlib
 
 class MetaDataItem:
     def __init__(self, id, title, url, collision_type, description, location):
@@ -12,6 +12,9 @@ class MetaDataItem:
     def __repr__(self) -> str:
         return self.to_json_str()
 
+    def encode(self) -> str:
+        return hashlib.sha224(self.url.encode()).hexdigest()
+
     def to_json(self) -> dict:
         return {
             'title': self.title,
@@ -23,7 +26,7 @@ class MetaDataItem:
 
     def to_json_str(self) -> str:
         return json.dumps(self.to_json(), sort_keys=True, indent=2)
-    
+
     def to_file(self):
         # Write the output to disk
         with open(self.id + '_metadata.json', 'w') as outfile:
