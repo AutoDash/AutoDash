@@ -1,4 +1,4 @@
-import MetaDataItem
+from .MetaDataItem import MetaDataItem
 import hashlib
 
 class VideoItem:
