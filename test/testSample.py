@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
-class TestUnitTest(unittest.TestCase):
-
-    def test_true(self):
+class SampleTest(unittest.TestCase):
+    def test_(self):
         self.assertEqual(True, True)
 
 if __name__ == '__main__':

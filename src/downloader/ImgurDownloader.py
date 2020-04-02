@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from abc import ABC
 from iDownloader import iDownloader
-from VideoItem import VideoItem
+from data.VideoItem import VideoItem
 from imgur_downloader import ImgurDownloader as imgur
 
 class ImgurDownloader(iDownloader):
