@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
-import VideoItem
+from src.data.VideoItem import VideoItem
 import os
+
+class DownloadException(Exception):
+    '''Raise on download failure'''
 
 class iDownloader(ABC):
     def __init__(self, pathname:str = os.getcwd()):
