@@ -1,6 +1,6 @@
 
 import re
-from MetaDataItem import MetaDataItem
+from src.data.MetaDataItem import MetaDataItem
 
 single_quote_str_regex = re.compile(r'\'([^\\\']|\\.)*\'')
 double_quote_str_regex = re.compile(r'"([^\\"]|\\.)*"')
