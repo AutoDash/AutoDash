@@ -11,8 +11,8 @@ class PipelineCLIParser(ArgumentParser):
                 help="Number of workers to process work", dest='n_workers')
         self.add_argument('--mode', choices={'crawler', 'ucrawler', 'user'}, default='user',
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
-        self.add_argument('--source', required=True, help='HTTP link to firebase')
-        self.add_argument('--filter', nargs='+', help='A relational condition over metadata that we pull')
+        self.add_argument('--source', type=str, required=True, help='HTTP link to firebase')
+        self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull')
 
     def positive_int_type(val):
         intval = int(val)

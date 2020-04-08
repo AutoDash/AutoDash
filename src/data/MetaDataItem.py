@@ -12,6 +12,17 @@ class MetaDataItem:
     def __repr__(self) -> str:
         return self.to_json_str()
 
+    # Returns lists of attributes and their types. Types should ideally be default constructable.
+    @staticmethod
+    def attributes() -> dict:
+        return {
+            'title': str,
+            'url' : str,
+            'collision_type' : str,
+            'description' : str,
+            'location' : str
+        }
+      
     def encode(self) -> str:
         return hashlib.sha224(self.url.encode()).hexdigest()
 
