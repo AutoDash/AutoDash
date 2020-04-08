@@ -6,12 +6,16 @@ single_quote_str_regex = re.compile(r'\'([^\\\']|\\.)*\'')
 double_quote_str_regex = re.compile(r'"([^\\"]|\\.)*"')
 
 def is_string_token(token):
+    if not token:
+        return False
+        
     if token[0] == "'":
         match = single_quote_str_regex.match(token)
     elif token[0] == '"':
         match = double_quote_str_regex.match(token)
     else:
         return False
+        
     return match is not None and match.group(0) == token
 
 def is_number_token(token):
@@ -107,8 +111,12 @@ class FilterCondition(object):
             raise SyntaxError("Mismatched quotes in filter string: " + filter_string)
         elif unenclosed_paren_count > 0:
             raise SyntaxError("'(' without matching ')' in filter string: " + filter_string)
-            
-        tokens.append(self.get_validated_token(curr_token)) 
+        
+        if op_token:
+            tokens.append(self.get_validated_token(curr_token[:-len(op_token)]))
+            tokens.append(self.get_validated_token(op_token))
+        else:
+            tokens.append(self.get_validated_token(curr_token)) 
         return tokens
 
 

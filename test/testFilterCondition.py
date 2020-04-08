@@ -17,7 +17,7 @@ class TestFilterCondition(unittest.TestCase):
         self.assertTrue(is_string_token("''"))
         self.assertTrue(is_string_token("'hello'"))
         self.assertTrue(is_string_token("'h\"ello'"))
-        self.assertTrue(is_string_token("'h\'ello'"))
+        self.assertTrue(is_string_token("'h\\'ello'"))
         self.assertTrue(is_string_token("'h\\ello'"))
         self.assertTrue(is_string_token("'hello\\''"))
         
@@ -27,13 +27,13 @@ class TestFilterCondition(unittest.TestCase):
         self.assertFalse(is_string_token("'hell'o"))
         self.assertFalse(is_string_token("'h'ello'"))
         self.assertFalse(is_string_token("'h''ello'"))
-        self.assertFalse(is_string_token("'hello\'"))
+        self.assertFalse(is_string_token("'hello\\'"))
         
     def test_double_quote_string(self):
         self.assertTrue(is_string_token('""'))
         self.assertTrue(is_string_token('"hello"'))
         self.assertTrue(is_string_token('"h\'ello"'))
-        self.assertTrue(is_string_token('"h\"ello"'))
+        self.assertTrue(is_string_token('"h\\"ello"'))
         self.assertTrue(is_string_token('"h\\ello"'))
         self.assertTrue(is_string_token('"hello\\""'))
         
@@ -43,7 +43,7 @@ class TestFilterCondition(unittest.TestCase):
         self.assertFalse(is_string_token('"hell"o'))
         self.assertFalse(is_string_token('"h"ello"'))
         self.assertFalse(is_string_token('"h""ello"'))
-        self.assertFalse(is_string_token('"hello\"'))
+        self.assertFalse(is_string_token('"hello\\"'))
 
     def test_number(self):
         self.assertTrue(is_number_token("0"))
@@ -101,7 +101,7 @@ class TestFilterCondition(unittest.TestCase):
         self.assertEqual(lst1[1].id, 5)
         
         fc2 = FilterCondition("title == 'Vid1' or title == 'Vid5'")
-        lst2 = fc1.filter(mdi_list)
+        lst2 = fc2.filter(mdi_list)
         self.assertEqual(len(lst2), 2)
         self.assertEqual(lst2[0].id, 1)
         self.assertEqual(lst2[1].id, 5)
