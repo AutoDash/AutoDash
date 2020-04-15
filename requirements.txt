@@ -2,3 +2,4 @@ imgur-downloader==0.2.2
 firebase-admin==3.2.1
 google-cloud-firestore==1.6.2
 youtube_dl==2019.11.28
+opencv-python==4.2.0.34
