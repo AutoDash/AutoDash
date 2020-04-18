@@ -6,11 +6,15 @@ from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
 from src.data.MetaDataItem import MetaDataItem
-from src.database.iDatabase import iDatabase
+from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+
 
 class FirebaseAccessor(iDatabase):
 
-    def __init__(self):
+    initialized = False
+
+    # Must be initialized only once
+    def initial_firebase(self):
         dirname, filename = os.path.split(os.path.abspath(sys.argv[0]))
         cred_file = os.path.join(dirname, "autodash-9dccb-firebase-adminsdk-si4cw-43915a72e5.json")
 
@@ -21,6 +25,11 @@ class FirebaseAccessor(iDatabase):
                 'uid': 'pipeline-worker'
             }
         })
+        FirebaseAccessor.initialized = True
+
+    def __init__(self):
+        if not FirebaseAccessor.initialized:
+            self.initial_firebase()
 
     # TODO: update to use a Metadata Attributes list, not the empty item
     def __create_metadata(self, id: str, var_dict: dict) -> MetaDataItem:
@@ -99,24 +108,29 @@ class FirebaseAccessor(iDatabase):
         # Check that the video isn't already in the list by seeing if its url is already in the list
         existing_list = await self.fetch_video_url_list()
         if metadata.url in existing_list:
-            return "Error, video url already in list"
+            raise AlreadyExistsException("Error, video url already in list")
 
-        return ref.push(metadata.to_json()).key
+        key = ref.push(metadata.to_json()).key
+        metadata.id = key
+        return key
 
 
-    # Returns 1 on Success and 0 on Failure
-    async def update_metadata(self, metadata: MetaDataItem) -> int:
+    async def update_metadata(self, metadata: MetaDataItem):
         ref = self.__metadata_reference()
 
         existing_ids = await self.__query_keys(ref)
         if metadata.id not in existing_ids:
-            return 0
+            raise NotExistingException()
 
         ref.child(metadata.id).update(metadata.to_json())
-        return 1
 
 
     async def fetch_metadata(self, id: str) -> MetaDataItem:
-        metadata_ref = self.__metadata_reference()
-        item_dict = metadata_ref.child(id).get()
+        ref = self.__metadata_reference()
+
+        existing_ids = await self.__query_keys(ref)
+        if id not in existing_ids:
+            raise NotExistingException()
+
+        item_dict = ref.child(id).get()
         return self.__create_metadata(id, dict(item_dict))
