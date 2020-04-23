@@ -10,7 +10,7 @@ class TestIExecutor(unittest.TestCase):
         self.assertEqual(True, True)
 
     def test_printer(self):
-        printer = Printer
+        printer = Printer(None,None)
         printer.run({
             "videoItem": VideoItem(0, 0, 0, 0, None)
         })

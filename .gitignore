@@ -2,3 +2,4 @@ __pycache__/
 .idea/
 .DS_Store
 autodash-9dccb-add3cdae62ea.json
+*.pyc
