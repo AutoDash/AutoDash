@@ -89,5 +89,12 @@ def main():
     run(executor)
 
 
+
+def main():
+    # TODO: build executors from file / command line arguments
+    executor = Printer()
+    run(executor)
+
+
 if __name__ == "__main__":
     main()

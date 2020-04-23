@@ -13,25 +13,23 @@ def run(executors):
 
 
 class TestExecutor(iExecutor):
-    def __init__(self, next, event_num):
-        super().__init__(next)
+    def __init__(self, prev, next, event_num):
+        super().__init__(next, prev)
         self.event_num = event_num
 
     def run(self, obj):
-        print(f"run {self.event_num}")
         events.put(self.event_num)
 
 
 class TestAdministrator(unittest.TestCase):
     def test_main_single_process(self):
         num_items = 10
-        ptr = TestExecutor(None, 0)
-        executors = [ptr]
+        executors = []
+        executors.append(TestExecutor(None, None, 0))
 
         for x in range(1, num_items):
-            temp = TestExecutor(None, x)
-            ptr.next = temp
-            ptr = temp
+            executors.append(TestExecutor(executors[-1], None, x))
+            executors[-2].next = executors[-1]
 
         administrator(executors, n_workers=1, max_iterations=1)
 
@@ -42,15 +40,15 @@ class TestAdministrator(unittest.TestCase):
 
     def test_main_multi_process(self):
         num_items = 10
-        ptr = TestExecutor(None, 0)
-        executors = [ptr]
+        executors = []
+        executors.append(TestExecutor(None, None, 0))
 
         for x in range(1, num_items):
-            temp = TestExecutor(None, x)
-            ptr.next = temp
-            ptr = temp
+            executors.append(TestExecutor(executors[-1], None, x))
+            executors[-2].next = executors[-1]
 
         administrator(executors, n_workers=2, max_iterations=3)
+
         for i in range(num_items*3):
             events.get(timeout=2)
 
