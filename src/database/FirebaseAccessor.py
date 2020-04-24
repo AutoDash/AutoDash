@@ -7,6 +7,7 @@ from firebase_admin.db import Reference
 
 from src.data.MetaDataItem import MetaDataItem
 from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+from src.utils import get_project_root
 
 
 class FirebaseAccessor(iDatabase):
@@ -15,8 +16,8 @@ class FirebaseAccessor(iDatabase):
 
     # Must be initialized only once
     def initial_firebase(self):
-        dirname, filename = os.path.split(os.path.abspath(sys.argv[0]))
-        cred_file = os.path.join(dirname, "autodash-9dccb-firebase-adminsdk-si4cw-43915a72e5.json")
+        dirname = get_project_root()
+        cred_file = os.path.join(dirname, "autodash-9dccb-add3cdae62ea.json")
 
         cred = credentials.Certificate(cred_file)
         fb_app = firebase_admin.initialize_app(cred, {
@@ -25,11 +26,11 @@ class FirebaseAccessor(iDatabase):
                 'uid': 'pipeline-worker'
             }
         })
-        FirebaseAccessor.initialized = True
 
     def __init__(self):
         if not FirebaseAccessor.initialized:
             self.initial_firebase()
+            FirebaseAccessor.initialized = True
 
     # TODO: update to use a Metadata Attributes list, not the empty item
     def __create_metadata(self, id: str, var_dict: dict) -> MetaDataItem:
