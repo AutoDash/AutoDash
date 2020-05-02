@@ -3,7 +3,7 @@ from typing import List
 
 import os
 
-from src.data.MetaDataItem import MetaDataItem, metadata_from_file, gen_filename
+from src.data.MetaDataItem import MetaDataItem, metadata_from_file, gen_filename, delete_metadata_file
 from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
 from src.utils import get_project_root
 
@@ -51,6 +51,12 @@ class LocalStorageAccessor(iDatabase):
             raise NotExistingException()
 
         return metadata_from_file(gen_filename(id), METADATA_STORAGE_DIR)
+
+    async def delete_metadata(self, id: str):
+        if id not in self.id_list:
+            raise NotExistingException()
+
+        delete_metadata_file(id, METADATA_STORAGE_DIR)
 
     async def fetch_video_id_list(self) -> List[str]:
         return self.id_list

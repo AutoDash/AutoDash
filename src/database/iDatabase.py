@@ -27,6 +27,10 @@ class iDatabase(ABC):
         pass
 
     @abstractmethod
+    async def delete_metadata(self, id: str):
+        pass
+
+    @abstractmethod
     async def fetch_video_id_list(self) -> List[str]:
         pass
 

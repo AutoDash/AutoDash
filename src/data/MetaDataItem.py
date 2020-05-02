@@ -55,6 +55,10 @@ def metadata_from_file(filename: str, directory: str) -> MetaDataItem:
         data['id'] = get_id_from_filename(filename)
         return MetaDataItem(**data)
 
+def delete_metadata_file(id: str, directory: str):
+    loc = os.path.join(directory, gen_filename(id))
+    if os.path.exists(loc):
+        os.remove(loc)
 
 def gen_filename(id: str):
     return id + '_metadata.json'
