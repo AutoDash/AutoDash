@@ -135,3 +135,13 @@ class FirebaseAccessor(iDatabase):
 
         item_dict = ref.child(id).get()
         return self.__create_metadata(id, dict(item_dict))
+
+
+    async def delete_metadata(self, id: str):
+        ref = self.__metadata_reference()
+
+        existing_ids = await self.__query_keys(ref)
+        if id not in existing_ids:
+            raise NotExistingException()
+
+        ref.child(id).delete()
