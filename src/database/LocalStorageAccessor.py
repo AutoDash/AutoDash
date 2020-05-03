@@ -11,14 +11,17 @@ METADATA_STORAGE_DIR = os.path.join(get_project_root(), "metadata_storage")
 
 class LocalStorageAccessor(iDatabase):
 
-    def __init__(self):
-        if not os.path.exists(METADATA_STORAGE_DIR):
-            os.mkdir(METADATA_STORAGE_DIR)
+    # Allow setting the storage location so that tests can run on a separate
+    #  directory and not break anything in the production database folder
+    def __init__(self, storage_loc = METADATA_STORAGE_DIR):
+        self.storage_loc = storage_loc
+        if not os.path.exists(self.storage_loc):
+            os.mkdir(self.storage_loc)
 
         self.url_list = []
         self.id_list = []
-        for filename in os.listdir(METADATA_STORAGE_DIR):
-            metadata = metadata_from_file(filename, METADATA_STORAGE_DIR)
+        for filename in os.listdir(self.storage_loc):
+            metadata = metadata_from_file(filename, self.storage_loc)
             self.url_list.append(metadata.url)
             self.id_list.append(metadata.id)
 
@@ -33,7 +36,7 @@ class LocalStorageAccessor(iDatabase):
             raise AlreadyExistsException()
 
         metadata.id = self.__gen_new_id()
-        metadata.to_file(METADATA_STORAGE_DIR)
+        metadata.to_file(self.storage_loc)
 
         self.id_list.append(metadata.id)
         self.url_list.append(metadata.url)
@@ -44,19 +47,19 @@ class LocalStorageAccessor(iDatabase):
             raise NotExistingException()
 
         # Overwrites existing file
-        metadata.to_file(METADATA_STORAGE_DIR)
+        metadata.to_file(self.storage_loc)
 
     async def fetch_metadata(self, id: str) -> MetaDataItem:
         if id not in self.id_list:
             raise NotExistingException()
 
-        return metadata_from_file(gen_filename(id), METADATA_STORAGE_DIR)
+        return metadata_from_file(gen_filename(id), self.storage_loc)
 
     async def delete_metadata(self, id: str):
         if id not in self.id_list:
             raise NotExistingException()
 
-        delete_metadata_file(id, METADATA_STORAGE_DIR)
+        delete_metadata_file(id, self.storage_loc)
 
     async def fetch_video_id_list(self) -> List[str]:
         return self.id_list
