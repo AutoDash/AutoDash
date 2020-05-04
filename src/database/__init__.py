@@ -9,7 +9,7 @@ class DatabaseConfigOption(enum.Enum):
     local_storage_only = 2
 
 #TODO: Update to read from config file, or replace this with singleton/dependency injection (whatever decided by pipeline)
-DATABASE_CONFIG = DatabaseConfigOption.firebase_metadata
+DATABASE_CONFIG = DatabaseConfigOption.local_storage_only
 
 if DATABASE_CONFIG is DatabaseConfigOption['firebase_metadata']:
     database_access = FirebaseAccessor()
