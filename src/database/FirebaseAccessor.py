@@ -1,4 +1,4 @@
-import os, sys
+import os
 from typing import List
 
 import firebase_admin
