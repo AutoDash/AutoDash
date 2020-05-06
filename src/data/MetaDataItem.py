@@ -1,5 +1,8 @@
 import json, hashlib
 
+import os
+
+
 class MetaDataItem:
     def __init__(self, id, title, url, collision_type, description, location):
         self.id = id
@@ -38,7 +41,28 @@ class MetaDataItem:
     def to_json_str(self) -> str:
         return json.dumps(self.to_json(), sort_keys=True, indent=2)
 
-    def to_file(self):
+    # For storing local storage in file system
+    def to_file(self, directory: str):
+        store_loc = os.path.join(directory, gen_filename(self.id))
         # Write the output to disk
-        with open(self.id + '_metadata.json', 'w') as outfile:
-            json.dump(self.to_json, outfile, sort_keys=True, indent=2)
+        with open(store_loc, 'w') as outfile:
+            json.dump(self.to_json(), outfile, sort_keys=True, indent=2)
+
+# For accessing metadata items stored in local storage
+def metadata_from_file(filename: str, directory: str) -> MetaDataItem:
+    loc = os.path.join(directory, filename)
+    with open(loc) as file:
+        data = json.load(file)
+        data['id'] = get_id_from_filename(filename)
+        return MetaDataItem(**data)
+
+def delete_metadata_file(id: str, directory: str):
+    loc = os.path.join(directory, gen_filename(id))
+    if os.path.exists(loc):
+        os.remove(loc)
+
+def gen_filename(id: str):
+    return id + '_metadata.json'
+
+def get_id_from_filename(filename: str):
+    return filename.split('_')[0]

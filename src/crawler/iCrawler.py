@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from data.MetaDataItem import MetaDataItem
+from src.data.MetaDataItem import MetaDataItem
 
 class iCrawler(ABC):
     def __init__(self):
