@@ -67,8 +67,7 @@ def run(executors, **kwargs):
     for worker in workers:
         worker.start()
 
-    iterations = context['max_iterations']
-    iterations = 10000 if iterations is None else iterations
+    iterations = context.get('max_iterations', 10000)
 
     for i in range(iterations):
         idx = 0
