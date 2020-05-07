@@ -4,13 +4,14 @@ import os
 
 
 class MetaDataItem:
-    def __init__(self, id, title, url, collision_type, description, location):
+    def __init__(self, id, title, url, collision_type=None, description=None, location=None, accident_index=None):
         self.id = id
         self.title = title
         self.url = url
         self.collision_type = collision_type
         self.description = description
         self.location = location
+        self.accident_index = accident_index
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -20,10 +21,11 @@ class MetaDataItem:
     def attributes() -> dict:
         return {
             'title': str,
-            'url' : str,
-            'collision_type' : str,
-            'description' : str,
-            'location' : str
+            'url': str,
+            'collision_type': str,
+            'description': str,
+            'location': str,
+            'accident_index': int
         }
       
     def encode(self) -> str:
@@ -35,7 +37,8 @@ class MetaDataItem:
             'url': self.url,
             'collision_type': self.collision_type,
             'description': self.description,
-            'location': self.location
+            'location': self.location,
+            'accident_index': self.accident_index
         }
 
     def to_json_str(self) -> str:
