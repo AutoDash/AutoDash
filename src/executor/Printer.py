@@ -3,5 +3,5 @@ from typing import Dict, Any
 from src.executor.iExecutor import iExecutor
 
 class Printer(iExecutor):
-    def run(obj : Dict[str, Any]):
+    def run(self, obj : Dict[str, Any]):
         print(obj["videoItem"])

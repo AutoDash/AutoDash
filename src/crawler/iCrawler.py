@@ -1,6 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from typing import Any, Dict
+
+import asyncio
 
 from src.data.MetaDataItem import MetaDataItem
+from src.executor.iExecutor import iExecutor
+
 
 class CrawlerException(Exception):
     '''Raise on inability to find next downloadable'''
@@ -8,7 +13,7 @@ class CrawlerException(Exception):
 class UndefinedDatabaseException(Exception):
     '''Raise when attempt to access database before injected into the crawler'''
 
-class iCrawler(ABC):
+class iCrawler(iExecutor):
     def __init__(self):
         self.database = None
         super().__init__
@@ -34,3 +39,7 @@ class iCrawler(ABC):
             raise UndefinedDatabaseException()
 
         await self.database.publish_new_metadata(item)
+
+    def run(self, obj : Dict[str, Any]):
+        metadata_item = asyncio.run(self.next_downloadable())
+        asyncio.run(self.publish_metadata(metadata_item))

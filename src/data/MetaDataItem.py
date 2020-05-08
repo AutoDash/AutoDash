@@ -5,13 +5,14 @@ import os
 
 
 class MetaDataItem:
-    def __init__(self, id, title, url, collision_type, description, location):
+    def __init__(self, id, title, url, download_src, collision_type, description, location):
         self.id = id
         self.title = title
         self.url = url
         self.collision_type = collision_type
         self.description = description
         self.location = location
+        self.download_src = download_src
         self.tags = {}
 
     def __repr__(self) -> str:
@@ -23,6 +24,7 @@ class MetaDataItem:
         return {
             'title': str,
             'url' : str,
+            'download_src': str,
             'collision_type' : str,
             'description' : str,
             'location' : str
@@ -35,6 +37,7 @@ class MetaDataItem:
         return {
             'title': self.title,
             'url': self.url,
+            'download_src': self.download_src,
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
