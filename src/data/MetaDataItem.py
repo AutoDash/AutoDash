@@ -5,7 +5,7 @@ import os
 
 
 class MetaDataItem:
-    def __init__(self, id, title, url, download_src, collision_type, description, location):
+    def __init__(self, id, title, url, download_src, collision_type=None, description=None, location=None, accident_index=None):
         self.id = id
         self.title = title
         self.url = url
@@ -13,7 +13,9 @@ class MetaDataItem:
         self.description = description
         self.location = location
         self.download_src = download_src
+        self.accident_index = accident_index
         self.tags = {}
+
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -28,6 +30,7 @@ class MetaDataItem:
             'collision_type' : str,
             'description' : str,
             'location' : str,
+            'accident_index': int,
             'tags': dict
         }
       
@@ -42,6 +45,7 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
+            'accident_index': self.accident_index,
             'tags': self.tags
         }
 

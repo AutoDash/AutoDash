@@ -3,3 +3,4 @@ firebase-admin==3.2.1
 google-cloud-firestore==1.6.2
 youtube_dl==2019.11.28
 praw==6.4.0
+opencv-python==4.2.0.34
