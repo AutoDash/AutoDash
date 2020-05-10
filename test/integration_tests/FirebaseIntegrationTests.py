@@ -123,3 +123,17 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
         self.assertFalse(self.metadata_exists(metadata1))
         self.assertFalse(self.metadata_exists(metadata2))
         self.assertFalse(self.metadata_exists(metadata3))
+
+    def test_fetch_metadata_with_tags(self):
+        metadata = MetaDataItem("", "title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata.add_tag("hello", "world")
+
+        try:
+            asyncio.run(self.storage.publish_new_metadata(metadata))
+
+            fetched_metadata = asyncio.run(self.storage.fetch_metadata(metadata.id))
+            self.assertEqual(fetched_metadata.to_json(), metadata.to_json())
+
+        finally:
+            asyncio.run(self.storage.delete_metadata(metadata.id))
+        self.assertFalse(self.metadata_exists(metadata))

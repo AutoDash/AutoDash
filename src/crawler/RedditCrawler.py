@@ -23,7 +23,7 @@ class RedditCrawler(iCrawler):
             hot_posts = self.reddit.subreddit(subreddit).hot()
             for index, post in enumerate(hot_posts):
                 if post.media is not None and 'oembed' in post.media.keys():
-                    if self.check_new_url(post.url):
+                    if await self.check_new_url(post.url):
                         title = post.media['oembed']['title']
                         video_source = post.media['type']
                         reddit_tag = {
@@ -35,7 +35,3 @@ class RedditCrawler(iCrawler):
                         return metadata
 
         raise CrawlerException("Reddit crawler could not find any new videos")
-
-
-r = RedditCrawler()
-r.next_downloadable()

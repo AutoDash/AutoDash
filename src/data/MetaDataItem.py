@@ -27,7 +27,8 @@ class MetaDataItem:
             'download_src': str,
             'collision_type' : str,
             'description' : str,
-            'location' : str
+            'location' : str,
+            'tags': dict
         }
       
     def encode(self) -> str:

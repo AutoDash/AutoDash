@@ -16,16 +16,26 @@ class TestMetaDataItem(unittest.TestCase):
             "hello": "world",
             "number": 1
         }
-
         metadata.add_tag("simple", simple_tag)
-        print(metadata.tags)
 
-        other_simple_tag = {
+        self.assertEqual(metadata.tags, {
+            "simple": {
+                "hello": "world",
+                "number": 1
+            }
+        })
+
+        updated_value_tag = {
             "number": 2
         }
-        metadata.add_tag("simple", other_simple_tag)
+        metadata.add_tag("simple", updated_value_tag)
 
-        print(metadata.tags)
+        self.assertEqual(metadata.tags, {
+            "simple": {
+                "hello": "world",
+                "number": 2
+            }
+        })
 
 
 if __name__ == '__main__':
