@@ -40,16 +40,7 @@ class FirebaseAccessor(iDatabase):
             if var not in defined_vars:
                 var_dict[var] = None
 
-        tags = var_dict.pop('tags', None)
-        if tags is None:
-            tags = {}
-
-        metadata_item = MetaDataItem(**var_dict)
-
-        for name, tag in tags.items():
-            metadata_item.add_tag(name, tag)
-
-        return metadata_item
+        return MetaDataItem(**var_dict)
 
     def __metadata_reference(self):
         return db.reference('metadata')

@@ -5,7 +5,7 @@ import os
 
 
 class MetaDataItem:
-    def __init__(self, id, title, url, download_src, collision_type=None, description=None, location=None, accident_index=None):
+    def __init__(self, id, title, url, download_src, collision_type=None, description=None, location=None, accident_index=None, tags={}):
         self.id = id
         self.title = title
         self.url = url
@@ -14,7 +14,11 @@ class MetaDataItem:
         self.location = location
         self.download_src = download_src
         self.accident_index = accident_index
-        self.tags = {}
+
+        if tags is None:
+            self.tags = {}
+        else:
+            self.tags = tags
 
 
     def __repr__(self) -> str:

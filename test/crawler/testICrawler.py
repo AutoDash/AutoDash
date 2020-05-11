@@ -27,14 +27,14 @@ class TestICrawler(unittest.TestCase):
         try:
             asyncio.run(self.crawler.check_new_url(metadata.url))
             self.assertTrue(False)
-        except UndefinedDatabaseException():
+        except UndefinedDatabaseException:
             # Expected error
             pass
 
         try:
             asyncio.run(self.crawler.publish_metadata(metadata))
             self.assertTrue(False)
-        except UndefinedDatabaseException():
+        except UndefinedDatabaseException:
             # Expected error
             pass
 
