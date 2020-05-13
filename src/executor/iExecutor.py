@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
-<<<<<<< HEAD
+from src.data.VideoItem import VideoItem
 
 
 class iExecutor(ABC):
@@ -11,7 +11,7 @@ class iExecutor(ABC):
             parent.set_next(self)
 
     @abstractmethod
-    def run(self, obj: Dict[str, Any]):
+    def run(self, item: VideoItem):
         pass
 
     def set_next(self, child):

@@ -82,14 +82,6 @@ def run(executors, **kwargs):
 
     work_queue.join()
 
-
-def main():
-    # TODO: build executors from file / command line arguments
-    executor = Printer()
-    run(executor)
-
-
-
 def main():
     # TODO: build executors from file / command line arguments
     executor = Printer()
