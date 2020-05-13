@@ -15,7 +15,7 @@ Usage:
     sink = Sink(accident_filter)
 
     pipeline = PipelineConfiguration()
-    pipeline.load_graph(input_nodes=source, output_nodes=[sink])
+    pipeline.load_graph(input_nodess=source)
     pipeline.run()
     pipeline.write("/my/path/myyml.yml")
 
@@ -24,11 +24,11 @@ Usage:
 class ExecutorFactory:
     # TODO: this should probably be improved
     @classmethod
-    def build(cls, executor_name, parent=None):
+    def build(cls, executor_name, parents=[]):
         local = {}
         exec(f'executor_class = {executor_name}', globals(), local)
         executor_class = local['executor_class']
-        executor = executor_class(parent)
+        executor = executor_class(*parents)
         return executor
 
 class PipelineConfiguration:
@@ -37,8 +37,7 @@ class PipelineConfiguration:
     """
 
     def __init__(self, ExecutorFactory=ExecutorFactory):
-        self.input_node = None
-        self.output_nodes = None
+        self.input_nodes = None
         self.graph_dict = None
         self.ExecutorFactory=ExecutorFactory
 
@@ -90,62 +89,57 @@ class PipelineConfiguration:
             'pkl'  : self._write_pickle
         })
 
-    def load_graph(self, input_node: iExecutor, output_nodes: List[iExecutor]):
+    def load_graph(self, input_nodes: List[iExecutor]):
         """ 
             Create PipelineConfiguration from existing graph. Stores graph in dict as: 
 
-            {parent: [{childA: ...}, {childB: ...} ...]}
+            [[layer_1], [layer_2], ... ]
 
-            :param input_node: iExecutor object that generates input to the pipeline - indegree 0
-            :param output_nodes:  list of iExecutor objects that handle pipeline output - outdegree 0
+            :param input_nodes: iExecutor object that generates input to the pipeline - indegree 0
         """
 
-        def collect_nodes(root, visited):
-            if root in visited: 
-                raise RuntimeError("Graph must be a tree.")
-            visited.add(root)
-            root_graph = dict()
-            root_graph[root.get_name()] = []
-            for child in root.next:
-                child_graph = collect_nodes(child, visited)
-                root_graph[root.get_name()].append(child_graph)
+        if input_nodes is None: raise ValueError("Missing input.")
+        if not isinstance(input_nodes, list): input_nodes = [input_nodes]
+        if len(input_nodes) == 0: raise ValueError("Missing input nodes.")
 
-            return root_graph
+        for inode in input_nodes:
+            if inode.next != input_nodes[0].next:
+                raise RuntimeError("All input executors must have the same child executor")
 
-        if input_node is None or output_nodes is None: raise ValueError("Missing input.")
-        if len(output_nodes) == 0: raise ValueError("Missing output nodes.")
+        self.input_nodes = input_nodes
 
-        self.input_node = input_node
-        self.output_nodes = output_nodes
+        self.graph_dict = [[node.get_name() for node in input_nodes]]
+        input_acceptor = input_nodes[0].next
 
-        self.graph_dict = collect_nodes(input_node, set())
+        node = input_acceptor
+        while(node):
+            self.graph_dict.append([node.get_name()])
+            node = node.next
+
 
     def generate_graph(self) -> [iExecutor, List[iExecutor]]:
         """
             Return a root executor and output executors from the loaded graph.
 
-            :return [input_executor, [output_executors]]
+            :return [[input_executors], output_executor]
         """
 
-        def traverse_and_generate(root_dict, visited, parent=None):
-            root_name = list(root_dict.keys())[0]
-            if root_name in visited: 
-                raise RuntimeError("Graph must be a tree.")
-            visited.add(root_name)
-            
-            root_executor = self.ExecutorFactory.build(executor_name=root_name, parent=parent)
-            if len(root_dict[root_name]) == 0:
-                return [root_executor, [root_executor]]
+        def traverse_and_generate(index=0, parents=[]):
+            root_executor = [self.ExecutorFactory.build(executor_name=input_name, parents=parents) for input_name in self.graph_dict[index]]
 
-            sinks = []
-            for child_dict in root_dict[root_name]:
-                _, leaf_executors = traverse_and_generate(child_dict, visited=visited, parent=root_executor)
-                sinks.extend(leaf_executors)
+            if index == len(self.graph_dict) - 1:
+                if index == 0: return [root_executor, root_executor]
+                return [root_executor[0], root_executor[0]]
 
-            return [root_executor, sinks]
+            _, sink = traverse_and_generate(index+1, parents=root_executor)
+            return [root_executor, sink]
+
 
         if self.graph_dict is None:
             raise RuntimeError("Graph not loaded.")
 
-        return traverse_and_generate(self.graph_dict, set())
-        
+        if not isinstance(self.graph_dict[0], list):
+            self.graph_dict[0] = [self.graph_dict[0]]
+
+        return traverse_and_generate()
+    

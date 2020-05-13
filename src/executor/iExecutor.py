@@ -2,20 +2,22 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 
 class iExecutor(ABC):
-    def __init__(self, prev: 'iExecutor' = None):
-        self.prev = prev
-        self.next = []
-        if prev: prev.add_next(self)
+    def __init__(self, *parents):
+        self.prev = parents 
+        self.next = None
+        for parent in parents:
+            parent.set_next(self)
 
     @abstractmethod
     def run(self, obj: Dict[str, Any]):
         pass
 
-    def add_next(self, child):
-        self.next.append(child)
+    def set_next(self, child):
+        if self.next: raise RuntimeError("Executor already has child")
+        self.next = child
     
-    def set_prev(self, prev):
-        self.prev = prev
+    def add_prev(self, prev):
+        self.prev.append(prev)
 
     def get_name(self):
         return type(self).__name__
