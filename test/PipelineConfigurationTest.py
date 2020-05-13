@@ -22,11 +22,11 @@ class testExecutorD(iExecutor):
 
 class TestExecutorFactory:
     @classmethod
-    def build(cls, executor_name, parent=None):
+    def build(cls, executor_name, parents=[]):
         local = {}
         exec(f'executor_class = {executor_name}', globals(), local)
         executor_class = local['executor_class']
-        executor = executor_class(parent)
+        executor = executor_class(*parents)
         return executor
 
 class TestUnitTest(unittest.TestCase):
@@ -35,14 +35,14 @@ class TestUnitTest(unittest.TestCase):
         pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
         exA = testExecutorA()
 
-        pc.load_graph(exA, [exA])
+        pc.load_graph(exA)
 
         self.assertRaises(ValueError, PipelineConfiguration.write, pc, 'out.mov')
         self.assertRaises(ValueError, PipelineConfiguration.read, pc, 'out.mov')
 
     def test_load_null_graph(self):
         pc = PipelineConfiguration()
-        self.assertRaises(ValueError, PipelineConfiguration.load_graph, pc, None, None)
+        self.assertRaises(ValueError, PipelineConfiguration.load_graph, pc, None)
 
     def test_generate_without_load(self):
         pc = PipelineConfiguration()
@@ -51,11 +51,23 @@ class TestUnitTest(unittest.TestCase):
     def test_single_node_graph(self):
         pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
         ex = testExecutorA()
-        pc.load_graph(ex, [ex])
-        root, sinks = pc.generate_graph()
-        self.assertEqual(root.get_name(), ex.get_name())
-        self.assertEqual(len(sinks), 1)
-        self.assertEqual(sinks[0].get_name(), ex.get_name())
+        pc.load_graph(ex)
+        roots, sink = pc.generate_graph()
+        self.assertEqual(len(roots), 1)
+        self.assertEqual(roots[0].get_name(), ex.get_name())
+        self.assertEqual(sink[0].get_name(), ex.get_name())
+
+    def test_only_input_node_graph(self):
+        pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
+        exA = testExecutorA()
+        exB = testExecutorB()
+        pc.load_graph([exA, exB])
+        roots, sink = pc.generate_graph()
+        self.assertEqual(len(roots), 2)
+        self.assertEqual(roots[0].get_name(), exA.get_name())
+        self.assertEqual(roots[1].get_name(), exB.get_name())
+        self.assertEqual(sink[0].get_name(), exA.get_name())
+        self.assertEqual(sink[1].get_name(), exB.get_name())
 
     def test_linear_graph(self):
         pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
@@ -64,57 +76,72 @@ class TestUnitTest(unittest.TestCase):
         exC = testExecutorC(exB)
         exD = testExecutorD(exC)
 
-        pc.load_graph(exA, [exD])
-        root, sinks = pc.generate_graph()
+        pc.load_graph([exA])
+        roots, sink = pc.generate_graph()
 
-        res_exA = root
+        self.assertEqual(len(roots), 1)
+
+        res_exA = roots[0]
         self.assertEqual(res_exA.get_name(), exA.get_name())
-        self.assertEqual(len(res_exA.next), 1)
 
-        res_exB = res_exA.next[0]
+        res_exB = res_exA.next
         self.assertEqual(res_exB.get_name(), exB.get_name())
-        self.assertEqual(len(res_exB.next), 1)
 
-        res_exC = res_exB.next[0]
+        res_exC = res_exB.next
         self.assertEqual(res_exC.get_name(), exC.get_name())
-        self.assertEqual(len(res_exC.next), 1)
 
-        res_exD = res_exC.next[0]
+        res_exD = res_exC.next
         self.assertEqual(res_exD.get_name(), exD.get_name())
-        self.assertEqual(len(res_exD.next), 0)
 
-        self.assertEqual(len(sinks), 1)
-        self.assertEqual(sinks[0].get_name(), exD.get_name())
+        self.assertEqual(sink.get_name(), exD.get_name())
 
     def test_simple_tree(self):
-        pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
         exA = testExecutorA()
         exB = testExecutorB(exA)
         exC = testExecutorC(exB)
-        exD = testExecutorD(exA)
+        self.assertRaises(RuntimeError, testExecutorD, exA)
 
-        pc.load_graph(exA, [exC, exD])
-        root, sinks = pc.generate_graph()
+    def test_multiple_valid_input_nodes(self):
+        pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
 
-        res_exA = root
+        exA = testExecutorA()
+        exB = testExecutorB()
+        exC = testExecutorC(exA, exB)
+        exD = testExecutorD(exC)
+
+        pc.load_graph([exA, exB])
+        roots, sink = pc.generate_graph()
+
+        self.assertEqual(len(roots), 2)
+        
+        res_exA, res_exB = roots
+
         self.assertEqual(res_exA.get_name(), exA.get_name())
-        self.assertEqual(len(res_exA.next), 2)
-
-        res_exB = res_exA.next[0]
         self.assertEqual(res_exB.get_name(), exB.get_name())
-        self.assertEqual(len(res_exB.next), 1)
 
-        res_exC = res_exB.next[0]
-        self.assertEqual(res_exC.get_name(), exC.get_name())
-        self.assertEqual(len(res_exC.next), 0)
+        res_exC_A = res_exA.next
+        res_exC_B = res_exB.next
 
-        res_exD = res_exA.next[1]
-        self.assertEqual(res_exD.get_name(), exD.get_name())
-        self.assertEqual(len(res_exD.next), 0)
+        self.assertEqual(res_exC_A.get_name(), res_exC_B.get_name())
+        self.assertEqual(exC.get_name(), res_exC_A.get_name())
 
-        self.assertEqual(len(sinks), 2)
-        self.assertEqual(sinks[0].get_name(), exC.get_name())
-        self.assertEqual(sinks[1].get_name(), exD.get_name())
+        res_exD_A = res_exC_A.next
+        res_exD_B = res_exC_B.next
+
+        self.assertEqual(res_exD_A.get_name(), res_exD_B.get_name())
+        self.assertEqual(exD.get_name(), res_exD_A.get_name())
+
+
+    def test_multiple_invalid_input_nodes(self):
+        pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
+
+        exA = testExecutorA()
+        exB = testExecutorB(exA)
+        exD = testExecutorD()
+        exC = testExecutorC(exB, exD)
+
+        self.assertRaises(RuntimeError, pc.load_graph, [exA, exD])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=True)
