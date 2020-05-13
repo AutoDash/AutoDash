@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from src.data.VideoItem import VideoItem
 
 
 class iExecutor(ABC):
-    def __init__(self, next: 'iExecutor', prev: List['iExecutor']):
+    def __init__(self, next: 'iExecutor'):
         self.next = next
-        self.prev = prev
 
     @abstractmethod
-    def run(self, obj: Dict[str, Any]):
+    def run(self, item: VideoItem):
         pass

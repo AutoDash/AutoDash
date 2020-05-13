@@ -39,19 +39,21 @@ class PipelineWorker(Process):
             work = work_queue.get()
             if work is None:
                 print("done")
+                work_queue.task_done()
                 return
             print(f"Received work {work}")
             executor = work.executor
             item = work.item
-            executor.run(item)
+            while executor is not None:
+                executor.run(item)
+                executor = executor.next
             print("Done processing work")
-            if executor.next is not None:
-                work_queue.put(Work(executor.next, item))
             work_queue.task_done()
 
 
 def run(executors, **kwargs):
-    work_queue = JoinableQueue()
+    num_workers = kwargs.get('n_workers', 1)
+    work_queue = JoinableQueue(num_workers)
 
     context = {
         **kwargs,
@@ -60,7 +62,7 @@ def run(executors, **kwargs):
 
     workers = [
         PipelineWorker(context, name=f"worker-{i}")
-        for i in range(0, context['n_workers'])
+        for i in range(0, num_workers)
     ]
 
     # Start all workers
@@ -70,14 +72,15 @@ def run(executors, **kwargs):
     iterations = context.get('max_iterations', 10000)
 
     for i in range(iterations):
-        idx = 0
-        work_queue.put(Work(executors[idx], None))
-        idx += 1
+        print("put work")
+        work_queue.put(Work(executors[i % len(executors)], None))
 
-    context['work_queue'].join()
+    print("signal complete")
     # A null job signals the end of work
-    for _ in range(0, context['n_workers']):
-        context['work_queue'].put(None)
+    for _ in range(num_workers):
+        work_queue.put(None)
+
+    work_queue.join()
 
 
 def main():
