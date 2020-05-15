@@ -10,7 +10,7 @@ from test.mock.MockDataAccessor import MockDataAccessor
 
 class MockCrawler(iCrawler):
     async def next_downloadable(self):
-        return MetaDataItem("", "title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        return MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
 
 class TestICrawler(unittest.TestCase):
 
