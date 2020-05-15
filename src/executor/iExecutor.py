@@ -3,5 +3,5 @@ from typing import Dict, Any
 
 class iExecutor(ABC):
     @abstractmethod
-    def run(obj : Dict[str, Any]):
+    def run(self, obj : Dict[str, Any]):
         pass
