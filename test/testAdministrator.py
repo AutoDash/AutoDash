@@ -4,17 +4,13 @@ from src.pipeline import run as administrator
 from src.executor.iExecutor import iExecutor
 from multiprocessing import Queue
 from queue import Empty as EmptyException
+from src.PipelineConfiguration import PipelineConfiguration
 
 events = Queue()
 
-
-def run(executors):
-    pass
-
-
 class TestExecutor(iExecutor):
-    def __init__(self, next, event_num):
-        super().__init__(next)
+    def __init__(self, event_num, *parents):
+        super().__init__(*parents)
         self.event_num = event_num
 
     def run(self, obj):
@@ -22,18 +18,29 @@ class TestExecutor(iExecutor):
         events.put(self.event_num)
 
 
+class TestExecutor(iExecutor):
+    def __init__(self, event_num, *parents):
+        super().__init__(*parents)
+        self.event_num = event_num
+
+    def run(self, obj):
+        print(f"run {self.event_num}")
+        events.put(self.event_num)
+
 class TestAdministrator(unittest.TestCase):
     def test_main_single_process(self):
+        pc = PipelineConfiguration()
+        ptr = TestExecutor(0)
+
         num_items = 10
-        ptr = TestExecutor(None, 0)
-        executors = [ptr]
-
+        
+        iter_exec = ptr
         for x in range(1, num_items):
-            temp = TestExecutor(None, x)
-            ptr.next = temp
-            ptr = temp
+            iter_exec = TestExecutor(x, iter_exec)
 
-        administrator(executors, n_workers=1, max_iterations=1)
+        pc.load_graph(input_nodes=[ptr])
+
+        administrator(pc, n_workers=1, max_iterations=1)
 
         for i in range(num_items):
             self.assertEqual(events.get(timeout=2), i, "items in wrong order")
@@ -41,16 +48,17 @@ class TestAdministrator(unittest.TestCase):
         self.assertRaises(EmptyException, events.get, True, 0.25)
 
     def test_main_multi_process(self):
+        pc = PipelineConfiguration()
         num_items = 10
-        ptr = TestExecutor(None, 0)
-        executors = [ptr]
+        ptr = TestExecutor(0)
 
+        iter_exec = ptr
         for x in range(1, num_items):
-            temp = TestExecutor(None, x)
-            ptr.next = temp
-            ptr = temp
+            iter_exec = TestExecutor(x, iter_exec)
 
-        administrator(executors, n_workers=2, max_iterations=3)
+        pc.load_graph(input_nodes=[ptr])
+
+        administrator(pc, n_workers=2, max_iterations=3)
         for i in range(num_items*3):
             events.get(timeout=2)
 
