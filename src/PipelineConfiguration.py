@@ -4,19 +4,23 @@ from typing import List
 import json
 import yaml
 import pickle
+from collections import defaultdict
 
 """
 Usage:
 
-    source = Source()
-    youtube_dl = YoutubeDownloader(source)
-    dashcam_filter = DashcamFilter(youtube_dl)
-    accident_filter = AccidentFilter(dashcam_filter)
-    sink = Sink(accident_filter)
-
     pipeline = PipelineConfiguration()
-    pipeline.load_graph(input_nodess=source)
-    pipeline.run()
+
+    x = Source()
+    x = YoutubeDownloader(x)
+    x = DashcamFilter(x)
+    x = AccidentFilter(x)
+    x = Sink(x)
+    
+    pipeline.load_graph(x)
+
+    administrator(pipeline, num_workers=4, ...)
+
     pipeline.write("/my/path/myyml.yml")
 
 """
@@ -38,6 +42,7 @@ class PipelineConfiguration:
 
     def __init__(self, ExecutorFactory=ExecutorFactory):
         self.input_nodes = None
+        self.output_node = None
         self.graph_dict = None
         self.ExecutorFactory=ExecutorFactory
 
@@ -89,32 +94,46 @@ class PipelineConfiguration:
             'pkl'  : self._write_pickle
         })
 
-    def load_graph(self, input_nodes: List[iExecutor]):
+    def load_graph(self, output_node: iExecutor):
         """ 
             Create PipelineConfiguration from existing graph. Stores graph in dict as: 
 
             [[layer_1], [layer_2], ... ]
 
-            :param input_nodes: iExecutor object that generates input to the pipeline - indegree 0
+            :param output_node: Final iExecutor object that is the output of the pipeline – outdegree 0
         """
 
-        if input_nodes is None: raise ValueError("Missing input.")
-        if not isinstance(input_nodes, list): input_nodes = [input_nodes]
-        if len(input_nodes) == 0: raise ValueError("Missing input nodes.")
+        def get_input_nodes(leaf):
+            queue = []
+            graph_dict = []
+            input_nodes = []
 
+            queue.append((leaf, 0))
+            cur_depth = -1
+            while len(queue) > 0:
+                node, depth = queue.pop(0)
+                if depth > cur_depth:
+                    graph_dict.append([])
+                    cur_depth = depth
+
+                graph_dict[depth].append(node)
+                if len(node.prev) == 0: input_nodes.append(node)
+
+                for parent in node.prev:
+                    queue.append((parent, depth+1))
+
+            return graph_dict, input_nodes
+
+        if output_node is None: raise ValueError("Missing input.")
+
+        graph_dict, input_nodes = get_input_nodes(output_node)
         for inode in input_nodes:
             if inode.next != input_nodes[0].next:
                 raise RuntimeError("All input executors must have the same child executor")
 
         self.input_nodes = input_nodes
-
-        self.graph_dict = [[node.get_name() for node in input_nodes]]
-        input_acceptor = input_nodes[0].next
-
-        node = input_acceptor
-        while(node):
-            self.graph_dict.append([node.get_name()])
-            node = node.next
+        self.output_node = output_node
+        self.graph_dict = graph_dict
 
 
     def generate_graph(self) -> [iExecutor, List[iExecutor]]:
@@ -128,18 +147,16 @@ class PipelineConfiguration:
             root_executor = [self.ExecutorFactory.build(executor_name=input_name, parents=parents) for input_name in self.graph_dict[index]]
 
             if index == len(self.graph_dict) - 1:
-                if index == 0: return [root_executor, root_executor]
-                return [root_executor[0], root_executor[0]]
+                return [root_executor, root_executor]
 
             _, sink = traverse_and_generate(index+1, parents=root_executor)
             return [root_executor, sink]
 
+        if self.input_nodes and self.output_node:
+            return self.input_nodes, self.output_node
 
         if self.graph_dict is None:
             raise RuntimeError("Graph not loaded.")
-
-        if not isinstance(self.graph_dict[0], list):
-            self.graph_dict[0] = [self.graph_dict[0]]
 
         return traverse_and_generate()
     

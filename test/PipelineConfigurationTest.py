@@ -55,19 +55,7 @@ class TestUnitTest(unittest.TestCase):
         roots, sink = pc.generate_graph()
         self.assertEqual(len(roots), 1)
         self.assertEqual(roots[0].get_name(), ex.get_name())
-        self.assertEqual(sink[0].get_name(), ex.get_name())
-
-    def test_only_input_node_graph(self):
-        pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
-        exA = testExecutorA()
-        exB = testExecutorB()
-        pc.load_graph([exA, exB])
-        roots, sink = pc.generate_graph()
-        self.assertEqual(len(roots), 2)
-        self.assertEqual(roots[0].get_name(), exA.get_name())
-        self.assertEqual(roots[1].get_name(), exB.get_name())
-        self.assertEqual(sink[0].get_name(), exA.get_name())
-        self.assertEqual(sink[1].get_name(), exB.get_name())
+        self.assertEqual(sink.get_name(), ex.get_name())
 
     def test_linear_graph(self):
         pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
@@ -76,7 +64,7 @@ class TestUnitTest(unittest.TestCase):
         exC = testExecutorC(exB)
         exD = testExecutorD(exC)
 
-        pc.load_graph([exA])
+        pc.load_graph(exD)
         roots, sink = pc.generate_graph()
 
         self.assertEqual(len(roots), 1)
@@ -109,7 +97,7 @@ class TestUnitTest(unittest.TestCase):
         exC = testExecutorC(exA, exB)
         exD = testExecutorD(exC)
 
-        pc.load_graph([exA, exB])
+        pc.load_graph(exD)
         roots, sink = pc.generate_graph()
 
         self.assertEqual(len(roots), 2)
@@ -140,7 +128,7 @@ class TestUnitTest(unittest.TestCase):
         exD = testExecutorD()
         exC = testExecutorC(exB, exD)
 
-        self.assertRaises(RuntimeError, pc.load_graph, [exA, exD])
+        self.assertRaises(RuntimeError, pc.load_graph, exC)
 
 
 if __name__ == '__main__':
