@@ -23,7 +23,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
         self.assertTrue(os.path.exists(self.storage_loc))
 
     def test_metadata_file_creation_and_deletion(self):
-        metadata = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(metadata.id is not "") # metadata id successfully updated by the publish call
@@ -33,7 +33,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
     def test_metadata_file_fetching(self):
-        metadata = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
@@ -47,8 +47,8 @@ class TestLocalStorageAccessor(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
     def test_id_and_url_lists(self):
-        metadata1 = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
-        metadata2 = MetaDataItem("", "title", "fake url 2", "car-v-car", "desc", "loc")
+        metadata1 = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata2 = MetaDataItem("title", "fake url 2", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata1))
             asyncio.run(self.storage.publish_new_metadata(metadata2))
@@ -67,8 +67,8 @@ class TestLocalStorageAccessor(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata2.id))))
 
     def test_id_and_url_lists_generated_correctly_on_startup(self):
-        metadata1 = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
-        metadata2 = MetaDataItem("", "title", "fake url 2", "car-v-car", "desc", "loc")
+        metadata1 = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata2 = MetaDataItem("title", "fake url 2", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata1))
             asyncio.run(self.storage.publish_new_metadata(metadata2))
@@ -90,7 +90,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata2.id))))
 
     def test_metadata_update(self):
-        metadata = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))

@@ -1,17 +1,25 @@
+from typing import Union
 import json, hashlib
 
 import os
 
 
 class MetaDataItem:
-    def __init__(self, id, title, url, collision_type=None, description=None, location=None, accident_index=None):
+    def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_index=None, tags={}):
         self.id = id
         self.title = title
         self.url = url
         self.collision_type = collision_type
         self.description = description
         self.location = location
+        self.download_src = download_src
         self.accident_index = accident_index
+
+        if tags is None:
+            self.tags = {}
+        else:
+            self.tags = tags
+
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -21,11 +29,13 @@ class MetaDataItem:
     def attributes() -> dict:
         return {
             'title': str,
-            'url': str,
-            'collision_type': str,
-            'description': str,
-            'location': str,
-            'accident_index': int
+            'url' : str,
+            'download_src': str,
+            'collision_type' : str,
+            'description' : str,
+            'location' : str,
+            'accident_index': int,
+            'tags': dict
         }
       
     def encode(self) -> str:
@@ -35,10 +45,12 @@ class MetaDataItem:
         return {
             'title': self.title,
             'url': self.url,
+            'download_src': self.download_src,
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
-            'accident_index': self.accident_index
+            'accident_index': self.accident_index,
+            'tags': self.tags
         }
 
     def to_json_str(self) -> str:
@@ -50,6 +62,13 @@ class MetaDataItem:
         # Write the output to disk
         with open(store_loc, 'w') as outfile:
             json.dump(self.to_json(), outfile, sort_keys=True, indent=2)
+
+    def add_tag(self, name: str, val: Union[dict, str]):
+        if name in self.tags.keys() and isinstance(self.tags[name], dict) and isinstance(val, dict):
+            self.tags[name].update(val)
+        else:
+            self.tags[name] = val
+
 
 # For accessing metadata items stored in local storage
 def metadata_from_file(filename: str, directory: str) -> MetaDataItem:

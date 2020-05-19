@@ -7,5 +7,5 @@ class iExecutor(ABC):
         self.next = next
 
     @abstractmethod
-    def run(self, item: VideoItem):
+    def run(self, obj : Dict[str, Any]):
         pass

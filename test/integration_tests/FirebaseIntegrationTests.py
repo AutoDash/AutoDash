@@ -25,7 +25,7 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
             return False
 
     def test_metadata_file_creation_and_deletion(self):
-        metadata = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(metadata.id is not "")  # metadata id successfully updated by the publish call
@@ -35,7 +35,7 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
         self.assertFalse(self.metadata_exists(metadata))
 
     def test_metadata_file_fetching(self):
-        metadata = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(self.metadata_exists(metadata))
@@ -49,8 +49,8 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
         self.assertFalse(self.metadata_exists(metadata))
 
     def test_id_and_url_lists(self):
-        metadata1 = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
-        metadata2 = MetaDataItem("", "title", "fake url 2", "car-v-car", "desc", "loc")
+        metadata1 = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata2 = MetaDataItem("title", "fake url 2", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata1))
             asyncio.run(self.storage.publish_new_metadata(metadata2))
@@ -76,7 +76,7 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
         storage2 = FirebaseAccessor()
 
     def test_metadata_update(self):
-        metadata = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(self.metadata_exists(metadata))
@@ -95,9 +95,9 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
         self.assertFalse(self.metadata_exists(metadata))
 
     def test_fetch_newest_videos(self):
-        metadata1 = MetaDataItem("", "title", "fake url 1", "car-v-car", "desc", "loc")
-        metadata2 = MetaDataItem("", "title", "fake url 2", "car-v-car", "desc", "loc")
-        metadata3 = MetaDataItem("", "title", "fake url 3", "car-v-car", "desc", "loc")
+        metadata1 = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata2 = MetaDataItem("title", "fake url 2", "youtube", "car-v-car", "desc", "loc")
+        metadata3 = MetaDataItem("title", "fake url 3", "youtube", "car-v-car", "desc", "loc")
 
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata1))
@@ -123,3 +123,17 @@ class IntegrationTestFirebaseAccessor(unittest.TestCase):
         self.assertFalse(self.metadata_exists(metadata1))
         self.assertFalse(self.metadata_exists(metadata2))
         self.assertFalse(self.metadata_exists(metadata3))
+
+    def test_fetch_metadata_with_tags(self):
+        metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata.add_tag("hello", "world")
+
+        try:
+            asyncio.run(self.storage.publish_new_metadata(metadata))
+
+            fetched_metadata = asyncio.run(self.storage.fetch_metadata(metadata.id))
+            self.assertEqual(fetched_metadata.to_json(), metadata.to_json())
+
+        finally:
+            asyncio.run(self.storage.delete_metadata(metadata.id))
+        self.assertFalse(self.metadata_exists(metadata))

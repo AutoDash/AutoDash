@@ -3,3 +3,4 @@ __pycache__/
 .DS_Store
 autodash-9dccb-add3cdae62ea.json
 *.pyc
+.env

@@ -32,19 +32,13 @@ class FirebaseAccessor(iDatabase):
             self.initial_firebase()
             FirebaseAccessor.initialized = True
 
-    # TODO: update to use a Metadata Attributes list, not the empty item
     def __create_metadata(self, id: str, var_dict: dict) -> MetaDataItem:
-        # Find all needed variables of MetadataItem
-        empty_item = MetaDataItem(None, None, None, None, None, None)
-        all_vars = empty_item.to_json().keys()
-
         var_dict['id'] = id
         defined_vars = var_dict.keys()
 
-        for var in all_vars:
+        for var in MetaDataItem.attributes():
             if var not in defined_vars:
                 var_dict[var] = None
-
 
         return MetaDataItem(**var_dict)
 

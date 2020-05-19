@@ -6,7 +6,7 @@ AutoDash is a pipeline aggregating dashcam footage for (near-)accident incidents
 
 # Requirements
 
-You will need Python 3.8. It's also possible to use package binaries from our release builds.
+You will need Python 3.7. It's also possible to use package binaries from our release builds.
 
 # Dependencies
 
