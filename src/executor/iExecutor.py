@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.data.VideoItem import VideoItem
+from typing import Dict, Any
 
 
 class iExecutor(ABC):
@@ -7,5 +7,5 @@ class iExecutor(ABC):
         self.next = next
 
     @abstractmethod
-    def run(self, obj : Dict[str, Any]):
+    def run(self, obj: Dict[str, Any]):
         pass
