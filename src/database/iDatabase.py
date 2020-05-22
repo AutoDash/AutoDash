@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.data.MetaDataItem import MetaDataItem
+from data.MetaDataItem import MetaDataItem
 
 class AlreadyExistsException(Exception):
     '''Raise on adding a video that is already stored'''
