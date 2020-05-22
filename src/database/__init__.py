@@ -1,3 +1,4 @@
+"""
 import enum
 
 from src.database.FirebaseAccessor import FirebaseAccessor
@@ -15,3 +16,4 @@ if DATABASE_CONFIG is DatabaseConfigOption['firebase_metadata']:
     database_access = FirebaseAccessor()
 else:
     database_access = LocalStorageAccessor()
+"""

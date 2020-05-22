@@ -5,9 +5,9 @@ import firebase_admin
 from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
-from src.data.MetaDataItem import MetaDataItem
-from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
-from src.utils import get_project_root
+from data.MetaDataItem import MetaDataItem
+from database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+from utils import get_project_root
 
 
 class FirebaseAccessor(iDatabase):
