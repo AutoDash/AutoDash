@@ -13,6 +13,7 @@ CRAWLABLE_SUBREDDITS = [
 class RedditCrawler(iCrawler):
 
     def __init__(self):
+        super().__init__()
         load_dotenv(os.path.join(get_project_root(), '.env'))
         self.reddit = praw.Reddit(client_id=os.getenv("REDDIT_CLIENT_ID"),
                                   client_secret=os.getenv("REDDIT_CLIENT_SECRET"),

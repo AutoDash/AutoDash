@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 class iExecutor(ABC):
 
-    def __init__(self, next: 'iExecutor'):
+    def __init__(self, next: 'iExecutor' = None):
         self.next = next
 
         self.database = None
