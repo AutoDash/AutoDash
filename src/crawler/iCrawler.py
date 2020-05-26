@@ -15,15 +15,11 @@ class UndefinedDatabaseException(Exception):
 
 class iCrawler(iExecutor):
     def __init__(self):
-        self.database = None
         super().__init__
 
     @abstractmethod
     async def next_downloadable(self) -> MetaDataItem:
         pass
-
-    def set_database(self, database):
-        self.database = database
 
     async def check_new_url(self, url: str) -> bool:
         if self.database is None:
