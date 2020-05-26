@@ -15,7 +15,7 @@ class UndefinedDatabaseException(Exception):
 
 class iCrawler(iExecutor):
     def __init__(self):
-        super().__init__
+        super().__init__()
 
     @abstractmethod
     async def next_downloadable(self) -> MetaDataItem:

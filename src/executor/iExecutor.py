@@ -5,7 +5,7 @@ class iExecutor(ABC):
 
     def __init__(self):
         self.database = None
-        super().__init__
+        super().__init__()
 
     def set_database(self, database):
         self.database = database
