@@ -9,6 +9,9 @@ from test.mock.MockDataAccessor import MockDataAccessor
 
 
 class MockCrawler(iCrawler):
+    def __init__(self):
+        super().__init__
+
     async def next_downloadable(self):
         return MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
 
