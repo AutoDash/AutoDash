@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
+
 class iExecutor(ABC):
 
-    def __init__(self):
+    def __init__(self, next: 'iExecutor'):
+        self.next = next
+
         self.database = None
         super().__init__()
 
@@ -11,5 +14,5 @@ class iExecutor(ABC):
         self.database = database
 
     @abstractmethod
-    def run(self, obj : Dict[str, Any]):
+    def run(self, obj: Dict[str, Any]):
         pass
