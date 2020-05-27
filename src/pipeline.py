@@ -43,15 +43,17 @@ class PipelineWorker(Process):
                 work = work_queue.pop(0)
             if work is None:
                 print("done")
-                #work_queue.task_done()
                 return
             print(f"Received work {work}")
             executor = work.executor
             item = work.item
             while executor is not None:
-                print(executor)
                 try:
-                    item = executor.run(item)
+                    if executor.is_stateful():
+                        with executor.get_lock():
+                            item = executor.run(item)
+                    else:
+                        item = executor.run(item)
                 except RuntimeError as e:
                     print(e)
                     break
@@ -70,6 +72,12 @@ class StatefulExecutorProxy(managers.BaseProxy):
     def set_lock(self, message):
         return self._callmethod('set_lock', [message])
 
+    def get_lock(self):
+        return self._callmethod('get_lock')
+
+    def is_stateful(self):
+        return self._callmethod('is_stateful')
+
 class StatefulExecutorManager(managers.SyncManager):
     pass
 
@@ -78,20 +86,20 @@ def run(pipeline, **kwargs):
 
     source_executors, output_executor = pipeline.generate_graph()
 
-    #work_queue = JoinableQueue(num_workers)
-    work_queue = []
+    manager = StatefulExecutorManager()
+    
+    for executor in source_executors:
+        if executor.is_stateful():
+            executor.register_shared(manager)
+
+    manager.start()
+
+    work_queue = manager.list()
 
     context = {
         **kwargs,
         'work_queue': work_queue,
     }
-
-    manager = StatefulExecutorManager()
-    for executor in source_executors:
-        if executor.stateful:
-            executor.register_shared(manager)
-
-    manager.start()
     queue_lock = manager.Lock()
     workers = [
         PipelineWorker(context, name=f"worker-{i}", queue_lock=queue_lock)
@@ -107,19 +115,18 @@ def run(pipeline, **kwargs):
         work_executor.set_lock(manager.Lock())
         work_queue.append(Work(work_executor, None))
 
-    # Start all workers
-    for worker in workers:
-        worker.start()
-
     print("signal complete")
+
     # A null job signals the end of work
     for _ in range(num_workers):
         work_queue.append(None)
 
+    # Start all workers
+    for worker in workers:
+        worker.start()
+
     for worker in workers:
         worker.join()
-
-    #work_queue.join()
 
 def main():
     # TODO: build executors from file / command line arguments

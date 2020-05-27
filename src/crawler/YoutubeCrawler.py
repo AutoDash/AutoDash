@@ -6,7 +6,7 @@ import youtube_dl
 class YoutubeCrawler(iCrawler):
     YOUTUBE_SRC_IDENTIFIER = "YouTube"
 
-    def __init__(self, search_terms: list, log_func=print, check_url=True, lock=None):
+    def __init__(self, search_terms: list, log_func=print, check_url=True):
         super().__init__()
         self.search_terms = search_terms
         self.log_func = log_func
@@ -20,7 +20,6 @@ class YoutubeCrawler(iCrawler):
         self.get_n = 100
         self.log("init")
         self.stateful = True
-        self.lock = lock
 
     def __update_search_results(self):
         ydl_opts = {'quiet': True}
@@ -40,36 +39,35 @@ class YoutubeCrawler(iCrawler):
         while True:  # Loop until return
             self.log(self.search_results[:5])
             
-            with self.lock:
-                zero_cases = 0
-                while len(self.search_results) == 0:
-                    if zero_cases > 3:
-                        raise CrawlerException("YouTube crawler could not find more results")
-                    self.__update_search_results()
-                    zero_cases += 1
+            zero_cases = 0
+            while len(self.search_results) == 0:
+                if zero_cases > 3:
+                    raise CrawlerException("YouTube crawler could not find more results")
+                self.__update_search_results()
+                zero_cases += 1
 
 
-                res = self.search_results[0]
-                self.search_results = self.search_results[1:]
+            res = self.search_results[0]
+            self.search_results = self.search_results[1:]
 
-                if not self.check_url or await self.check_new_url(res['url']):
-                    url = "https://www.youtube.com/watch?v={0}".format(res["url"])
-                    title = res.get("title", None)
-                    id = res["id"]
-                    tags = {'id': id}
+            if not self.check_url or await self.check_new_url(res['url']):
+                url = "https://www.youtube.com/watch?v={0}".format(res["url"])
+                title = res.get("title", None)
+                id = res["id"]
+                tags = {'id': id}
 
-                    if title is None:
-                        self.log("Failed to extract title: Got {0}".format(res))
-                        title = "TitleUnknown"
-                        tags['title_extraction_failed'] = True
+                if title is None:
+                    self.log("Failed to extract title: Got {0}".format(res))
+                    title = "TitleUnknown"
+                    tags['title_extraction_failed'] = True
 
-                    return MetaDataItem(title, url, self.YOUTUBE_SRC_IDENTIFIER, tags=tags)
+                return MetaDataItem(title, url, self.YOUTUBE_SRC_IDENTIFIER, tags=tags)
 
     def log(self, log):
         self.log_func("[Youtube Crawler] {0}".format(log))
 
     def register_shared(self, manager):
-        manager.register('YoutubeCrawler', lambda: self, proxytype=StatefulExecutorProxy, exposed=['run', 'get_next', 'set_lock'])
+        manager.register('YoutubeCrawler', lambda: self, proxytype=StatefulExecutorProxy, exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful'])
 
     def share(self, manager):
         return manager.YoutubeCrawler()

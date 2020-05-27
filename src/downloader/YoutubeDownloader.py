@@ -9,17 +9,17 @@ import asyncio
 
 class YoutubeDownloader(iDownloader):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, dl_archive=os.path.join(os.getcwd(), 'ydl_archive.txt'), **kwargs):
         super().__init__(*args, **kwargs)
         self.file_name = None
-
-    async def download(self, md_item: MetaDataItem, dl_archive=os.path.join(os.getcwd(), 'ydl_archive.txt')) -> VideoItem:
-        ydl = youtube_dl.YoutubeDL({
+        self.dl_opts = {
             'nocheckcertificate': True,
             'progress_hooks': [self.on_download_callback],
-            'restrictfilenames': True,
-            'download_archive': dl_archive,
-        })
+            'restrictfilenames': True
+        }
+
+    async def download(self, md_item: MetaDataItem) -> VideoItem:
+        ydl = youtube_dl.YoutubeDL(self.dl_opts)
 
         link = md_item.url
         ydl.download([link])

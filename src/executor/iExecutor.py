@@ -39,3 +39,9 @@ class iExecutor(ABC):
 
     def set_lock(self, lock):
         self.lock = lock
+
+    def get_lock(self):
+        return self.lock
+
+    def is_stateful(self):
+        return self.stateful
