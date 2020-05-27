@@ -4,7 +4,8 @@ from src.data.VideoItem import VideoItem
 
 
 class iExecutor(ABC):
-    def __init__(self, *parents):
+    def __init__(self, *parents, stateful=False):
+        self.stateful = stateful
         self.prev = parents 
         self.next = None
         for parent in parents:
@@ -23,3 +24,18 @@ class iExecutor(ABC):
 
     def get_name(self):
         return type(self).__name__
+
+    def get_executor(self):
+        return self
+
+    def register_shared(self, manager):
+        pass
+
+    def shared(self, manager):
+        return None
+
+    def get_next(self):
+        return self.next
+
+    def set_lock(self, lock):
+        self.lock = lock

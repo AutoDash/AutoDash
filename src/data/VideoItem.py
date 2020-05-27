@@ -1,11 +1,11 @@
 from .MetaDataItem import MetaDataItem
 import hashlib
 import numpy as np
+import skvideo.io
 
 class VideoItem:
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.image = np.load(file_path)
+    def __init__(self, filename):
+        self.image = skvideo.io.vread(filename)  
 
     def update_storage_location(self, id: str):
         pass
