@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem
 
 class AlreadyExistsException(Exception):
@@ -36,4 +37,9 @@ class iDatabase(ABC):
 
     @abstractmethod
     async def fetch_video_url_list(self) -> List[str]:
+        pass
+
+    @abstractmethod
+    async def fetch_newest_videos(self, last_id: str = None,
+                                  filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         pass

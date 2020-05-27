@@ -5,6 +5,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
+from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem
 from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
 from src.utils import get_project_root
@@ -78,7 +79,8 @@ class FirebaseAccessor(iDatabase):
         return await self.__query_keys(ref)
 
 
-    async def fetch_newest_videos(self, last_id: str) -> List[MetaDataItem]:
+    async def fetch_newest_videos(self, last_id: str = None,
+                                  filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         metadata_ref = self.__metadata_reference()
 
         # Keys are timestamp based and therefore ordering them by key gets them in the order they were added
@@ -93,6 +95,9 @@ class FirebaseAccessor(iDatabase):
             if key == last_id:
                 break
             result.append(self.__create_metadata(key, val))
+
+        if filter_cond is not None:
+            result = filter_cond.filter(result)
 
         return result
 

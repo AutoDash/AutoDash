@@ -124,7 +124,7 @@ class FilterCondition(object):
         # Do a test filter to catch any syntax/type errors not captured by tokenization
         data = {}
         for attr in self.VALID_ATTRS:
-            data[attr] = self.VALID_ATTRS[attr]();
+            data[attr] = self.VALID_ATTRS[attr]()
         self.filter_func(data)
 
 
