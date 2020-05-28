@@ -3,7 +3,6 @@ import json, hashlib
 
 import os
 
-
 class MetaDataItem:
     def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_index=None, is_dashcam=None, tags={}):
         self.id = id
@@ -91,3 +90,4 @@ def gen_filename(id: str):
 
 def get_id_from_filename(filename: str):
     return filename.split('_')[0]
+

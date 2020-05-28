@@ -18,7 +18,6 @@ class YoutubeCrawler(iCrawler):
         self.search_results = []
         self.skip_n = 0
         self.get_n = 100
-        self.log("init")
         self.stateful = True
 
     def __update_search_results(self):
@@ -37,15 +36,12 @@ class YoutubeCrawler(iCrawler):
 
     async def next_downloadable(self) -> MetaDataItem:
         while True:  # Loop until return
-            self.log(self.search_results[:5])
-            
             zero_cases = 0
             while len(self.search_results) == 0:
                 if zero_cases > 3:
                     raise CrawlerException("YouTube crawler could not find more results")
                 self.__update_search_results()
                 zero_cases += 1
-
 
             res = self.search_results[0]
             self.search_results = self.search_results[1:]
@@ -67,7 +63,7 @@ class YoutubeCrawler(iCrawler):
         self.log_func("[Youtube Crawler] {0}".format(log))
 
     def register_shared(self, manager):
-        manager.register('YoutubeCrawler', lambda: self, proxytype=StatefulExecutorProxy, exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful'])
+        manager.register_executor('YoutubeCrawler', self)
 
     def share(self, manager):
         return manager.YoutubeCrawler()

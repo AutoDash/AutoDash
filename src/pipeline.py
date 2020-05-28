@@ -59,7 +59,6 @@ class PipelineWorker(Process):
                     break
                 executor = executor.get_next()
             print("Done processing work")
-            #work_queue.task_done()
 
 
 class StatefulExecutorProxy(managers.BaseProxy):
@@ -79,7 +78,12 @@ class StatefulExecutorProxy(managers.BaseProxy):
         return self._callmethod('is_stateful')
 
 class StatefulExecutorManager(managers.SyncManager):
-    pass
+    def register_executor(self, name, executor):
+        self.register(
+                name, lambda: executor, 
+                proxytype=StatefulExecutorProxy, 
+                exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful']
+        )
 
 def run(pipeline, **kwargs):
     num_workers = kwargs.get('n_workers', 1)

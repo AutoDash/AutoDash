@@ -44,5 +44,4 @@ class iCrawler(iExecutor):
     def run(self, obj : Dict[str, Any]):
         metadata_item = asyncio.run(self.next_downloadable())
         asyncio.run(self.publish_metadata(metadata_item))
-        print("crawler returned metadataitem: ", metadata_item)
         return metadata_item

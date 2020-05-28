@@ -7,17 +7,16 @@ class VideoItem:
     def __init__(self, filepath=None, metadata=None):
         self.filepath=filepath
         self.metadata=metadata
+        self.npy=None
         # TODO: use cv2 to read mp4
         if self.filepath:
             self.npy = skvideo.io.vread(self.filepath)
-        elif self.metadata:
+        elif self.metadata and self.metadata.location:
             self.npy = skvideo.io.vread(self.metadata.location)
-        else:
-            raise ValueError("Missing filepath and metadata item") 
 
 
     def encode(self):
-        if metadata is None:
+        if self.metadata is None:
             print("No metadata loaded")
             return None
         return self.metadata.encode()

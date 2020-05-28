@@ -5,7 +5,6 @@ from src.data.VideoItem import VideoItem
 import youtube_dl
 import os
 import asyncio
-#   Zimport imageio
 
 class YoutubeDownloader(iDownloader):
 
@@ -33,7 +32,6 @@ class YoutubeDownloader(iDownloader):
         
         base_filename, ext = os.path.splitext(self.file_name)
         os.system(f"mv {base_filename}* {self.pathname}")
-        # os.system(f"ls {self.pathname} | grep -v mp4 | xargs -I {{}} rm {self.pathname}/{{}}")
 
         return VideoItem(os.path.join(self.pathname, self.file_name))
 

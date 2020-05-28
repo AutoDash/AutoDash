@@ -12,7 +12,7 @@ class TestIExecutor(unittest.TestCase):
     def test_printer(self):
         printer = Printer()
         printer.run({
-            "videoItem": VideoItem(None)
+            "videoItem": VideoItem()
         })
 
 

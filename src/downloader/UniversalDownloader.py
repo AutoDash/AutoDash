@@ -17,11 +17,11 @@ class UniversalDownloader(iExecutor):
         downloader.set_pathname(self.pathname)
         return self
 
-    def run(self, md_item: MetaDataItem) -> VideoItem:
+    def run(self, metadata_item: MetaDataItem) -> VideoItem:
         for regex, downloader in self.registered_downloaders:
-            if re.search(regex, md_item.url): return downloader.run(md_item)
+            if re.search(regex, metadata_item.url): return downloader.run(metadata_item)
         else:
-            raise RuntimeError(f"No registered downloader can handle link: {link}")
+            raise RuntimeError(f"No registered downloader can handle link: {metadata_item.url}")
 
     def set_pathname(self, pathname):
         self.pathname = pathname
