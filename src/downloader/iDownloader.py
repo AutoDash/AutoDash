@@ -19,3 +19,8 @@ class iDownloader(iExecutor):
 
     def run(self, md_item: MetaDataItem):
         return asyncio.run(self.download(md_item))
+
+    def set_pathname(self, pathname):
+        self.pathname = pathname
+        return self
+

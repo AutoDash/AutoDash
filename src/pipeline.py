@@ -95,7 +95,6 @@ def run(pipeline, **kwargs):
     manager.start()
 
     work_queue = manager.list()
-
     context = {
         **kwargs,
         'work_queue': work_queue,
