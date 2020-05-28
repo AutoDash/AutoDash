@@ -13,7 +13,7 @@ class TestUnitTest(unittest.TestCase):
 
     def test_store_load_delete_video(self):
         metaData = MetaDataItem("title","url","youtube","car-v-car","desc","loc")
-        vidItem = VideoItem([0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], metaData)
+        vidItem = VideoItem(metadata=metaData)
 
         self.storage.store_video(vidItem)
         self.assertTrue(os.path.exists(self.storage.get_file(vidItem)))
@@ -29,15 +29,14 @@ class TestUnitTest(unittest.TestCase):
 
         for vid in videos:
             self.storage.store_video(
-                VideoItem([0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],  
-                    MetaDataItem(
+                VideoItem(metadata=MetaDataItem(
                         "title",vid,"youtube","comp","desc","loc"
                     )
                 )
             )
 
         for vid in self.storage.list_videos():
-            videos.remove(vid.meta_data.url)
+            videos.remove(vid.metadata.url)
 
         self.assertTrue(len(videos) == 0, "Not all videos listed")
 

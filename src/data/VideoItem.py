@@ -4,8 +4,12 @@ import numpy as np
 import skvideo.io
 
 class VideoItem:
-    def __init__(self, filename):
-        self.image = skvideo.io.vread(filename)  
+    def __init__(self, filename=None, metadata=None):
+        self.filename=filename
+        self.metadata=metadata
+
+    def encode(self):
+        return self.metadata.encode()
 
     def update_storage_location(self, id: str):
         pass
