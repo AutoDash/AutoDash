@@ -1,8 +1,11 @@
 language: python
+cache: pip
 matrix:
   include:
     - os: linux
       name: Linux Test
-      python: 3.7
+      python: 3.8
       script: 
+        - python -m pip install --upgrade pip
+        - pip install -r requirements.txt
         - ./tools/run_tests.sh
