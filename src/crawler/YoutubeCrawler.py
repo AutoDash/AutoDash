@@ -47,8 +47,7 @@ class YoutubeCrawler(iCrawler):
             if not self.check_url or await self.check_new_url(res.url):
                 url = "https://www.youtube.com/watch?v={0}".format(res["url"])
                 title = res.get("title", None)
-                id = res["id"]
-                tags = {'id': id}
+                tags = { 'id': res["id"] }
 
                 if title is None:
                     self.log("Failed to extract title: Got {0}".format(res))
