@@ -2,9 +2,9 @@ import os
 import praw
 from dotenv import load_dotenv
 
-from src.crawler.iCrawler import iCrawler, CrawlerException
-from src.data.MetaDataItem import MetaDataItem
-from src.utils import get_project_root
+from .iCrawler import iCrawler, CrawlerException
+from ..data.MetaDataItem import MetaDataItem
+from ..utils import get_project_root
 
 CRAWLABLE_SUBREDDITS = [
     'CarCrash'

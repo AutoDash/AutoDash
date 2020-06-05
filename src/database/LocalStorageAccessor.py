@@ -3,9 +3,9 @@ from typing import List
 
 import os
 
-from src.data.MetaDataItem import MetaDataItem, metadata_from_file, gen_filename, delete_metadata_file
-from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
-from src.utils import get_project_root
+from ..data.MetaDataItem import MetaDataItem, metadata_from_file, gen_filename, delete_metadata_file
+from .iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+from utils import get_project_root
 
 METADATA_STORAGE_DIR = os.path.join(get_project_root(), "metadata_storage")
 

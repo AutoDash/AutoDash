@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from src.downloader.iDownloader import iDownloader, DownloadException
-from src.data.VideoItem import VideoItem
+from .iDownloader import iDownloader, DownloadException
+from ..data.VideoItem import VideoItem
 import youtube_dl
 
 

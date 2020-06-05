@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 import asyncio
 
-from src.data.MetaDataItem import MetaDataItem
-from src.executor.iExecutor import iExecutor
+from ..data.MetaDataItem import MetaDataItem
+from ..executor.iExecutor import iExecutor
 
 
 class CrawlerException(Exception):

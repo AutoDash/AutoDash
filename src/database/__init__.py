@@ -1,7 +1,7 @@
 import enum
 
-from src.database.FirebaseAccessor import FirebaseAccessor
-from src.database.LocalStorageAccessor import LocalStorageAccessor
+from .FirebaseAccessor import FirebaseAccessor
+from .LocalStorageAccessor import LocalStorageAccessor
 
 
 class DatabaseConfigOption(enum.Enum):

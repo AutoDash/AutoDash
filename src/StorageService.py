@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from src.data.MetaDataItem import MetaDataItem
-from src.data.VideoItem import VideoItem
+from .data.MetaDataItem import MetaDataItem
+from .data.VideoItem import VideoItem
 import os, pickle
 
 

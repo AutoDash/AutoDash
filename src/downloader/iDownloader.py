@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.data.VideoItem import VideoItem
+from ..data.VideoItem import VideoItem
 import os
 
 class DownloadException(Exception):

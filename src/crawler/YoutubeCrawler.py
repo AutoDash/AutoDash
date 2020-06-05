@@ -1,5 +1,5 @@
-from src.crawler.iCrawler import iCrawler, CrawlerException
-from src.data.MetaDataItem import MetaDataItem
+from ..crawler.iCrawler import iCrawler, CrawlerException
+from ..data.MetaDataItem import MetaDataItem
 import youtube_dl
 
 class YoutubeCrawler(iCrawler):
