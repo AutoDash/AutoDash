@@ -8,13 +8,13 @@ Navigation:
     space: pause/unpause
 
 Tagging:
-    m: Tag the current location as accident location
-    n: Tag the video as not a dashcam video
-    b: Remove tagging
+    m: Mark current location as accident location
+    n: Not a dashcam video
+        NOTE: by default, all videos will be dashcam
+    u: untag (Remove tags)
 
 Note:
     By default, video are assumed to be dashcam video
-    For now, if it actually is dashcam video is ignored. There is no field in MetaDataItem
 
 """
 from src.gui_tool.gui_managers import VideoPlayerGUIManager
@@ -24,6 +24,7 @@ from src.data.MetaDataItem import MetaDataItem
 def tag_file(file_loc, mdi:MetaDataItem):
     gui = VideoPlayerGUIManager(file_loc)
     res = gui.start()
-    mdi.location = res.accident_frame_number
+    mdi.accident_index = res.accident_frame_number
+    mdi.is_dashcam = res.is_dashcam
     return mdi
 

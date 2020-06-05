@@ -153,7 +153,7 @@ class VideoPlayerGUIManager(object):
                 self.vcm.shift_frame_index(10)
             elif received_key == ord(" "):
                 cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, not self.vcm.get_paused())
-            elif received_key == ord("b"):
+            elif received_key == ord("u"):
                 self.result.unmark()
                 mark_changed = True
             elif received_key == ord("n"):
@@ -169,6 +169,5 @@ class VideoPlayerGUIManager(object):
     def cleanup(self):
         self.vcm.release()
         cv2.destroyAllWindows()
-
 
 

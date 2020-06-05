@@ -53,8 +53,11 @@ class PipelineWorker(Process):
             work_queue.task_done()
 
 
-def run(executors, **kwargs):
+def run(pipeline, **kwargs):
     num_workers = kwargs.get('n_workers', 1)
+
+    source_executors, output_executor = pipeline.generate_graph()
+
     work_queue = JoinableQueue(num_workers)
 
     context = {
@@ -75,7 +78,7 @@ def run(executors, **kwargs):
 
     for i in range(iterations):
         print("put work")
-        work_queue.put(Work(executors[i % len(executors)], None))
+        work_queue.put(Work(source_executors[i % len(source_executors)], None))
 
     print("signal complete")
     # A null job signals the end of work
@@ -83,7 +86,6 @@ def run(executors, **kwargs):
         work_queue.put(None)
 
     work_queue.join()
-
 
 def main():
     # TODO: build executors from file / command line arguments
