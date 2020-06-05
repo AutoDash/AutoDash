@@ -5,8 +5,8 @@ from src.data.MetaDataItem import MetaDataItem
 
 class RedditCrawler(iCrawler):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *parents):
+        super().__init__(*parents)
 
 
     async def find_next_downloadable(self, posts) -> MetaDataItem:
