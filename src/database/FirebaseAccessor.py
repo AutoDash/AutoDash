@@ -45,16 +45,6 @@ class FirebaseAccessor(iDatabase):
     def __metadata_reference(self):
         return db.reference('metadata')
 
-    async def __query_list(self, ref: Reference) -> List[str]:
-        vals = ref.get()
-        if vals is None:
-            return []
-
-        result = []
-        for key, val in vals.items():
-            result.append(val)
-        return result
-
     async def __query_keys(self, ref: Reference) -> List[str]:
         vals = ref.get()
         if vals is None:
@@ -68,7 +58,7 @@ class FirebaseAccessor(iDatabase):
 
     async def fetch_video_url_list(self) -> List[str]:
         ref = self.__metadata_reference()
-        metadata_list = await self.__query_list(ref)
+        metadata_list = await self.__query_keys(ref)
         urls = map(lambda metadata: metadata['url'], metadata_list)
         return list(urls)
 
