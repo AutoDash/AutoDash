@@ -65,7 +65,7 @@ class TestICrawler(unittest.TestCase):
         self.crawler.run({})
 
         id_list = asyncio.run(self.database.fetch_video_id_list())
-        self.assertTrue(len(id_list) is 1)
+        self.assertTrue(len(id_list) == 1)
 
         metadata = asyncio.run(self.database.fetch_metadata(id_list[0]))
 
