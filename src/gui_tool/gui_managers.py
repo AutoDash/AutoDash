@@ -127,8 +127,12 @@ class VideoPlayerGUIManager(object):
 
     def start(self):
         self.set_GUI()
-        self.play_video()
-        self.cleanup()
+        try:
+            self.play_video()
+        except ManualTaggingAbortedException:
+            raise
+        finally:
+            self.cleanup()
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
@@ -210,23 +214,28 @@ class VisualizeTaggingResultsGUIManager(object):
 
     def start(self):
         self.set_GUI()
-        while True:
-            cv2.imshow(self.WINDOW_NAME, self.displayed)
-            received_key = cv2.waitKey(500) & 0xFF
-            if received_key == 27:  # Escape key
-                raise ManualTaggingAbortedException("Verification operation aborted")
-            elif received_key == 13:  # Enter: Accepted
-                return True
-            elif received_key == 8:  # Backspace: Rejected
-                return False
-            elif received_key == ord("a"):
-                self.shift_frame_index(-1)
-            elif received_key == ord("s"):
-                self.shift_frame_index(-10)
-            elif received_key == ord("d"):
-                self.shift_frame_index(1)
-            elif received_key == ord("w"):
-                self.shift_frame_index(10)
+        try:
+            while True:
+                cv2.imshow(self.WINDOW_NAME, self.displayed)
+                received_key = cv2.waitKey(500) & 0xFF
+                if received_key == 27:  # Escape key
+                    raise ManualTaggingAbortedException("Verification operation aborted")
+                elif received_key == 13:  # Enter: Accepted
+                    return True
+                elif received_key == 8:  # Backspace: Rejected
+                    return False
+                elif received_key == ord("a"):
+                    self.shift_frame_index(-1)
+                elif received_key == ord("s"):
+                    self.shift_frame_index(-10)
+                elif received_key == ord("d"):
+                    self.shift_frame_index(1)
+                elif received_key == ord("w"):
+                    self.shift_frame_index(10)
+        except ManualTaggingAbortedException:
+            raise
+        finally:
+            self.cleanup()
 
     def shift_frame_index(self, shift: int):
         if len(self.frame_numbers) == 0:
@@ -237,7 +246,7 @@ class VisualizeTaggingResultsGUIManager(object):
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
-        cv2.createTrackbar(self.FRAME_I_NAME, self.WINDOW_NAME, 0, len(self.frame_numbers)-1,
+        cv2.createTrackbar(self.FRAME_I_NAME, self.WINDOW_NAME, 0, max(len(self.frame_numbers)-1, 0),
                            self.page_change_callback)
         self.page_change_callback(0)
 
@@ -271,3 +280,7 @@ class VisualizeTaggingResultsGUIManager(object):
             img[self.IMG_STARTING_Y:, 0:] = displayed
 
         self.displayed = img
+
+    def cleanup(self):
+        self.vcm.release()
+        cv2.destroyAllWindows()
