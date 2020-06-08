@@ -9,8 +9,8 @@ from src.executor.iExecutor import iExecutor
 class iSource(iExecutor):
 
     @abstractmethod
-    def __init__(self, last_id: str = None, cond: FilterCondition = None):
-        super().__init__()
+    def __init__(self, *parents, last_id: str = None, cond: FilterCondition = None):
+        super().__init__(*parents)
         self.last_id = last_id
         self.cond = cond
 

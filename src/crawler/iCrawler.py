@@ -32,14 +32,5 @@ class iCrawler(iExecutor):
         urls = await self.database.fetch_video_url_list()
         return url not in urls
 
-
-    #helper method to publish item to database
-    async def publish_metadata(self, item:MetaDataItem):
-        if self.database is None:
-            raise UndefinedDatabaseException()
-
-        await self.database.publish_new_metadata(item)
-
     def run(self, obj : Dict[str, Any]):
-        metadata_item = asyncio.run(self.next_downloadable())
-        asyncio.run(self.publish_metadata(metadata_item))
+        return asyncio.run(self.next_downloadable())
