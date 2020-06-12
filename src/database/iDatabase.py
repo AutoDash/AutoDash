@@ -12,7 +12,7 @@ class NotExistingException(Exception):
 
 class iDatabase(ABC):
     def __init__(self):
-        super().__init__
+        super().__init__()
 
     # Sets the id of the metadata to a unique identifier
     @abstractmethod
