@@ -1,10 +1,10 @@
 import asyncio
 
 from src.data.MetaDataItem import MetaDataItem
-from src.executor.iExecutor import iExecutor
+from src.executor.iDatabaseExecutor import iDatabaseExecutor
 
 
-class iDataUpdater(iExecutor):
+class iDataUpdater(iDatabaseExecutor):
 
     def __init__(self, *parents):
         super().__init__(*parents)

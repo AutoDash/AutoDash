@@ -3,10 +3,10 @@ from typing import Dict, Any, List
 
 from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem
-from src.executor.iExecutor import iExecutor
+from src.executor.iDatabaseExecutor import iDatabaseExecutor
 
 
-class iSource(iExecutor):
+class iSource(iDatabaseExecutor):
 
     @abstractmethod
     def __init__(self, *parents, last_id: str = None, cond: FilterCondition = None):
