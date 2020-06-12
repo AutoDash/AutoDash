@@ -14,16 +14,12 @@ class UndefinedDatabaseException(Exception):
     '''Raise when attempt to access database before injected into the crawler'''
 
 class iCrawler(iExecutor):
-    def __init__(self):
-        self.database = None
-        super().__init__
+    def __init__(self, *parents):
+        super().__init__(*parents)
 
     @abstractmethod
     async def next_downloadable(self) -> MetaDataItem:
         pass
-
-    def set_database(self, database):
-        self.database = database
 
     async def check_new_url(self, url: str) -> bool:
         if self.database is None:

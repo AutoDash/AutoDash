@@ -5,8 +5,8 @@ import youtube_dl
 class YoutubeCrawler(iCrawler):
     YOUTUBE_SRC_IDENTIFIER = "YouTube"
 
-    def __init__(self, search_terms: list, log_func=print, check_url=True):
-        super().__init__()
+    def __init__(self, search_terms: list, log_func=print, check_url=True, *parents):
+        super().__init__(*parents)
         self.search_terms = search_terms
         self.log_func = log_func
         self.check_url = check_url  # If true, will not return MetaDataItem if already exists in database
