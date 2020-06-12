@@ -4,16 +4,14 @@ from typing import Any, Dict
 import asyncio
 
 from src.data.MetaDataItem import MetaDataItem
-from src.executor.iExecutor import iExecutor
+from src.executor.iDatabaseExecutor import iDatabaseExecutor, UndefinedDatabaseException
 
 
 class CrawlerException(Exception):
     '''Raise on inability to find next downloadable'''
 
-class UndefinedDatabaseException(Exception):
-    '''Raise when attempt to access database before injected into the crawler'''
 
-class iCrawler(iExecutor):
+class iCrawler(iDatabaseExecutor):
     def __init__(self, *parents):
         super().__init__(*parents)
 
