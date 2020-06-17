@@ -2,6 +2,7 @@
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
+from executor.Printer import Printer
 
 
 class Work:

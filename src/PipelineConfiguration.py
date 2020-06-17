@@ -6,6 +6,7 @@ import yaml
 import pickle
 from collections import defaultdict
 
+
 """
 Usage:
 
@@ -30,8 +31,12 @@ class ExecutorFactory:
     @classmethod
     def build(cls, executor_name, parents=[]):
         local = {}
-        executor_name.prev = parents
-        return executor_name
+        res = executor_name.rsplit(".",1)
+        exec(f'from {res[0]} import {res[1]}', globals(), local)
+        exec(f'executor_class = {res[1]}', globals(), local)
+        executor_class = local['executor_class']
+        executor = executor_class(*parents)
+        return executor
 
 class PipelineConfiguration:
     """
@@ -114,7 +119,7 @@ class PipelineConfiguration:
                     graph_dict.append([])
                     cur_depth = depth
 
-                graph_dict[depth].append(node)
+                graph_dict[depth].append(node.get_name())
                 if len(node.prev) == 0: input_nodes.append(node)
 
                 for parent in node.prev:

@@ -1,9 +1,2 @@
-- - &id001 !!python/object:executor.Printer.Printer
-    database: null
-    next: null
-    prev: !!python/tuple
-    - &id002 !!python/object:executor.Printer.Printer
-      database: null
-      next: *id001
-      prev: !!python/tuple []
-- - *id002
+- - executor.Printer.Printer
+- - executor.Printer.Printer

@@ -30,7 +30,9 @@ class iExecutor(ABC):
         self.prev.append(prev)
 
     def get_name(self):
-        return type(self).__name__
+        cls = self.__class__
+
+        return cls.__module__ + '.' + cls.__name__
 
     def get_executor(self):
         return self
