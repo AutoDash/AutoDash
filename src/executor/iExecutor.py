@@ -11,6 +11,13 @@ class iExecutor(ABC):
         for parent in parents:
             parent.set_next(self)
 
+
+        self.database = None
+        super().__init__()
+
+    def set_database(self, database):
+        self.database = database
+
     @abstractmethod
     def run(self, item: VideoItem):
         pass

@@ -26,7 +26,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
         metadata = MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
         try:
             asyncio.run(self.storage.publish_new_metadata(metadata))
-            self.assertTrue(metadata.id is not "") # metadata id successfully updated by the publish call
+            self.assertTrue(metadata.id != "") # metadata id successfully updated by the publish call
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
         finally:
             asyncio.run(self.storage.delete_metadata(metadata.id))

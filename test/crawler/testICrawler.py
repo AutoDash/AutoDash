@@ -9,6 +9,9 @@ from test.mock.MockDataAccessor import MockDataAccessor
 
 
 class MockCrawler(iCrawler):
+    def __init__(self):
+        super().__init__()
+
     async def next_downloadable(self):
         return MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
 
@@ -62,7 +65,7 @@ class TestICrawler(unittest.TestCase):
         self.crawler.run({})
 
         id_list = asyncio.run(self.database.fetch_video_id_list())
-        self.assertTrue(len(id_list) is 1)
+        self.assertTrue(len(id_list) == 1)
 
         metadata = asyncio.run(self.database.fetch_metadata(id_list[0]))
 

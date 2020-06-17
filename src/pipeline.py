@@ -18,9 +18,11 @@ class PipelineCLIParser(ArgumentParser):
                 help="Number of workers to process work", dest='n_workers')
         self.add_argument('--mode', choices={'crawler', 'ucrawler', 'user'}, default='user',
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
-        self.add_argument('--source', type=str, required=True, help='HTTP link to firebase')
+        self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
+                help="Data storage used. Either 'firebase' or 'local")
         self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull')
 
+    @staticmethod
     def positive_int_type(val):
         intval = int(val)
         if intval <= 0:

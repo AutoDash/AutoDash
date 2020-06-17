@@ -12,8 +12,7 @@ class TestYouTubeCrawler(unittest.TestCase):
     def test_crawl(self):
         async def __sub():
             crawler = YoutubeCrawler(["dashcam crash", "accident footage dashcam"], check_url=False)
-            for i in range(450):
-                await crawler.next_downloadable()
+            await crawler.next_downloadable()
 
         asyncio.run(__sub())
 

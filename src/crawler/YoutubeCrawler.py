@@ -6,8 +6,8 @@ import youtube_dl
 class YoutubeCrawler(iCrawler):
     YOUTUBE_SRC_IDENTIFIER = "YouTube"
 
-    def __init__(self, search_terms: list, log_func=print, check_url=True):
-        super().__init__()
+    def __init__(self, search_terms: list, log_func=print, check_url=True, *parents):
+        super().__init__(*parents)
         self.search_terms = search_terms
         self.log_func = log_func
         self.check_url = check_url  # If true, will not return MetaDataItem if already exists in database
@@ -49,8 +49,7 @@ class YoutubeCrawler(iCrawler):
             if not self.check_url or await self.check_new_url(res['url']):
                 url = "https://www.youtube.com/watch?v={0}".format(res["url"])
                 title = res.get("title", None)
-                id = res["id"]
-                tags = {'id': id}
+                tags = { 'id': res["id"] }
 
                 if title is None:
                     self.log("Failed to extract title: Got {0}".format(res))
