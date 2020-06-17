@@ -30,10 +30,8 @@ class ExecutorFactory:
     @classmethod
     def build(cls, executor_name, parents=[]):
         local = {}
-        exec(f'executor_class = {executor_name}', globals(), local)
-        executor_class = local['executor_class']
-        executor = executor_class(*parents)
-        return executor
+        executor_name.prev = parents
+        return executor_name
 
 class PipelineConfiguration:
     """
@@ -144,6 +142,7 @@ class PipelineConfiguration:
         """
 
         def traverse_and_generate(index=0, parents=[]):
+            print(f"graph: {self.graph_dict}")
             root_executor = [self.ExecutorFactory.build(executor_name=input_name, parents=parents) for input_name in self.graph_dict[index]]
 
             if index == len(self.graph_dict) - 1:

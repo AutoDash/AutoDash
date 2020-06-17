@@ -148,7 +148,8 @@ def main():
 
     print(args)
     if args.config is None:
-        config.load_graph(Printer())  # TODO: load default config from a file
+        config.load_graph(Printer(Printer()))  # TODO: load default config from a file
+        config.write("default_configuration.yaml")
     else:
         config.read(args.config)
 
