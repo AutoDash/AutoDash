@@ -1,5 +1,5 @@
 import os
-from src.executor.iExecutor import iExecutor
+from executor.iExecutor import iExecutor
 from typing import List
 import json
 import yaml
@@ -16,7 +16,7 @@ Usage:
     x = DashcamFilter(x)
     x = AccidentFilter(x)
     x = Sink(x)
-    
+
     pipeline.load_graph(x)
 
     administrator(pipeline, num_workers=4, ...)
@@ -85,7 +85,7 @@ class PipelineConfiguration:
             'yaml' : self._read_yaml,
             'pkl'  : self._read_pickle
         })
-         
+
     def write(self, fpath, ffmt=None):
         self._execute_rw(fpath, ffmt, {
             'json' : self._write_json,
@@ -95,8 +95,8 @@ class PipelineConfiguration:
         })
 
     def load_graph(self, output_node: iExecutor):
-        """ 
-            Create PipelineConfiguration from existing graph. Stores graph in dict as: 
+        """
+            Create PipelineConfiguration from existing graph. Stores graph in dict as:
 
             [[layer_1], [layer_2], ... ]
 
@@ -159,4 +159,3 @@ class PipelineConfiguration:
             raise RuntimeError("Graph not loaded.")
 
         return traverse_and_generate()
-    

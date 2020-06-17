@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 from multiprocessing.managers import BaseManager
 from argparse import ArgumentParser, ArgumentTypeError
+<<<<<<< HEAD
 from multiprocessing import Process, JoinableQueue, managers
 from src.executor.Printer import Printer
+=======
+from multiprocessing import Process, JoinableQueue
+from PipelineConfiguration import PipelineConfiguration
+from executor.Printer import Printer
+>>>>>>> tie configuration and pipeline together
 
 
 class Work:
@@ -21,6 +27,7 @@ class PipelineCLIParser(ArgumentParser):
         self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
                 help="Data storage used. Either 'firebase' or 'local")
         self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull')
+        self.add_argument('--config', type=str, dest='config')
 
     @staticmethod
     def positive_int_type(val):
@@ -133,10 +140,19 @@ def run(pipeline, **kwargs):
     for worker in workers:
         worker.join()
 
+
 def main():
-    # TODO: build executors from file / command line arguments
-    executor = Printer()
-    run(executor)
+    config = PipelineConfiguration()
+    parser = PipelineCLIParser()
+    args = parser.parse_args()
+
+    print(args)
+    if args.config is None:
+        config.load_graph(Printer())  # TODO: load default config from a file
+    else:
+        config.read(args.config)
+
+    run(config, **vars(args))
 
 
 if __name__ == "__main__":
