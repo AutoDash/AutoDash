@@ -148,10 +148,9 @@ def main():
 
     print(args)
     if args.config is None:
-        config.load_graph(Printer(Printer()))  # TODO: load default config from a file
-        config.write("default_configuration.yaml")
-    else:
-        config.read(args.config)
+        args.config = "default_configuration.yml"
+
+    config.read(args.config)
 
     run(config, **vars(args))
 
