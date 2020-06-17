@@ -1,5 +1,6 @@
 from src.crawler.iCrawler import iCrawler, CrawlerException
 from src.data.MetaDataItem import MetaDataItem
+from src.pipeline import StatefulExecutorProxy
 import youtube_dl
 
 class YoutubeCrawler(iCrawler):
@@ -17,6 +18,7 @@ class YoutubeCrawler(iCrawler):
         self.search_results = []
         self.skip_n = 0
         self.get_n = 100
+        self.stateful = True
 
     def __update_search_results(self):
         ydl_opts = {'quiet': True}
@@ -44,7 +46,7 @@ class YoutubeCrawler(iCrawler):
             res = self.search_results[0]
             self.search_results = self.search_results[1:]
 
-            if not self.check_url or await self.check_new_url(res.url):
+            if not self.check_url or await self.check_new_url(res['url']):
                 url = "https://www.youtube.com/watch?v={0}".format(res["url"])
                 title = res.get("title", None)
                 tags = { 'id': res["id"] }
@@ -58,4 +60,10 @@ class YoutubeCrawler(iCrawler):
 
     def log(self, log):
         self.log_func("[Youtube Crawler] {0}".format(log))
+
+    def register_shared(self, manager):
+        manager.register_executor('YoutubeCrawler', self)
+
+    def share(self, manager):
+        return manager.YoutubeCrawler()
 

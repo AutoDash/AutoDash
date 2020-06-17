@@ -7,19 +7,24 @@ from src.data.MetaDataItem import MetaDataItem
 from src.executor.iExecutor import iExecutor
 
 
-class CrawlerException(Exception):
+class CrawlerException(RuntimeError):
     '''Raise on inability to find next downloadable'''
 
-class UndefinedDatabaseException(Exception):
+class UndefinedDatabaseException(RuntimeError):
     '''Raise when attempt to access database before injected into the crawler'''
 
 class iCrawler(iExecutor):
-    def __init__(self, *parents):
-        super().__init__(*parents)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.database = None
 
     @abstractmethod
     async def next_downloadable(self) -> MetaDataItem:
         pass
+
+    def set_database(self, database):
+        self.database = database
+        return self
 
     async def check_new_url(self, url: str) -> bool:
         if self.database is None:
@@ -39,3 +44,4 @@ class iCrawler(iExecutor):
     def run(self, obj : Dict[str, Any]):
         metadata_item = asyncio.run(self.next_downloadable())
         asyncio.run(self.publish_metadata(metadata_item))
+        return metadata_item
