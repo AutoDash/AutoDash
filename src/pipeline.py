@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
-from multiprocessing.managers import BaseManager
 from argparse import ArgumentParser, ArgumentTypeError
-<<<<<<< HEAD
-from multiprocessing import Process, JoinableQueue, managers
-from src.executor.Printer import Printer
-=======
-from multiprocessing import Process, JoinableQueue
+from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
-from executor.Printer import Printer
->>>>>>> tie configuration and pipeline together
 
 
 class Work:
@@ -76,7 +69,7 @@ class StatefulExecutorProxy(managers.BaseProxy):
 
     def get_next(self):
         return self._callmethod('get_next')
-    
+
     def set_lock(self, message):
         return self._callmethod('set_lock', [message])
 
@@ -89,8 +82,8 @@ class StatefulExecutorProxy(managers.BaseProxy):
 class StatefulExecutorManager(managers.SyncManager):
     def register_executor(self, name, executor):
         self.register(
-                name, lambda: executor, 
-                proxytype=StatefulExecutorProxy, 
+                name, lambda: executor,
+                proxytype=StatefulExecutorProxy,
                 exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful']
         )
 
@@ -100,7 +93,7 @@ def run(pipeline, **kwargs):
     source_executors, output_executor = pipeline.generate_graph()
 
     manager = StatefulExecutorManager()
-    
+
     for executor in source_executors:
         if executor.is_stateful():
             executor.register_shared(manager)
