@@ -1,10 +1,11 @@
 import os
-from src.executor.iExecutor import iExecutor
+from executor.iExecutor import iExecutor
 from typing import List
 import json
 import yaml
 import pickle
 from collections import defaultdict
+
 
 """
 Usage:
@@ -16,7 +17,7 @@ Usage:
     x = DashcamFilter(x)
     x = AccidentFilter(x)
     x = Sink(x)
-    
+
     pipeline.load_graph(x)
 
     administrator(pipeline, num_workers=4, ...)
@@ -30,7 +31,9 @@ class ExecutorFactory:
     @classmethod
     def build(cls, executor_name, parents=[]):
         local = {}
-        exec(f'executor_class = {executor_name}', globals(), local)
+        res = executor_name.rsplit(".",1)
+        exec(f'from {res[0]} import {res[1]}', globals(), local)
+        exec(f'executor_class = {res[1]}', globals(), local)
         executor_class = local['executor_class']
         executor = executor_class(*parents)
         return executor
@@ -85,7 +88,7 @@ class PipelineConfiguration:
             'yaml' : self._read_yaml,
             'pkl'  : self._read_pickle
         })
-         
+
     def write(self, fpath, ffmt=None):
         self._execute_rw(fpath, ffmt, {
             'json' : self._write_json,
@@ -95,8 +98,8 @@ class PipelineConfiguration:
         })
 
     def load_graph(self, output_node: iExecutor):
-        """ 
-            Create PipelineConfiguration from existing graph. Stores graph in dict as: 
+        """
+            Create PipelineConfiguration from existing graph. Stores graph in dict as:
 
             [[layer_1], [layer_2], ... ]
 
@@ -116,7 +119,7 @@ class PipelineConfiguration:
                     graph_dict.append([])
                     cur_depth = depth
 
-                graph_dict[depth].append(node)
+                graph_dict[depth].append(node.get_name())
                 if len(node.prev) == 0: input_nodes.append(node)
 
                 for parent in node.prev:
@@ -144,6 +147,7 @@ class PipelineConfiguration:
         """
 
         def traverse_and_generate(index=0, parents=[]):
+            print(f"graph: {self.graph_dict}")
             root_executor = [self.ExecutorFactory.build(executor_name=input_name, parents=parents) for input_name in self.graph_dict[index]]
 
             if index == len(self.graph_dict) - 1:
@@ -159,4 +163,3 @@ class PipelineConfiguration:
             raise RuntimeError("Graph not loaded.")
 
         return traverse_and_generate()
-    

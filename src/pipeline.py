@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from multiprocessing.managers import BaseManager
 from argparse import ArgumentParser, ArgumentTypeError
-from multiprocessing import Process, JoinableQueue, managers
-from src.executor.Printer import Printer
+from multiprocessing import Process, managers
+from PipelineConfiguration import PipelineConfiguration
+from executor.Printer import Printer
 
 
 class Work:
@@ -21,6 +21,7 @@ class PipelineCLIParser(ArgumentParser):
         self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
                 help="Data storage used. Either 'firebase' or 'local")
         self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull')
+        self.add_argument('--config', type=str, dest='config')
 
     @staticmethod
     def positive_int_type(val):
@@ -69,7 +70,7 @@ class StatefulExecutorProxy(managers.BaseProxy):
 
     def get_next(self):
         return self._callmethod('get_next')
-    
+
     def set_lock(self, message):
         return self._callmethod('set_lock', [message])
 
@@ -82,8 +83,8 @@ class StatefulExecutorProxy(managers.BaseProxy):
 class StatefulExecutorManager(managers.SyncManager):
     def register_executor(self, name, executor):
         self.register(
-                name, lambda: executor, 
-                proxytype=StatefulExecutorProxy, 
+                name, lambda: executor,
+                proxytype=StatefulExecutorProxy,
                 exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful']
         )
 
@@ -93,7 +94,7 @@ def run(pipeline, **kwargs):
     source_executors, output_executor = pipeline.generate_graph()
 
     manager = StatefulExecutorManager()
-    
+
     for executor in source_executors:
         if executor.is_stateful():
             executor.register_shared(manager)
@@ -133,10 +134,19 @@ def run(pipeline, **kwargs):
     for worker in workers:
         worker.join()
 
+
 def main():
-    # TODO: build executors from file / command line arguments
-    executor = Printer()
-    run(executor)
+    config = PipelineConfiguration()
+    parser = PipelineCLIParser()
+    args = parser.parse_args()
+
+    print(args)
+    if args.config is None:
+        args.config = "default_configuration.yml"
+
+    config.read(args.config)
+
+    run(config, **vars(args))
 
 
 if __name__ == "__main__":
