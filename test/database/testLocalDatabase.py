@@ -5,6 +5,7 @@ import os
 
 import asyncio
 
+from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem, gen_filename
 from src.database.LocalStorageAccessor import LocalStorageAccessor
 from src.utils import get_project_root
@@ -108,6 +109,28 @@ class TestLocalStorageAccessor(unittest.TestCase):
             asyncio.run(self.storage.delete_metadata(metadata.id))
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
+    def test_filter_condition_query(self):
+        metadata1 = MetaDataItem("title", "fake url 1", "youtube", collision_type="car", location="Canada")
+        metadata2 = MetaDataItem("title", "fake url 2", "youtube", collision_type="human", location="Canada")
+        metadata3 = MetaDataItem("title", "fake url 3", "youtube", collision_type="human", location="America")
+        try:
+            asyncio.run(self.storage.publish_new_metadata(metadata1))
+            asyncio.run(self.storage.publish_new_metadata(metadata2))
+            asyncio.run(self.storage.publish_new_metadata(metadata3))
+
+            condition = FilterCondition("title == 'title' and location == 'Canada' and collision_type != 'car'")
+            print(condition.tokenize("title == 'title' and location == 'Canada' and collision_type != 'car'"))
+            metadata_list = asyncio.run(self.storage.fetch_newest_videos(filter_cond=condition))
+            self.assertEqual(set(map(lambda metadata: metadata.url, metadata_list)), {metadata2.url})
+
+        # Clean up after test
+        finally:
+            asyncio.run(self.storage.delete_metadata(metadata1.id))
+            asyncio.run(self.storage.delete_metadata(metadata2.id))
+            asyncio.run(self.storage.delete_metadata(metadata3.id))
+        self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata1.id))))
+        self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata2.id))))
+        self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata3.id))))
 
 if __name__ == '__main__':
     unittest.main()
