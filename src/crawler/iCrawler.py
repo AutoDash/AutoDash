@@ -7,17 +7,21 @@ from src.data.MetaDataItem import MetaDataItem
 from src.executor.iDatabaseExecutor import iDatabaseExecutor, UndefinedDatabaseException
 
 
-class CrawlerException(Exception):
+class CrawlerException(RuntimeError):
     '''Raise on inability to find next downloadable'''
 
 
 class iCrawler(iDatabaseExecutor):
-    def __init__(self, *parents):
-        super().__init__(*parents)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @abstractmethod
     async def next_downloadable(self) -> MetaDataItem:
         pass
+
+    def set_database(self, database):
+        self.database = database
+        return self
 
     async def check_new_url(self, url: str) -> bool:
         if self.database is None:
