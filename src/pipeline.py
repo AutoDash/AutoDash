@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
-from PipelineConfiguration import PipelineConfiguration
-from executor.Printer import Printer
+from src.PipelineConfiguration import PipelineConfiguration
+from src.executor.Printer import Printer
 
 
 class Work:

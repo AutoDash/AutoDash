@@ -4,7 +4,7 @@ import json, hashlib
 import os
 
 class MetaDataItem:
-    def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_index=None, is_dashcam=None, tags={}):
+    def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_index=None, is_dashcam=None, tags=None):
         self.id = id
         self.title = title
         self.url = url

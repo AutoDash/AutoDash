@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
-from data.VideoItem import VideoItem
+from src.data.VideoItem import VideoItem
 
 
 class iExecutor(ABC):

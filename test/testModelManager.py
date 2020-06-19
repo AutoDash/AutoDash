@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-from service.ModelManager import ModelManager
+from src.service.ModelManager import ModelManager
 import tensorflow as tf
 
 class TestModelManager(unittest.TestCase):

@@ -1,4 +1,4 @@
-from executor.iExecutor import iExecutor
+from src.executor.iExecutor import iExecutor
 
 
 class Printer(iExecutor):
