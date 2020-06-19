@@ -6,9 +6,9 @@ from src.data.MetaDataItem import MetaDataItem
 from src.executor.iDatabaseExecutor import iDatabaseExecutor
 
 
-class iSource(iDatabaseExecutor):
+# Not abstract, so a user can choose to default what database to interact with using this Executor
+class Source(iDatabaseExecutor):
 
-    @abstractmethod
     def __init__(self, *parents, last_id: str = None, cond: FilterCondition = None):
         super().__init__(*parents)
         self.last_id = last_id

@@ -14,7 +14,11 @@ class iDatabaseExecutor(iExecutor):
 
     def set_database(self, database):
         self.database = database
+        return self
 
     @abstractmethod
     def run(self, obj: Dict[str, Any]):
         pass
+
+    def requires_database(self):
+        return self.database is None

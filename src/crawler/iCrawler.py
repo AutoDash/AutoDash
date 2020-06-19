@@ -19,10 +19,6 @@ class iCrawler(iDatabaseExecutor):
     async def next_downloadable(self) -> MetaDataItem:
         pass
 
-    def set_database(self, database):
-        self.database = database
-        return self
-
     async def check_new_url(self, url: str) -> bool:
         if self.database is None:
             raise UndefinedDatabaseException()
