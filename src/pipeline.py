@@ -2,8 +2,6 @@
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
-from executor.Printer import Printer
-
 
 class Work:
     def __init__(self, executor, item):
@@ -16,6 +14,8 @@ class PipelineCLIParser(ArgumentParser):
         super().__init__(*args, **kwargs)
         self.add_argument('--workers', type=PipelineCLIParser.positive_int_type, default=1,
                 help="Number of workers to process work", dest='n_workers')
+        self.add_argument('--iterations', type=PipelineCLIParser.positive_int_type, default=10000,
+                help="Number of times to run pipeline loop", dest='max_iterations')
         self.add_argument('--mode', choices={'crawler', 'ucrawler', 'user'}, default='user',
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
         self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
@@ -47,8 +47,8 @@ class PipelineWorker(Process):
             if work is None:
                 print("done")
                 return
-            print(f"Received work {work}")
             executor = work.executor
+            print(f"Received work {work.executor} next {work.executor.get_next()}")
             item = work.item
             while executor is not None:
                 try:
@@ -86,12 +86,14 @@ class StatefulExecutorManager(managers.SyncManager):
                 name, lambda: executor,
                 proxytype=StatefulExecutorProxy,
                 exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful']
-        )
+    )
 
 def run(pipeline, **kwargs):
     num_workers = kwargs.get('n_workers', 1)
 
     source_executors, output_executor = pipeline.generate_graph()
+
+    print(f"source: {source_executors}, output: {output_executor}")
 
     manager = StatefulExecutorManager()
 
@@ -115,7 +117,6 @@ def run(pipeline, **kwargs):
     iterations = context.get('max_iterations', 10000)
 
     for i in range(iterations):
-        print("put work")
         executor = source_executors[i % len(source_executors)]
         work_executor = executor.share(manager) if executor.stateful else executor
         work_executor.set_lock(manager.Lock())

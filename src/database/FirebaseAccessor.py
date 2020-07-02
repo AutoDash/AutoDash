@@ -79,7 +79,7 @@ class FirebaseAccessor(iDatabase):
         return await self.__query_keys(ref)
 
 
-    async def fetch_newest_videos(self, last_id: str = None,
+    def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         metadata_ref = self.__metadata_reference()
 
