@@ -47,8 +47,8 @@ class PipelineWorker(Process):
             if work is None:
                 print("done")
                 return
+            print(f"Received work {work}")
             executor = work.executor
-            print(f"Received work {work.executor} next {work.executor.get_next()}")
             item = work.item
             while executor is not None:
                 try:
@@ -92,8 +92,6 @@ def run(pipeline, **kwargs):
     num_workers = kwargs.get('n_workers', 1)
 
     source_executors, output_executor = pipeline.generate_graph()
-
-    print(f"source: {source_executors}, output: {output_executor}")
 
     manager = StatefulExecutorManager()
 
