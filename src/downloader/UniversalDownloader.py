@@ -5,13 +5,17 @@ from src.downloader.iDownloader import iDownloader
 from src.data.VideoItem import VideoItem
 from src.data.MetaDataItem import MetaDataItem
 from src.executor.iExecutor import iExecutor
+from downloader.YoutubeDownloader import YoutubeDownloader
+from downloader.ImgurDownloader import ImgurDownloader
 
 class UniversalDownloader(iExecutor):
     def __init__(self, *args):
         super().__init__(*args);
         self.registered_downloaders = []
         self.pathname = os.getcwd()
-        
+        self.register_downloader(".*youtube.*", YoutubeDownloader())
+        self.register_downloader(".*imgur.*", ImgurDownloader())
+
     def register_downloader(self, regex: str, downloader: iDownloader):
         self.registered_downloaders.append((regex, downloader))
         downloader.set_pathname(self.pathname)
@@ -28,4 +32,3 @@ class UniversalDownloader(iExecutor):
         for _, downloader in self.registered_downloaders:
             downloader.set_pathname(pathname)
         return self
-               
