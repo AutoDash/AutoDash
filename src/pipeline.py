@@ -3,7 +3,7 @@ from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
 from executor.Printer import Printer
-
+import tensorflow as tf
 
 class Work:
     def __init__(self, executor, item):
@@ -115,7 +115,6 @@ def run(pipeline, **kwargs):
     iterations = context.get('max_iterations', 10000)
 
     for i in range(iterations):
-        print("put work")
         executor = source_executors[i % len(source_executors)]
         work_executor = executor.share(manager) if executor.stateful else executor
         work_executor.set_lock(manager.Lock())
@@ -150,4 +149,6 @@ def main():
 
 
 if __name__ == "__main__":
+    if not tf.test.is_gpu_available():
+        print("WARNING: You are running tensorflow in CPU mode.")    
     main()
