@@ -9,7 +9,7 @@ class DatabaseConfigOption(enum.Enum):
     local = 2
 
 def get_database(database_config: DatabaseConfigOption):
-    if database_config is DatabaseConfigOption['firebase']:
+    if database_config is DatabaseConfigOption.firebase:
         database_access = FirebaseAccessor()
     else:
         database_access = LocalStorageAccessor()
