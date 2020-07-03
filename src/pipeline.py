@@ -2,7 +2,6 @@
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
-from executor.Printer import Printer
 import tensorflow as tf
 
 class Work:
@@ -16,6 +15,8 @@ class PipelineCLIParser(ArgumentParser):
         super().__init__(*args, **kwargs)
         self.add_argument('--workers', type=PipelineCLIParser.positive_int_type, default=1,
                 help="Number of workers to process work", dest='n_workers')
+        self.add_argument('--iterations', type=PipelineCLIParser.positive_int_type, default=10000,
+                help="Number of times to run pipeline loop", dest='max_iterations')
         self.add_argument('--mode', choices={'crawler', 'ucrawler', 'user'}, default='user',
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
         self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
@@ -86,7 +87,7 @@ class StatefulExecutorManager(managers.SyncManager):
                 name, lambda: executor,
                 proxytype=StatefulExecutorProxy,
                 exposed=['run', 'get_next', 'set_lock', 'get_lock', 'is_stateful']
-        )
+    )
 
 def run(pipeline, **kwargs):
     num_workers = kwargs.get('n_workers', 1)
