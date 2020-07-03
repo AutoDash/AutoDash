@@ -1,13 +1,13 @@
-from src.executor.iExecutor import iExecutor
-from gluoncv import model_zoo
+from executor.iExecutor import iExecutor
+from service import ModelManager
 
 class ObjectDetector(iExecutor):
 
     def __init__(self, *kargs, **kwargs):
         super().__init__(*kargs, **kwargs)
-        self._network = model_zoo.get_model('mask_rcnn_resnet50_v1b_coco', pretrained=True)
 
     @classmethod
-    def run(self, item : VideoItem):
-        ids, scores, bboxes, masks = [X[0].asnumpy() for X in net(item.npy)]
+    def run(self, item):
+        network = ModelManager.get_model("faster_rcnn_resnet101_kitti_2018_01_28")
+        ids, scores, bboxes, masks = [X[0].asnumpy() for X in network(item.npy)]
         breakpoint()

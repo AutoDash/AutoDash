@@ -7,15 +7,15 @@ _models = { }
 def get_model(model_id : str):
     if model_id in _models:
         return self._models[model_id]
-    model_path = _get_model_path() / model_id
+    model_path = _get_model_path() / model_id / "saved_model"
     if path.exists(model_path):
-        return tf.save_model.load(model_path)
+        return tf.saved_model.load(str(model_path))
     raise ValueError(f"No model {model_id} is available")
 
 def save_model(self, model_id : str, model):
     _models[model_id] = model
-    model_path = _get_model_path() / model_id
-    tf.saved_models.save(model, model_path)
+    model_path = _get_model_path() / model_id / "saved_model"
+    tf.saved_models.save(model, str(model_path))
 
 def save_all(self) -> None:
     for (model_id, model) in self._models:

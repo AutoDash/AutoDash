@@ -2,4 +2,5 @@
 - - executor.Printer.Printer
 - - downloader.UniversalDownloader.UniversalDownloader
 - - executor.Printer.Printer
+- - executor.ObjectDetector.ObjectDetector
 - - executor.labeler.Labeler
