@@ -11,6 +11,13 @@ from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistin
 from src.utils import get_project_root
 
 
+FIREBASE_CRED_FILENAME = "autodash-9dccb-add3cdae62ea.json"
+
+# Raised if trying to instantiate Firebase Accessor without
+class MissingCredentials(Exception):
+    pass
+
+
 class FirebaseAccessor(iDatabase):
 
     initialized = False
@@ -20,28 +27,23 @@ class FirebaseAccessor(iDatabase):
         dirname = get_project_root()
         cred_file = os.path.join(dirname, "autodash-9dccb-add3cdae62ea.json")
 
-        cred = credentials.Certificate(cred_file)
-        fb_app = firebase_admin.initialize_app(cred, {
-            'databaseURL': 'https://autodash-9dccb.firebaseio.com/',
-            'databaseAuthVariableOverride': {
-                'uid': 'pipeline-worker'
-            }
-        })
+        if os.path.exists(cred_file):
+            # Have write access to Firebase
+            cred = credentials.Certificate(cred_file)
+            fb_app = firebase_admin.initialize_app(cred, {
+                'databaseURL': 'https://autodash-9dccb.firebaseio.com/',
+                'databaseAuthVariableOverride': {
+                    'uid': 'pipeline-worker'
+                }
+            })
+        else:
+            raise MissingCredentials()
+
 
     def __init__(self):
         if not FirebaseAccessor.initialized:
             self.initial_firebase()
             FirebaseAccessor.initialized = True
-
-    def __create_metadata(self, id: str, var_dict: dict) -> MetaDataItem:
-        var_dict['id'] = id
-        defined_vars = var_dict.keys()
-
-        for var in MetaDataItem.attributes():
-            if var not in defined_vars:
-                var_dict[var] = None
-
-        return MetaDataItem(**var_dict)
 
     def __metadata_reference(self):
         return db.reference('metadata')
@@ -94,7 +96,7 @@ class FirebaseAccessor(iDatabase):
         for key, val in reversed(vals.items()):
             if key == last_id:
                 break
-            result.append(self.__create_metadata(key, val))
+            result.append(self.create_metadata(key, val))
 
         if filter_cond is not None:
             result = filter_cond.filter(result)
@@ -133,7 +135,7 @@ class FirebaseAccessor(iDatabase):
             raise NotExistingException()
 
         item_dict = ref.child(id).get()
-        return self.__create_metadata(id, dict(item_dict))
+        return self.create_metadata(id, dict(item_dict))
 
 
     async def delete_metadata(self, id: str):
