@@ -24,7 +24,7 @@ class TestAnonymizationExecutor(unittest.TestCase):
     def tearDown(self):
         # Delete test directory
         if os.path.exists(self.TEST_DIR):
-            os.rmdir(self.TEST_DIR)
+            shutil.rmtree(self.TEST_DIR)
 
     def test_compiles(self):
         self.assertEqual(True, True)
