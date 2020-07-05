@@ -5,7 +5,10 @@ matrix:
     - os: linux
       name: Linux Test
       python: 3.8
-      script: 
+      script:
+        - cd lib/anonymization
+        - git checkout autodash
+        - cd -
         - python -m pip install --upgrade pip
         - pip install -r requirements.txt
         - ./tools/run_tests.sh

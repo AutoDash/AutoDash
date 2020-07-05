@@ -7,7 +7,7 @@ from src.StorageService import StorageService
 from numpy.testing import assert_array_equal, assert_raises
 
 class TestAnonymizationExecutor(unittest.TestCase):
-    TEST_DIR = "test"
+    TEST_DIR = os.path.join(os.getcwd(), "anontest")
     TEST_FILE = "test.mp4"
     TEST_FILE_PATH = os.path.join(TEST_DIR, TEST_FILE)
 
@@ -15,7 +15,7 @@ class TestAnonymizationExecutor(unittest.TestCase):
         self.storage = StorageService()
         # Create test directory and copy one of the test videos from the anonymization repo into it
         os.mkdir(self.TEST_DIR)
-        shutil.copy2("../lib/anonymization/dataset/input/man_face.mp4", self.TEST_FILE_PATH)
+        shutil.copy2(os.path.join(os.getcwd(), "lib/anonymization/dataset/input/man_face.mp4"), self.TEST_FILE_PATH)
         self.video = self.storage.load_file(self.TEST_FILE_PATH)
 
     def tearDown(self):
