@@ -29,7 +29,7 @@ class TestAnonymizationExecutor(unittest.TestCase):
     def test_compiles(self):
         self.assertEqual(True, True)
 
-    def test_video_creation(self):
+    def test_face_blurrer(self):
         original_data = self.video.npy
 
         # Running the face blurrer should overwrite the input file
