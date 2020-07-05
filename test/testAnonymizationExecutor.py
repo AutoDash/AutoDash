@@ -2,8 +2,9 @@
 import unittest
 import os
 import shutil
+
+from src.data.VideoItem import VideoItem
 from src.executor.FaceBlurrer import FaceBlurrer
-from src.StorageService import StorageService
 from numpy.testing import assert_array_equal, assert_raises
 
 class TestAnonymizationExecutor(unittest.TestCase):
@@ -12,15 +13,18 @@ class TestAnonymizationExecutor(unittest.TestCase):
     TEST_FILE_PATH = os.path.join(TEST_DIR, TEST_FILE)
 
     def setUp(self):
-        self.storage = StorageService()
         # Create test directory and copy one of the test videos from the anonymization repo into it
-        os.mkdir(self.TEST_DIR)
+        if not os.path.exists(self.TEST_DIR):
+            os.mkdir(self.TEST_DIR)
+
         shutil.copy2(os.path.join(os.getcwd(), "lib/anonymization/dataset/input/man_face.mp4"), self.TEST_FILE_PATH)
-        self.video = self.storage.load_file(self.TEST_FILE_PATH)
+        print(self.TEST_FILE_PATH)
+        self.video = VideoItem(self.TEST_FILE_PATH)
 
     def tearDown(self):
         # Delete test directory
-        os.rmdir(self.TEST_DIR)
+        if os.path.exists(self.TEST_DIR):
+            os.rmdir(self.TEST_DIR)
 
     def test_compiles(self):
         self.assertEqual(True, True)
