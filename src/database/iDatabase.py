@@ -14,7 +14,7 @@ class iReadOnlyDatabase(ABC):
     def __init__(self):
         super().__init__()
 
-    # Used
+    # Used to create metadataItems from the dictionaries that databases return
     @staticmethod
     def create_metadata(id: str, var_dict: dict) -> MetaDataItem:
         var_dict['id'] = id
