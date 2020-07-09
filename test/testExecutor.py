@@ -11,9 +11,7 @@ class TestIExecutor(unittest.TestCase):
 
     def test_printer(self):
         printer = Printer()
-        printer.run({
-            "videoItem": VideoItem()
-        })
+        printer.run(VideoItem())
 
 
 if __name__ == '__main__':

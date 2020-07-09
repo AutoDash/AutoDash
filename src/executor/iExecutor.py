@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
 from data.VideoItem import VideoItem
 
 
@@ -49,3 +48,6 @@ class iExecutor(ABC):
 
     def is_stateful(self):
         return self.stateful
+
+    def requires_database(self) -> bool:
+        return False

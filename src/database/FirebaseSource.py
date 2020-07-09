@@ -1,8 +1,8 @@
 from src.database.FirebaseAccessor import FirebaseAccessor
-from src.database.iSource import iSource
+from src.database.Source import Source
 
 
-class FirebaseSource(iSource):
+class FirebaseSource(Source):
 
     def __init__(self, *parents):
         super().__init__(*parents)

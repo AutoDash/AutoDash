@@ -8,8 +8,8 @@ from .LocalStorageAccessor import LocalStorageAccessor
 
 
 class DatabaseConfigOption(enum.Enum):
-    firebase_metadata = 1
-    local_storage_only = 2
+    firebase = 1
+    local = 2
 
 def get_firebase_access():
     dirname = get_project_root()
@@ -20,11 +20,10 @@ def get_firebase_access():
     else:
         return ReadOnlyFirebaseAccessor()
 
+def get_database(database_config: DatabaseConfigOption):
+    if database_config is DatabaseConfigOption.firebase:
+        database_access = get_firebase_access()
+    else:
+        database_access = LocalStorageAccessor()
 
-#TODO: Update to read from config file, or replace this with singleton/dependency injection (whatever decided by pipeline)
-DATABASE_CONFIG = DatabaseConfigOption.local_storage_only
-
-if DATABASE_CONFIG is DatabaseConfigOption['firebase_metadata']:
-    database_access = get_firebase_access()
-else:
-    database_access = LocalStorageAccessor()
+    return database_access
