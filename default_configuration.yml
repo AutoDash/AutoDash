@@ -2,4 +2,5 @@
 - - executor.Printer.Printer
 - - downloader.UniversalDownloader.UniversalDownloader
 - - executor.Printer.Printer
+- - executor.FaceBlurrer.FaceBlurrer
 - - executor.labeler.Labeler
