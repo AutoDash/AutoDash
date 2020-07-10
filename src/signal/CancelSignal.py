@@ -1,0 +1,3 @@
+
+class CancelSignal(Exception):
+    pass

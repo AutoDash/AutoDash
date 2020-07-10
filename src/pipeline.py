@@ -2,7 +2,9 @@
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
+from signal import CancelSignal
 import tensorflow as tf
+from database import database_access
 
 class Work:
     def __init__(self, executor, item):
@@ -51,19 +53,22 @@ class PipelineWorker(Process):
             print(f"Received work {work}")
             executor = work.executor
             item = work.item
-            while executor is not None:
-                try:
-                    if executor.is_stateful():
-                        with executor.get_lock():
+            try:
+                while executor is not None:
+                    try:
+                        if executor.is_stateful():
+                            with executor.get_lock():
+                                item = executor.run(item)
+                        else:
                             item = executor.run(item)
-                    else:
-                        item = executor.run(item)
-                except RuntimeError as e:
-                    print(e)
-                    break
-                executor = executor.get_next()
-            print("Done processing work")
-
+                    except RuntimeError as e:
+                        print(e)
+                        break
+                    executor = executor.get_next()
+                print("Done processing work")
+            except CancelSignal:
+                item.is_cancelled = True
+                database_access.update_metadata(item)
 
 class StatefulExecutorProxy(managers.BaseProxy):
     def run(self, message):
