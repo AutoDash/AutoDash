@@ -1,8 +1,8 @@
 from src.database.FirebaseAccessor import FirebaseAccessor
-from src.database.iDataUpdater import iDataUpdater
+from src.database.DataUpdater import DataUpdater
 
 
-class FirebaseUpdater(iDataUpdater):
+class FirebaseUpdater(DataUpdater):
 
     def __init__(self, *parents):
         super().__init__(*parents)

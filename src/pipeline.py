@@ -4,7 +4,7 @@ from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
 from signal import CancelSignal
 import tensorflow as tf
-from database import database_access
+from src.database import get_database, DatabaseConfigOption, database_access
 
 class Work:
     def __init__(self, executor, item):
@@ -101,9 +101,15 @@ def run(pipeline, **kwargs):
 
     manager = StatefulExecutorManager()
 
+    database_config = kwargs.get('storage', DatabaseConfigOption.local)
+    database = get_database(database_config)
+
     for executor in source_executors:
         if executor.is_stateful():
             executor.register_shared(manager)
+
+        if executor.requires_database():
+            executor.set_database(database)
 
     manager.start()
 
