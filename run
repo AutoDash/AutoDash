@@ -1,1 +1,5 @@
-src/pipeline.py
+#!/usr/bin/env python3
+
+from src import pipeline
+
+pipeline.main()

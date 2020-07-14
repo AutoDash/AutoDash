@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
-from PipelineConfiguration import PipelineConfiguration
-from src.database import get_database, DatabaseConfigOption
+from .PipelineConfiguration import PipelineConfiguration
+from .database import get_database, DatabaseConfigOption
 
 
 class Work:
