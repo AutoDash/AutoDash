@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import unittest
+import unittest, os
 from src.PipelineConfiguration import PipelineConfiguration
 from src.executor.iExecutor import iExecutor
 
@@ -19,7 +19,6 @@ class testExecutorD(iExecutor):
     def run(self):
         pass
 
-
 class TestExecutorFactory:
     @classmethod
     def build(cls, executor_name, parents=[]):
@@ -30,7 +29,7 @@ class TestExecutorFactory:
         return executor
 
 class TestUnitTest(unittest.TestCase):
-    
+
     def test_read_write_invalid_format(self):
         pc = PipelineConfiguration(ExecutorFactory=TestExecutorFactory)
         exA = testExecutorA()
@@ -101,7 +100,7 @@ class TestUnitTest(unittest.TestCase):
         roots, sink = pc.generate_graph()
 
         self.assertEqual(len(roots), 2)
-        
+
         res_exA, res_exB = roots
 
         self.assertEqual(res_exA.get_name(), exA.get_name())
@@ -129,6 +128,13 @@ class TestUnitTest(unittest.TestCase):
         exC = testExecutorC(exB, exD)
 
         self.assertRaises(RuntimeError, pc.load_graph, exC)
+
+    def test_pipelineConfig_with_args(self):
+        pc = PipelineConfiguration()
+        pc.read(os.path.join(__file__ ,"test_data", "pipelineConfigWithArgs.yaml"))
+        source_executors, _ = pc.generate_graph()
+        self.assertEqual(len(source_executors()), 1)
+        self.assertEqual(source_executors[0].msg, "TEST MESSAGE")
 
 
 if __name__ == '__main__':
