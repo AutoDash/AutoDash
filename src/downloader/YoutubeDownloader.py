@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from src.downloader.iDownloader import iDownloader, DownloadException
-from src.data.MetaDataItem import MetaDataItem
-from src.data.VideoItem import VideoItem
+from .iDownloader import iDownloader, DownloadException
+from ..data.MetaDataItem import MetaDataItem
+from ..data.VideoItem import VideoItem
 import youtube_dl
 import os
 import asyncio
@@ -29,7 +29,7 @@ class YoutubeDownloader(iDownloader):
         # TODO self.file_name doesn't initialize when file already exists locally
         if self.file_name is None:
             raise DownloadException("Failed to download youtube link " + link)
-        
+
         base_filename, ext = os.path.splitext(self.file_name)
         os.system(f"mv {base_filename}* {self.pathname}")
 

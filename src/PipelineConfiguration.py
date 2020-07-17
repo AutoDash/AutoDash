@@ -1,5 +1,5 @@
 import os
-from executor.iExecutor import iExecutor
+from .executor.iExecutor import iExecutor
 from typing import List
 import json
 import yaml
