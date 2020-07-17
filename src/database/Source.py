@@ -9,10 +9,10 @@ from ..executor.iDatabaseExecutor import iDatabaseExecutor
 # Not abstract, so a user can choose to default what database to interact with using this Executor
 class Source(iDatabaseExecutor):
 
-    def __init__(self, *parents, last_id: str = None, cond: FilterCondition = None):
+    def __init__(self, *parents, last_id: str = None, filter_str: str = None):
         super().__init__(*parents)
         self.last_id = last_id
-        self.cond = cond
+        self.cond = FilterCondition(filter_Str)
 
     def __load_data(self, cond) -> List[MetaDataItem]:
         # Prioritize passed-in filter condition over class cond
