@@ -14,8 +14,11 @@ class Source(iDatabaseExecutor):
         self.last_id = last_id
         self.cond = cond
 
-    def __load_data(self) -> List[MetaDataItem]:
-        return self.database.fetch_newest_videos(self.last_id, self.cond)
+    def __load_data(self, cond) -> List[MetaDataItem]:
+        # Prioritize passed-in filter condition over class cond
+        if cond is None:
+            cond = self.cond
+        return self.database.fetch_newest_videos(self.last_id, cond)
 
-    def run(self, obj: Dict[str, Any]) -> MetaDataItem:
-        return self.__load_data()[0]
+    def run(self, cond: FilterCondition = None) -> MetaDataItem:
+        return self.__load_data(cond)[0]
