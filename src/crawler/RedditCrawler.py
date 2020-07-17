@@ -1,6 +1,6 @@
-from src.crawler.RedditAccessor import get_posts, reload_posts
-from src.crawler.iCrawler import iCrawler, CrawlerException
-from src.data.MetaDataItem import MetaDataItem
+from .RedditAccessor import get_posts, reload_posts
+from .iCrawler import iCrawler, CrawlerException
+from ..data.MetaDataItem import MetaDataItem
 
 
 class RedditCrawler(iCrawler):

@@ -1,6 +1,6 @@
-from src.crawler.iCrawler import iCrawler, CrawlerException
-from src.data.MetaDataItem import MetaDataItem
-from src.pipeline import StatefulExecutorProxy
+from .iCrawler import iCrawler, CrawlerException
+from ..data.MetaDataItem import MetaDataItem
+from ..pipeline import StatefulExecutorProxy
 import youtube_dl
 
 class YoutubeCrawler(iCrawler):
@@ -66,4 +66,3 @@ class YoutubeCrawler(iCrawler):
 
     def share(self, manager):
         return manager.YoutubeCrawler()
-

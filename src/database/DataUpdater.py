@@ -1,7 +1,7 @@
 import asyncio
 
-from src.data.MetaDataItem import MetaDataItem
-from src.executor.iDatabaseExecutor import iDatabaseExecutor
+from ..data.MetaDataItem import MetaDataItem
+from ..executor.iDatabaseExecutor import iDatabaseExecutor
 
 
 # Not abstract, so a user can choose to default what database to interact with using this Executor
@@ -19,4 +19,3 @@ class DataUpdater(iDatabaseExecutor):
             asyncio.run(self.database.update_metadata(metadata))
         # Return saved metadata item
         return metadata
-
