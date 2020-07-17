@@ -12,7 +12,7 @@ class Source(iDatabaseExecutor):
     def __init__(self, *parents, last_id: str = None, filter_str: str = None):
         super().__init__(*parents)
         self.last_id = last_id
-        self.cond = FilterCondition(filter_Str)
+        self.cond = FilterCondition(filter_str)
 
     def __load_data(self, cond) -> List[MetaDataItem]:
         # Prioritize passed-in filter condition over class cond
