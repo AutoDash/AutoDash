@@ -122,6 +122,7 @@ def run(pipeline, **kwargs):
 
     iterations = context.get('max_iterations', 10000)
     filter_str = context.get('filter')
+    filter_cond = None
     if filter_str:
         filter_cond = FilterCondition(filter_str)
 
