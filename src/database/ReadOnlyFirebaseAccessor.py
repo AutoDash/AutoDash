@@ -2,9 +2,9 @@ from typing import List
 
 import requests
 
-from ..data.FilterCondition import FilterCondition
-from ..data.MetaDataItem import MetaDataItem
-from .iDatabase import iReadOnlyDatabase
+from data.FilterCondition import FilterCondition
+from data.MetaDataItem import MetaDataItem
+from database.iDatabase import iReadOnlyDatabase
 
 firebase_url = 'https://autodash-9dccb.firebaseio.com/metadata'
 
@@ -28,7 +28,7 @@ class ReadOnlyFirebaseAccessor(iReadOnlyDatabase):
             urls.append(metadata.url)
         return urls
 
-    async def fetch_newest_videos(self, last_id: str = None,
+    def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         ids = reversed(self.fetch_video_id_list())
         metadata_items = []

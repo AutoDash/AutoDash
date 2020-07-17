@@ -3,10 +3,10 @@ from typing import List
 
 import os
 
-from ..data.FilterCondition import FilterCondition
-from ..data.MetaDataItem import MetaDataItem, metadata_from_file, gen_filename, delete_metadata_file
-from .iDatabase import iDatabase, AlreadyExistsException, NotExistingException
-from ..utils import get_project_root
+from data.FilterCondition import FilterCondition
+from data.MetaDataItem import MetaDataItem, metadata_from_file, gen_filename, delete_metadata_file
+from database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+from utils import get_project_root
 
 METADATA_STORAGE_DIR = os.path.join(get_project_root(), "metadata_storage")
 
@@ -68,13 +68,14 @@ class LocalStorageAccessor(iDatabase):
     async def fetch_video_url_list(self) -> List[str]:
         return self.url_list
 
-    async def fetch_newest_videos(self, last_id: str = None,
+    def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         result = []
-        for id in reversed(await self.fetch_video_id_list()):
+        id_list = asyncio.run(self.fetch_video_id_list())
+        for id in reversed(id_list):
             if id == last_id:
                 break
-            result.append(await self.fetch_metadata(id))
+            result.append(asyncio.run(self.fetch_metadata(id)))
 
         if filter_cond is not None:
             result = filter_cond.filter(result)
