@@ -3,7 +3,7 @@ import unittest
 
 from src.data.MetaDataItem import MetaDataItem
 from src.database.Source import Source
-from ..mock.MockDataAccessor import MockDataAccessor
+from test.mock.MockDataAccessor import MockDataAccessor
 
 class TestSource(unittest.TestCase):
 
