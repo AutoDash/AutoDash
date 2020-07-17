@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
-from PipelineConfiguration import PipelineConfiguration
-from signal import CancelSignal
+from .PipelineConfiguration import PipelineConfiguration
+from .database import get_database, DatabaseConfigOption
+from .signal import CancelSignal
 import tensorflow as tf
-from src.database import get_database, DatabaseConfigOption, database_access
+
 
 class Work:
     def __init__(self, executor, item):

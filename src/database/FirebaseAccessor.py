@@ -5,10 +5,10 @@ import firebase_admin
 from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
-from src.data.FilterCondition import FilterCondition
-from src.data.MetaDataItem import MetaDataItem
-from src.database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
-from src.utils import get_project_root
+from ..data.FilterCondition import FilterCondition
+from ..data.MetaDataItem import MetaDataItem
+from .iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+from ..utils import get_project_root
 
 
 FIREBASE_CRED_FILENAME = "autodash-9dccb-add3cdae62ea.json"

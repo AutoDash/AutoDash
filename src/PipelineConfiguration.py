@@ -1,5 +1,5 @@
 import os
-from executor.iExecutor import iExecutor
+from .executor.iExecutor import iExecutor
 from typing import List
 import json
 import yaml
@@ -29,13 +29,13 @@ Usage:
 class ExecutorFactory:
     # TODO: this should probably be improved
     @classmethod
-    def build(cls, executor_name, parents=[]):
+    def build(cls, executor_name, args, parents=[]):
         local = {}
         res = executor_name.rsplit(".",1)
         exec(f'from {res[0]} import {res[1]}', globals(), local)
         exec(f'executor_class = {res[1]}', globals(), local)
         executor_class = local['executor_class']
-        executor = executor_class(*parents)
+        executor = executor_class(*parents, **args)
         return executor
 
 class PipelineConfiguration:
@@ -148,7 +148,7 @@ class PipelineConfiguration:
 
         def traverse_and_generate(index=0, parents=[]):
             print(f"graph: {self.graph_dict}")
-            root_executor = [self.ExecutorFactory.build(executor_name=input_name, parents=parents) for input_name in self.graph_dict[index]]
+            root_executor = [self.ExecutorFactory.build(executor_name=node["executor"], args=node.get("config", {}), parents=parents) for node in self.graph_dict[index]]
 
             if index == len(self.graph_dict) - 1:
                 return [root_executor, root_executor]

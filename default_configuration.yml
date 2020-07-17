@@ -1,7 +1,9 @@
-- - database.FirebaseSource.FirebaseSource
-- - executor.Printer.Printer
-- - downloader.UniversalDownloader.UniversalDownloader
-- - executor.Printer.Printer
-- - executor.ObjectDetector.ObjectDetector
-- - executor.FaceBlurrer.FaceBlurrer
-- - executor.labeler.Labeler
+- - executor: .database.FirebaseSource.FirebaseSource
+- - executor: .executor.Printer.Printer
+    config:
+      msg: "firebase src complete"
+- - executor: .downloader.UniversalDownloader.UniversalDownloader
+- - executor: .executor.Printer.Printer
+- - executor: .executor.ObjectDetector.ObjectDetector
+- - executor: .executor.FaceBlurrer.FaceBlurrer
+- - executor: .executor.labeler.Labeler

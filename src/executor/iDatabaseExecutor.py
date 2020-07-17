@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Dict, Any
 
-from src.executor.iExecutor import iExecutor
+from .iExecutor import iExecutor
 
 class UndefinedDatabaseException(Exception):
     '''Raise when attempt to access database before injected into the crawler'''

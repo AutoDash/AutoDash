@@ -1,5 +1,5 @@
-from src.database.FirebaseAccessor import FirebaseAccessor
-from src.database.DataUpdater import DataUpdater
+from .FirebaseAccessor import FirebaseAccessor
+from .DataUpdater import DataUpdater
 
 
 class FirebaseUpdater(DataUpdater):

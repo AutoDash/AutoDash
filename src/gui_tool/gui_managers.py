@@ -1,11 +1,15 @@
 import numpy as np
 import cv2
 
+from .additional_tags import AdditionalTagWindow
+
+
 class VideoTaggingResults(object):
     def __init__(self):
         self.is_dashcam = None
         self.accident_frame_number = None
         self.marked = None
+        self.additional_tags = {}
         self.unmark()
 
     def __str__(self):
@@ -32,6 +36,9 @@ class VideoTaggingResults(object):
         self.is_dashcam = True
         self.accident_frame_number = None
         self.marked = False
+
+    def set_additional_tags(self, tags):
+        self.additional_tags = tags
 
 class VideoCaptureManager(object):
     def __init__(self, file_loc: str):
@@ -162,6 +169,10 @@ class VideoPlayerGUIManager(object):
             elif received_key == ord("m"):
                 self.result.mark_accident(self.vcm.get_current_frame_index())
                 mark_changed = True
+            elif received_key == ord("t"):
+                window = AdditionalTagWindow()
+                tags = window.get_user_tags()
+                self.result.set_additional_tags(tags)
             if mark_changed:
                 print("Marked {0} with {1}".format(self.vcm.file_loc, self.result))
 

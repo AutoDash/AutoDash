@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from src.data.VideoItem import VideoItem
-from src.executor.iExecutor import iExecutor
-from src.data.MetaDataItem import MetaDataItem
+from ..data.VideoItem import VideoItem
+from ..executor.iExecutor import iExecutor
+from ..data.MetaDataItem import MetaDataItem
 import asyncio
 import os
 
@@ -23,4 +23,3 @@ class iDownloader(iExecutor):
     def set_pathname(self, pathname):
         self.pathname = pathname
         return self
-

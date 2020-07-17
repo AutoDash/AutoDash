@@ -3,6 +3,7 @@ import json, hashlib
 
 import os
 
+
 class MetaDataItem:
     def __init__(self, **kwargs):
         self.id = kwargs.get("id")
@@ -33,7 +34,7 @@ class MetaDataItem:
             'tags': dict,
             'is_cancelled': bool,
         }
-      
+
     def encode(self) -> str:
         return hashlib.sha224(self.url.encode()).hexdigest()
 
@@ -85,4 +86,3 @@ def gen_filename(id: str):
 
 def get_id_from_filename(filename: str):
     return filename.split('_')[0]
-
