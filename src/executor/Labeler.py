@@ -1,6 +1,6 @@
-from ..gui_tool.entry import tag_file
-from ..data.VideoItem import VideoItem
-from .iExecutor import iExecutor
+from gui_tool.entry import tag_file
+from data.VideoItem import VideoItem
+from executor.iExecutor import iExecutor
 
 
 class Labeler(iExecutor):

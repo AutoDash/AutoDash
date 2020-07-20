@@ -32,8 +32,8 @@ class ExecutorFactory:
     def build(cls, executor_name, args, parents=[]):
         local = {}
         res = executor_name.rsplit(".",1)
-        exec(f'from {res[0]} import {res[1]}', globals(), local)
-        exec(f'executor_class = {res[1]}', globals(), local)
+        exec(f'from executor.{executor_name} import {executor_name}', globals(), local)
+        exec(f'executor_class = {executor_name}', globals(), local)
         executor_class = local['executor_class']
         executor = executor_class(*parents, **args)
         return executor

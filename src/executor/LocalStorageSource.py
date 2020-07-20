@@ -1,5 +1,5 @@
-from .LocalStorageAccessor import LocalStorageAccessor
-from .Source import Source
+from database.LocalStorageAccessor import LocalStorageAccessor
+from database.Source import Source
 
 
 class LocalStorageSource(Source):

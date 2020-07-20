@@ -1,5 +1,5 @@
-from . import get_firebase_access
-from .DataUpdater import DataUpdater
+from database import get_firebase_access
+from database.DataUpdater import DataUpdater
 
 
 class FirebaseUpdater(DataUpdater):

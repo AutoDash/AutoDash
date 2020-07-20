@@ -1,8 +1,8 @@
 from typing import Dict, Any, List
 
-from ..data.FilterCondition import FilterCondition
-from ..data.MetaDataItem import MetaDataItem
-from ..executor.iDatabaseExecutor import iDatabaseExecutor
+from data.FilterCondition import FilterCondition
+from data.MetaDataItem import MetaDataItem
+from executor.iDatabaseExecutor import iDatabaseExecutor
 
 
 # Not abstract, so a user can choose to default what database to interact with using this Executor

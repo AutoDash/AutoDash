@@ -1,7 +1,8 @@
-from .iCrawler import iCrawler, CrawlerException
-from ..data.MetaDataItem import MetaDataItem
-from ..pipeline import StatefulExecutorProxy
+from crawler.iCrawler import iCrawler, CrawlerException
+from data.MetaDataItem import MetaDataItem
+from pipeline import StatefulExecutorProxy
 import youtube_dl
+
 
 class YoutubeCrawler(iCrawler):
     YOUTUBE_SRC_IDENTIFIER = "YouTube"

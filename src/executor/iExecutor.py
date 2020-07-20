@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ..data.VideoItem import VideoItem
+from data.VideoItem import VideoItem
 
 
 class iExecutor(ABC):

@@ -1,5 +1,5 @@
-from . import get_firebase_access
-from .Source import Source
+from database import get_firebase_access
+from database.Source import Source
 
 
 class FirebaseSource(Source):
