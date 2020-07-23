@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
+import asyncio
+
 from src.data.MetaDataItem import MetaDataItem
 from src.database.Source import Source
 from test.mock.MockDataAccessor import MockDataAccessor
@@ -14,8 +16,8 @@ class TestSource(unittest.TestCase):
         src = Source()
 
         mockdb = MockDataAccessor()
-        mockdb.publish_new_metadata(MetaDataItem("first", "fake url 1", "youtube"))
-        mockdb.publish_new_metadata(MetaDataItem("second", "fake url 2", "youtube"))
+        asyncio.run(mockdb.publish_new_metadata(MetaDataItem("first", "fake url 1", "youtube")))
+        asyncio.run(mockdb.publish_new_metadata(MetaDataItem("second", "fake url 2", "youtube")))
         src.set_database(mockdb)
 
         item = src.run({})

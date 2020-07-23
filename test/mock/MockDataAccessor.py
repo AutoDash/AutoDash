@@ -10,13 +10,13 @@ class MockDataAccessor(iDatabase):
     def __init__(self):
         self.metadata_list = []
 
-    def publish_new_metadata(self, metadata: MetaDataItem) -> str:
+    async def publish_new_metadata(self, metadata: MetaDataItem) -> str:
         id = str(len(self.metadata_list))
         metadata.id = id
         self.metadata_list.append(metadata)
         return id
 
-    def update_metadata(self, metadata: MetaDataItem):
+    async def update_metadata(self, metadata: MetaDataItem):
         self.metadata_list[int(metadata.id)] = metadata
 
     def fetch_metadata(self, id: str) -> MetaDataItem:
@@ -24,7 +24,7 @@ class MockDataAccessor(iDatabase):
             raise NotExistingException()
         return self.metadata_list[int(id)]
 
-    def delete_metadata(self, id: str):
+    async def delete_metadata(self, id: str):
         if int(id) >= len(self.metadata_list):
             raise NotExistingException()
         self.metadata_list[int(id)] = None
