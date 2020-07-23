@@ -22,7 +22,7 @@ class PipelineCLIParser(ArgumentParser):
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
         self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
                 help="Data storage used. Either 'firebase' or 'local")
-        self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull')
+        self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull, overrides any conditions set by executors')
         self.add_argument('--config', type=str, dest='config')
 
     @staticmethod
@@ -121,12 +121,16 @@ def run(pipeline, **kwargs):
     ]
 
     iterations = context.get('max_iterations', 10000)
+    filter_str = context.get('filter')
+    filter_cond = None
+    if filter_str:
+        filter_cond = FilterCondition(filter_str)
 
     for i in range(iterations):
         executor = source_executors[i % len(source_executors)]
         work_executor = executor.share(manager) if executor.stateful else executor
         work_executor.set_lock(manager.Lock())
-        work_queue.append(Work(work_executor, None))
+        work_queue.append(Work(work_executor, filter_cond))
 
     print("signal complete")
 
