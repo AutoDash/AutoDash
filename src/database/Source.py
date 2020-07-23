@@ -11,10 +11,15 @@ class Source(iDatabaseExecutor):
     def __init__(self, *parents, last_id: str = None, filter_str: str = None):
         super().__init__(*parents, stateful=True)
         self.last_id = last_id
-        self.cond = FilterCondition(filter_str)
+
+        if filter_str is None:
+            self.cond = None
+        else:
+            self.cond = FilterCondition(filter_str)
+
         self.data = []
 
-    def __load_data(self) -> List[MetaDataItem]:
+    def __load_data(self, cond) -> List[MetaDataItem]:
         # Prioritize passed-in filter condition over class cond
         if cond is None:
             cond = self.cond

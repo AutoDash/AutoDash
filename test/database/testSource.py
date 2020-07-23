@@ -20,10 +20,10 @@ class TestSource(unittest.TestCase):
         asyncio.run(mockdb.publish_new_metadata(MetaDataItem("second", "fake url 2", "youtube")))
         src.set_database(mockdb)
 
-        item = src.run({})
+        item = src.run()
         self.assertEqual("first", item.title)
 
-        item = src.run({})
+        item = src.run()
         self.assertEqual("second", item.title)
 
 
