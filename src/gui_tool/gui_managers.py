@@ -5,6 +5,7 @@ from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
 from .additional_tags import AdditionalTagWindow
 from .popup import PopUpWindow
+from .label_popup import LabelPopup
 from enum import Enum, auto
 
 class ManualTaggingAbortedException(Exception):
@@ -25,6 +26,17 @@ class VideoPlayerGUIManager(object):
     LOG_LINE_MARGIN = 2
     LOG_START_X = 250
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
+
+    INSTRUCTIONS = """
+a:     1 back
+s:     10 back
+d:     1 forward
+w:     10 forward
+Space: Pause/unpause
+Enter: Finish and continue
+Esc:   Abort. Will raise ManualTaggingAbortedException
+t: opens window for user customizable tags
+"""
 
     def __init__(self, context: VideoTaggingContext):
         self.context = context
@@ -97,6 +109,12 @@ class VideoPlayerGUIManager(object):
                 window = AdditionalTagWindow()
                 tags = window.get_user_tags()
                 self.result.set_additional_tags(tags)
+            elif received_key == ord("h"):
+                window = LabelPopup(
+                    "GUI controls reference",
+                    self.INSTRUCTIONS + "\n\n" + self.get_mode_handler().instructions
+                )
+                window.run()
             elif received_key == get_ord("a"):
                 self.vcm.shift_frame_index(-1)
             elif received_key == get_ord("s"):
@@ -152,8 +170,9 @@ class VideoPlayerGUIManager(object):
         cv2.destroyAllWindows()
 
 class InternalMode(object):
-    def __init__(self, parent: VideoPlayerGUIManager):
+    def __init__(self, parent: VideoPlayerGUIManager, instructions: str):
         self.par = parent
+        self.instructions = instructions
     def handle_click(self, event, x, y, flags, param):
         raise NotImplementedError()
     def handle_keyboard(self, received_key: int):
@@ -162,6 +181,16 @@ class InternalMode(object):
         raise NotImplementedError()
 
 class InternaSelectionMode(InternalMode):
+    def __init__(self, parent: VideoPlayerGUIManager):
+        super().__init__(parent,
+"""
+m: Mark current location as accident location
+n: Toggle whether it is a dashcam video
+    NOTE: by default, all videos will be dashcam
+    Pressing n the first time will mark the video as not dashcam
+u: untag (Remove tags)
+,: Remove the last marked accident location
+""")
     def handle_click(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.par.bbm.handleClickSelection(self.par.vcm.get_frame_index(), x, y)
@@ -190,7 +219,10 @@ class InternaSelectionMode(InternalMode):
 
 class InternalBBoxMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
-        super().__init__(parent)
+        super().__init__(parent,
+"""
+i: Select a new integer ID to work on. If ID already exists, will modify original
+""")
         self.ref_point = []
         self.selected_id = 1
 
