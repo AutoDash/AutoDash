@@ -7,7 +7,7 @@ git submodule update --init --recursive
 cd "${BASEDIR}/../src/lib/anonymization" || exit
 git checkout autodash
 cd - || exit
-cd "${BASEDIR}/" || exit
+cd "${BASEDIR}/.." || exit
 
 # install requirements
 python -m pip install --upgrade pip
