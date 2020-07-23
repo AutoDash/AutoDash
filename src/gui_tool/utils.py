@@ -2,7 +2,8 @@
 ORD_EXCEPTIONS = {
     "esc": 27,
     "enter": 13,
-    "backspace": 8
+    "backspace": 8,
+    "tab": 9
 }
 
 def get_ord(key):

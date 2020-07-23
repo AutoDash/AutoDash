@@ -4,6 +4,7 @@ import cv2
 from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
 from .additional_tags import AdditionalTagWindow
+from .popup import PopUpWindow
 from enum import Enum, auto
 
 class ManualTaggingAbortedException(Exception):
@@ -19,9 +20,10 @@ class VideoPlayerGUIManager(object):
     PAUSE_BUTTON_NAME = "pause"
     WINDOW_NAME = 'tagger'
 
-    LOG_LINES = 1
+    LOG_LINES = 4
     LOG_LINE_HEIGHT = 17
     LOG_LINE_MARGIN = 2
+    LOG_START_X = 250
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
 
     def __init__(self, context: VideoTaggingContext):
@@ -32,7 +34,7 @@ class VideoPlayerGUIManager(object):
         self.logger = RotatingLog(self.LOG_LINES)
         self.bbm = BoundingBoxManager(
             frames=["1"],
-            ids=["test"],
+            ids=[1],
             clss=["testCls"],
             x1s=[50],
             y1s=[50],
@@ -40,8 +42,11 @@ class VideoPlayerGUIManager(object):
             y2s=[100],
         )
 
-        self.selection_mode_handler = InternaSelectionMode(self)
-        self.mode_handler = self.selection_mode_handler
+        self.mode_handlers = [
+            InternaSelectionMode(self),
+            InternalBBoxMode(self)
+        ]
+        self.mode_handler_i = 0
 
     def start(self):
         self.set_GUI()
@@ -92,7 +97,23 @@ class VideoPlayerGUIManager(object):
                 window = AdditionalTagWindow()
                 tags = window.get_user_tags()
                 self.result.set_additional_tags(tags)
-            self.mode_handler.handle_keyboard(received_key)
+            elif received_key == get_ord("a"):
+                self.vcm.shift_frame_index(-1)
+            elif received_key == get_ord("s"):
+                self.vcm.shift_frame_index(-10)
+            elif received_key == get_ord("d"):
+                self.vcm.shift_frame_index(1)
+            elif received_key == get_ord("w"):
+                self.vcm.shift_frame_index(10)
+            elif received_key == get_ord(" "):
+                cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, 0 if self.vcm.get_paused() else 1)
+
+            if received_key == get_ord("tab"):
+                self.mode_handler_i += 1
+                self.mode_handler_i %= len(self.mode_handlers)
+                self.logger.log("Changed mode")
+            else:
+                self.get_mode_handler().handle_keyboard(received_key)
 
     def build_frame(self, frame):
         img = np.zeros((
@@ -105,7 +126,12 @@ class VideoPlayerGUIManager(object):
             font_scale = 0.5
             font_color = (255, 255, 255)
             for i, msg in enumerate(self.logger.get_logs()):
-                starting_index = (0, self.LOG_LINE_HEIGHT * (i+1) + self.LOG_LINE_MARGIN * i)
+                starting_index = (self.LOG_START_X, self.LOG_LINE_HEIGHT * (i+1) + self.LOG_LINE_MARGIN * i)
+                cv2.putText(img, msg, starting_index,
+                            font, font_scale, font_color)
+
+            for i, msg in enumerate(self.get_mode_handler().get_state_message()):
+                starting_index = (0, self.LOG_LINE_HEIGHT * (i + 1) + self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index,
                             font, font_scale, font_color)
 
@@ -116,7 +142,10 @@ class VideoPlayerGUIManager(object):
 
     def handleClick(self, event, x, y, flags, param):
         y = y-self.IMG_STARTING_Y
-        self.mode_handler.handle_click(event, x, y, flags, param)
+        self.get_mode_handler().handle_click(event, x, y, flags, param)
+
+    def get_mode_handler(self):
+        return self.mode_handlers[self.mode_handler_i]
 
     def cleanup(self):
         self.vcm.release()
@@ -129,6 +158,8 @@ class InternalMode(object):
         raise NotImplementedError()
     def handle_keyboard(self, received_key: int):
         raise NotImplementedError()
+    def get_state_message(self):
+        raise NotImplementedError()
 
 class InternaSelectionMode(InternalMode):
     def handle_click(self, event, x, y, flags, param):
@@ -137,17 +168,7 @@ class InternaSelectionMode(InternalMode):
     def handle_keyboard(self, received_key: int):
         par = self.par
         mark_changed = False
-        if received_key == get_ord("a"):
-            par.vcm.shift_frame_index(-1)
-        elif received_key == get_ord("s"):
-            par.vcm.shift_frame_index(-10)
-        elif received_key == get_ord("d"):
-            par.vcm.shift_frame_index(1)
-        elif received_key == get_ord("w"):
-            par.vcm.shift_frame_index(10)
-        elif received_key == get_ord(" "):
-            cv2.setTrackbarPos(par.PAUSE_BUTTON_NAME, par.WINDOW_NAME, 0 if par.vcm.get_paused() else 1)
-        elif received_key == get_ord("u"):
+        if received_key == get_ord("u"):
             par.result.unmark()
             mark_changed = True
         elif received_key == get_ord("n"):
@@ -161,3 +182,49 @@ class InternaSelectionMode(InternalMode):
             mark_changed = True
         if mark_changed:
             par.logger.log(str(par.result))
+    def get_state_message(self):
+        return [
+            "Selection Mode",
+            "{0} Selected".format(self.par.bbm.get_n_selected())
+        ]
+
+class InternalBBoxMode(InternalMode):
+    def __init__(self, parent: VideoPlayerGUIManager):
+        super().__init__(parent)
+        self.ref_point = []
+        self.selected_id = 1
+
+    def handle_click(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.ref_point = [(x, y)]
+        elif event == cv2.EVENT_LBUTTONUP:
+            self.ref_point.append((x, y))
+
+    def handle_keyboard(self, received_key: int):
+        par = self.par
+        if received_key == get_ord("i"):  # Select id
+            res = PopUpWindow("Select the new ID").run()
+            if res is None or res == "":
+                self.par.logger.log("Select ID operation canceled. Still on {0}".format(self.selected_id))
+            else:
+                try:
+                    res = int(res)
+                    self.par.logger.log("Switched id from {0} to {1}".format(self.selected_id, res))
+                    self.selected_id = res
+                except:
+                    self.par.logger.log("Input ID not valid. Still on {0}".format(self.selected_id))
+
+    def get_state_message(self):
+        bbm = self.par.bbm
+        messages = [
+            "BBox Mode:",
+            "{0} BBoxes total".format(bbm.get_n_ids()),
+            "Working on {0} id {1}".format(
+                "existing" if bbm.has_id(self.selected_id) else "new",
+                self.selected_id
+            )
+        ]
+        if len(self.ref_point) == 1:
+            messages.append("Drawing from {0}".format(str(self.ref_point[0])))
+        return messages
+

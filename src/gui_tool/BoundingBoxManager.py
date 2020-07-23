@@ -20,6 +20,7 @@ class BoundingBoxManager(object):
     def __init__(self, frames, ids, clss, x1s, y1s, x2s, y2s):
         self.bboxes = None
         self.id_to_cls = None
+        self.selected = set()
         self.structure(frames, ids, clss, x1s, y1s, x2s, y2s)
 
     def structure(self, frames, ids, clss, x1s, y1s, x2s, y2s):
@@ -31,7 +32,7 @@ class BoundingBoxManager(object):
 
             if id not in self.bboxes:
                 self.bboxes[id] = {}
-            self.bboxes[id][frame] = [(x1, y1), (x2, y2), 0]
+            self.bboxes[id][frame] = [(x1, y1), (x2, y2)]
 
 
     def unstructure(self):
@@ -40,8 +41,8 @@ class BoundingBoxManager(object):
     def modify_frame(self, frame, i):
         i = 0
         for id, frame_data in self.bboxes.items():
-            p1, p2, selected = frame_data[i]
-            if selected == 1:
+            p1, p2 = frame_data[i]
+            if id in self.selected:
                 cv2.rectangle(frame, p1, p2, **self.BOX_DISPLAY)
             else:
                 cv2.rectangle(frame, p1, p2, **self.SELECTED_BOX_DISPLAY)
@@ -51,6 +52,16 @@ class BoundingBoxManager(object):
     def handleClickSelection(self, i, x, y):
         i = 0
         for id, frame_data in self.bboxes.items():
-            p1, p2, selected = frame_data[i]
+            p1, p2 = frame_data[i]
             if p1[0] < x < p2[0] and p1[1] < y < p2[1]:
-                frame_data[i][2] = 1 - selected
+                if id in self.selected:
+                    self.selected.remove(id)
+                else:
+                    self.selected.add(id)
+
+    def get_n_selected(self):
+        return len(self.selected)
+    def get_n_ids(self):
+        return len(self.id_to_cls)
+    def has_id(self, id):
+        return id in self.id_to_cls
