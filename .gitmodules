@@ -1,3 +1,3 @@
 [submodule "lib/anonymization"]
-	path = lib/anonymization
+	path = src/lib/anonymization
 	url = https://github.com/AutoDash/anonymization
