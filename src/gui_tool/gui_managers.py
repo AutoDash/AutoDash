@@ -4,9 +4,14 @@ import cv2
 from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
 from .additional_tags import AdditionalTagWindow
+from enum import Enum, auto
 
 class ManualTaggingAbortedException(Exception):
     '''Raise when user aborts the tagging'''
+
+class GUIModes(Enum):
+    SELECTION = auto()
+    BBOX = auto()
 
 class VideoPlayerGUIManager(object):
     PROGRESS_BAR_NAME = "progress"
@@ -25,7 +30,18 @@ class VideoPlayerGUIManager(object):
         self.frame_rate = 25
         self.result = self.context.result
         self.logger = RotatingLog(self.LOG_LINES)
-        self.bbm = BoundingBoxManager([])
+        self.bbm = BoundingBoxManager(
+            frames=["1"],
+            ids=["test"],
+            clss=["testCls"],
+            x1s=[50],
+            y1s=[50],
+            x2s=[100],
+            y2s=[100],
+        )
+
+        self.selection_mode_handler = InternaSelectionMode(self)
+        self.mode_handler = self.selection_mode_handler
 
     def start(self):
         self.set_GUI()
@@ -67,41 +83,16 @@ class VideoPlayerGUIManager(object):
 
             cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, self.vcm.get_frame_index())
 
-            mark_changed = False
             received_key = cv2.waitKey(self.frame_rate) & 0xFF
             if received_key == get_ord("esc"):  # Escape key
                 raise ManualTaggingAbortedException("Tagging operation aborted")
-            if received_key == get_ord("enter"):  # Enter
+            elif received_key == get_ord("enter"):  # Enter
                 break
-            elif received_key == get_ord("a"):
-                self.vcm.shift_frame_index(-1)
-            elif received_key == get_ord("s"):
-                self.vcm.shift_frame_index(-10)
-            elif received_key == get_ord("d"):
-                self.vcm.shift_frame_index(1)
-            elif received_key == get_ord("w"):
-                self.vcm.shift_frame_index(10)
-            elif received_key == get_ord(" "):
-                cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, 0 if self.vcm.get_paused() else 1)
-            elif received_key == get_ord("u"):
-                self.result.unmark()
-                mark_changed = True
-            elif received_key == get_ord("n"):
-                self.result.mark_is_dashcam(not self.result.is_dashcam)
-                mark_changed = True
-            elif received_key == get_ord("m"):
-                self.result.mark_accident(self.vcm.get_frame_index())
-                mark_changed = True
-            elif received_key == get_ord(","):  # , Key
-                self.result.unmark_last()
-                mark_changed = True
             elif received_key == ord("t"):
                 window = AdditionalTagWindow()
                 tags = window.get_user_tags()
                 self.result.set_additional_tags(tags)
-            if mark_changed:
-                self.logger.log(str(self.result))
-                # print("Marked {0} with {1}".format(self.vcm.file_loc, self.result))
+            self.mode_handler.handle_keyboard(received_key)
 
     def build_frame(self, frame):
         img = np.zeros((
@@ -125,9 +116,48 @@ class VideoPlayerGUIManager(object):
 
     def handleClick(self, event, x, y, flags, param):
         y = y-self.IMG_STARTING_Y
-        if event == cv2.EVENT_LBUTTONDOWN:
-            self.bbm.handleClickSelection(self.vcm.get_frame_index(), x, y)
+        self.mode_handler.handle_click(event, x, y, flags, param)
 
     def cleanup(self):
         self.vcm.release()
         cv2.destroyAllWindows()
+
+class InternalMode(object):
+    def __init__(self, parent: VideoPlayerGUIManager):
+        self.par = parent
+    def handle_click(self, event, x, y, flags, param):
+        raise NotImplementedError()
+    def handle_keyboard(self, received_key: int):
+        raise NotImplementedError()
+
+class InternaSelectionMode(InternalMode):
+    def handle_click(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.par.bbm.handleClickSelection(self.par.vcm.get_frame_index(), x, y)
+    def handle_keyboard(self, received_key: int):
+        par = self.par
+        mark_changed = False
+        if received_key == get_ord("a"):
+            par.vcm.shift_frame_index(-1)
+        elif received_key == get_ord("s"):
+            par.vcm.shift_frame_index(-10)
+        elif received_key == get_ord("d"):
+            par.vcm.shift_frame_index(1)
+        elif received_key == get_ord("w"):
+            par.vcm.shift_frame_index(10)
+        elif received_key == get_ord(" "):
+            cv2.setTrackbarPos(par.PAUSE_BUTTON_NAME, par.WINDOW_NAME, 0 if par.vcm.get_paused() else 1)
+        elif received_key == get_ord("u"):
+            par.result.unmark()
+            mark_changed = True
+        elif received_key == get_ord("n"):
+            par.result.mark_is_dashcam(not par.result.is_dashcam)
+            mark_changed = True
+        elif received_key == get_ord("m"):
+            par.result.mark_accident(par.vcm.get_frame_index())
+            mark_changed = True
+        elif received_key == get_ord(","):  # , Key
+            par.result.unmark_last()
+            mark_changed = True
+        if mark_changed:
+            par.logger.log(str(par.result))
