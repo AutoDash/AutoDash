@@ -10,7 +10,7 @@ from numpy.testing import assert_array_equal, assert_raises
 class TestAnonymizationExecutor(unittest.TestCase):
     TEST_DIR = os.path.join(os.getcwd(), "anontest")
     TEST_FILE = "test.mp4"
-    DATASET_PATH = "lib/anonymization/dataset/input"
+    DATASET_PATH = "src/lib/anonymization/dataset/input"
     ACCEPTED_FILE_EXTENSION = ".mp4"
     TEST_FILE_PATH = os.path.join(TEST_DIR, TEST_FILE)
 
