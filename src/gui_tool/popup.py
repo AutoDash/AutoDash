@@ -26,10 +26,3 @@ class PopUpWindow:
     def run(self) -> str:
         self.root.mainloop()
         return self.inp
-
-#
-# window = PopUpWindow("test_title")
-# tags = window.run()
-# print(tags)
-# print(str(tags))
-# print("done")
