@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Dict, Any, List
 
 from ..data.FilterCondition import FilterCondition
@@ -10,9 +9,15 @@ from ..executor.iDatabaseExecutor import iDatabaseExecutor
 class Source(iDatabaseExecutor):
 
     def __init__(self, *parents, last_id: str = None, filter_str: str = None):
-        super().__init__(*parents)
+        super().__init__(*parents, stateful=True)
         self.last_id = last_id
-        self.cond = FilterCondition(filter_str)
+
+        if filter_str is None:
+            self.cond = None
+        else:
+            self.cond = FilterCondition(filter_str)
+
+        self.data = []
 
     def __load_data(self, cond) -> List[MetaDataItem]:
         # Prioritize passed-in filter condition over class cond
@@ -21,4 +26,6 @@ class Source(iDatabaseExecutor):
         return self.database.fetch_newest_videos(self.last_id, cond)
 
     def run(self, cond: FilterCondition = None) -> MetaDataItem:
-        return self.__load_data(cond)[0]
+        if not self.data:
+            self.data = self.__load_data(cond)
+        return self.data.pop(0)

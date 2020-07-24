@@ -27,19 +27,19 @@ class iReadOnlyDatabase(ABC):
         return MetaDataItem(**var_dict)
 
     @abstractmethod
-    async def fetch_metadata(self, id: str) -> MetaDataItem:
+    def fetch_metadata(self, id: str) -> MetaDataItem:
         pass
 
     @abstractmethod
-    async def fetch_video_id_list(self) -> List[str]:
+    def fetch_video_id_list(self) -> List[str]:
         pass
 
     @abstractmethod
-    async def fetch_video_url_list(self) -> List[str]:
+    def fetch_video_url_list(self) -> List[str]:
         pass
 
     @abstractmethod
-    async def fetch_newest_videos(self, last_id: str = None,
+    def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         pass
 

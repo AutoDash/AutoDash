@@ -39,7 +39,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
             asyncio.run(self.storage.publish_new_metadata(metadata))
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
-            metadata2 = asyncio.run(self.storage.fetch_metadata(metadata.id))
+            metadata2 = self.storage.fetch_metadata(metadata.id)
             self.assertEqual(str(metadata), str(metadata2))
 
         finally:
@@ -54,10 +54,10 @@ class TestLocalStorageAccessor(unittest.TestCase):
             asyncio.run(self.storage.publish_new_metadata(metadata1))
             asyncio.run(self.storage.publish_new_metadata(metadata2))
 
-            actual_id_list = asyncio.run(self.storage.fetch_video_id_list())
+            actual_id_list = self.storage.fetch_video_id_list()
             self.assertEqual(actual_id_list, [metadata1.id, metadata2.id])
 
-            actual_url_list = asyncio.run(self.storage.fetch_video_url_list())
+            actual_url_list = self.storage.fetch_video_url_list()
             self.assertEqual(actual_url_list, [metadata1.url, metadata2.url])
 
         # Clean up after test
@@ -77,10 +77,10 @@ class TestLocalStorageAccessor(unittest.TestCase):
             # Create a second storage system to run the initialization code again with existing files
             storage2 = LocalStorageAccessor(self.storage_loc)
 
-            actual_id_list = asyncio.run(storage2.fetch_video_id_list())
+            actual_id_list = storage2.fetch_video_id_list()
             self.assertEqual(set(actual_id_list), {metadata1.id, metadata2.id})
 
-            actual_url_list = asyncio.run(storage2.fetch_video_url_list())
+            actual_url_list = storage2.fetch_video_url_list()
             self.assertEqual(set(actual_url_list), {metadata1.url, metadata2.url})
 
         # Clean up after test
@@ -102,7 +102,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
             # Check that update was successful by fetching the file
-            metadata = asyncio.run(self.storage.fetch_metadata(metadata.id))
+            metadata = self.storage.fetch_metadata(metadata.id)
             self.assertEqual(metadata.title, "new title")
 
         finally:
@@ -120,7 +120,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
 
             condition = FilterCondition("title == 'title' and location == 'Canada' and collision_type != 'car'")
             print(condition.tokenize("title == 'title' and location == 'Canada' and collision_type != 'car'"))
-            metadata_list = asyncio.run(self.storage.fetch_newest_videos(filter_cond=condition))
+            metadata_list = self.storage.fetch_newest_videos(filter_cond=condition)
             self.assertEqual(set(map(lambda metadata: metadata.url, metadata_list)), {metadata2.url})
 
         # Clean up after test

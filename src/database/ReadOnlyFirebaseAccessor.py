@@ -20,7 +20,7 @@ class ReadOnlyFirebaseAccessor(iReadOnlyDatabase):
         res = requests.get(firebase_url + ".json", params={'shallow':'true'})
         return list(res.json().keys())
 
-    async def fetch_video_url_list(self) -> List[str]:
+    def fetch_video_url_list(self) -> List[str]:
         ids = self.fetch_video_id_list()
         urls = []
         for id in ids:
@@ -28,7 +28,7 @@ class ReadOnlyFirebaseAccessor(iReadOnlyDatabase):
             urls.append(metadata.url)
         return urls
 
-    async def fetch_newest_videos(self, last_id: str = None,
+    def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         ids = reversed(self.fetch_video_id_list())
         metadata_items = []
