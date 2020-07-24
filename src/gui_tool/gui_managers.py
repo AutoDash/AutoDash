@@ -47,9 +47,8 @@ t: opens window for user customizable tags
         self.logger = RotatingLog(self.LOG_LINES)
 
         self.bbm = BoundingBoxManager()
-        # TODO: remove when testing complete
-        # self.bbm.add_or_update_id(5, "None")
-        # self.bbm.replace_in_range(5, 0, [(50, 50), (100, 100)], 100, [(50, 50), (150, 150)])
+        if context.bbox_fields is not None:
+            self.bbm.set_to(*context.bbox_fields)
 
         self.mode_handlers = [
             InternaSelectionMode(self),
@@ -66,6 +65,8 @@ t: opens window for user customizable tags
             raise
         finally:
             self.cleanup()
+
+        self.context.bbox_fields = self.bbm.extract()
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)

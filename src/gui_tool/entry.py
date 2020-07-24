@@ -9,8 +9,9 @@ Navigation:
     Enter: Finish and continue
     Esc:   Abort. Will raise ManualTaggingAbortedException
     t: opens window for user customizable tags
+    tab: Switch mode
 
-Selection Mode:
+Selection Mode: [NOT IN USE ANY MORE. ONLY USE MOUSE]
     m: Mark current location as accident location
     n: Toggle whether it is a dashcam video
         NOTE: by default, all videos will be dashcam
@@ -35,13 +36,13 @@ from ..data.MetaDataItem import MetaDataItem
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
-    context = VideoTaggingContext(file_loc)
+    context = VideoTaggingContext(file_loc, None)
     gui = VideoPlayerGUIManager(context)
     gui.start()
 
-    if context.result.marked:
-        mdi.accident_indexes = context.result.accident_frame_numbers
-        mdi.is_dashcam = context.result.is_dashcam
+    # mdi.accident_indexes = context.result.accident_frame_numbers
+    # mdi.is_dashcam = context.result.is_dashcam
+    bbox_fields = context.bbox_fields
 
     for key, val in context.result.additional_tags:
         mdi.add_tag(key, val)
