@@ -24,10 +24,10 @@ elif [ "$(expr substr "$(uname -s)" 1 5)" == "Linux" ]; then
     distro_ver=$(expr substr "$(lsb_release -c)" 10 11 | sed -e 's/^[[:space:]]*//')
     if [ "$distro_ver" == "xenial" ]; then
       # Ubuntu distro version is xenial
-      sudo add-apt-repository -y ppa:mc3man/bionic-media
+      sudo add-apt-repository -y ppa:mc3man/xerus-media
     elif [ "$distro_ver" == "bionic" ]; then
       # Ubuntu distro version is bionic
-      sudo add-apt-repository -y ppa:mc3man/xerus-media
+      sudo add-apt-repository -y ppa:mc3man/bionic-media
     elif [ "$distro_ver" == "trusty" ]; then
       # Ubuntu distro version is trusty
       sudo add-apt-repository -y ppa:mc3man/trusty-media
