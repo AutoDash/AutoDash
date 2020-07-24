@@ -29,3 +29,9 @@ class Source(iDatabaseExecutor):
         if not self.data:
             self.data = self.__load_data(cond)
         return self.data.pop(0)
+
+    def register_shared(self, manager):
+        manager.register_executor('Source', self)
+
+    def share(self, manager):
+        return manager.Source()
