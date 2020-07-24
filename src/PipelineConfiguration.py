@@ -64,7 +64,7 @@ class PipelineConfiguration:
 
     def _read_yaml(self, fpath):
         with open(fpath, 'r') as fin:
-            self.graph_dict = yaml.load(fin)
+            self.graph_dict = yaml.load(fin, Loader=yaml.FullLoader)
 
     def _write_json(self, fpath):
         with open(fpath, 'w') as fin:

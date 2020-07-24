@@ -32,7 +32,7 @@ class ObjectDetector(iExecutor):
             if self.skip_n > 0:
                 X_b = X_b[::self.skip_n]
             Y = network(tf.convert_to_tensor(X_b))
-            if i % (n_batches / 10) == 0:
+            if i % (n_batches // 20) == 0:
                 print(f"[ObjectDetector] {int(100 * i / n_batches)}% completed")
             detections = Y['detection_scores'] > self.confidence_threshold
             if np.any(detections):
@@ -45,4 +45,5 @@ class ObjectDetector(iExecutor):
                 item.labels['frames'] += frames.tolist()
                 item.labels['classes'].append(classes.numpy().tolist())
                 item.labels['boxes'].append(boxes.numpy().tolist())
+        print("[ObjectDetector] done")
         return item

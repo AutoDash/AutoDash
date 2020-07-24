@@ -8,7 +8,8 @@ class iExecutor(ABC):
         self.prev = parents
         self.next = None
         for parent in parents:
-            parent.set_next(self)
+            if parent:
+                parent.set_next(self)
 
         super().__init__()
 
