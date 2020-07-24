@@ -8,8 +8,8 @@ class UndefinedDatabaseException(Exception):
 
 # Interface for any Executor that requires access to a database (either to make changes or get information)
 class iDatabaseExecutor(iExecutor):
-    def __init__(self, *parents):
-        super().__init__(*parents)
+    def __init__(self, *parents, stateful=False):
+        super().__init__(*parents, stateful=stateful)
         self.database = None
 
     def set_database(self, database):

@@ -19,7 +19,7 @@ class MockDataAccessor(iDatabase):
     async def update_metadata(self, metadata: MetaDataItem):
         self.metadata_list[int(metadata.id)] = metadata
 
-    async def fetch_metadata(self, id: str) -> MetaDataItem:
+    def fetch_metadata(self, id: str) -> MetaDataItem:
         if int(id) >= len(self.metadata_list):
             raise NotExistingException()
         return self.metadata_list[int(id)]
@@ -29,21 +29,21 @@ class MockDataAccessor(iDatabase):
             raise NotExistingException()
         self.metadata_list[int(id)] = None
 
-    async def fetch_video_id_list(self) -> List[str]:
+    def fetch_video_id_list(self) -> List[str]:
         id_list = []
         for i, metadata in enumerate(self.metadata_list):
             if metadata is not None:
                 id_list.append(i)
         return id_list
 
-    async def fetch_video_url_list(self) -> List[str]:
+    def fetch_video_url_list(self) -> List[str]:
         url_list = []
         for metadata in self.metadata_list:
             if metadata is not None:
                 url_list.append(metadata.url)
         return url_list
 
-    async def fetch_newest_videos(self, last_id: str = None,
+    def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         if last_id is not None:
             metadata_list = self.metadata_list[int(last_id):]
@@ -51,4 +51,7 @@ class MockDataAccessor(iDatabase):
             metadata_list = self.metadata_list
 
         metadata_list = list(filter(None, metadata_list))
-        return filter_cond.filter(metadata_list)
+        if filter_cond is not None:
+            return filter_cond.filter(metadata_list)
+        else:
+            return metadata_list
