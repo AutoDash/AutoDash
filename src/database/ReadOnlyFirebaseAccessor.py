@@ -20,7 +20,7 @@ class ReadOnlyFirebaseAccessor(iReadOnlyDatabase):
         res = requests.get(firebase_url + ".json", params={'shallow':'true'})
         return list(res.json().keys())
 
-    async def fetch_video_url_list(self) -> List[str]:
+    def fetch_video_url_list(self) -> List[str]:
         ids = self.fetch_video_id_list()
         urls = []
         for id in ids:

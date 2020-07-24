@@ -50,7 +50,7 @@ class LocalStorageAccessor(iDatabase):
         # Overwrites existing file
         metadata.to_file(self.storage_loc)
 
-    async def fetch_metadata(self, id: str) -> MetaDataItem:
+    def fetch_metadata(self, id: str) -> MetaDataItem:
         if id not in self.id_list:
             raise NotExistingException()
 
@@ -62,20 +62,19 @@ class LocalStorageAccessor(iDatabase):
 
         delete_metadata_file(id, self.storage_loc)
 
-    async def fetch_video_id_list(self) -> List[str]:
+    def fetch_video_id_list(self) -> List[str]:
         return self.id_list
 
-    async def fetch_video_url_list(self) -> List[str]:
+    def fetch_video_url_list(self) -> List[str]:
         return self.url_list
 
     def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
         result = []
-        id_list = asyncio.run(self.fetch_video_id_list())
-        for id in reversed(id_list):
+        for id in reversed(self.fetch_video_id_list()):
             if id == last_id:
                 break
-            result.append(asyncio.run(self.fetch_metadata(id)))
+            result.append(self.fetch_metadata(id))
 
         if filter_cond is not None:
             result = filter_cond.filter(result)

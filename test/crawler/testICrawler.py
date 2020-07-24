@@ -49,10 +49,10 @@ class TestICrawler(unittest.TestCase):
         metadata = self.crawler.run({})
         asyncio.run(self.database.publish_new_metadata(metadata))
 
-        id_list = asyncio.run(self.database.fetch_video_id_list())
+        id_list = self.database.fetch_video_id_list()
         self.assertTrue(len(id_list) == 1)
 
-        metadata = asyncio.run(self.database.fetch_metadata(id_list[0]))
+        metadata = self.database.fetch_metadata(id_list[0])
 
         # Get exact copy of the metadata item that was published
         copy_metadata = asyncio.run(self.crawler.next_downloadable())

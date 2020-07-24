@@ -15,7 +15,7 @@ class PipelineCLIParser(ArgumentParser):
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
         self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
                 help="Data storage used. Either 'firebase' or 'local")
-        self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull')
+        self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull, overrides any conditions set by executors')
         self.add_argument('--config', type=str, default='default_configuration.yml', dest='config')
 
     @staticmethod
@@ -40,6 +40,7 @@ def main(args):
         if executor.requires_database():
             executor.set_database(database)
 
+<<<<<<< HEAD
     iterations = args['max_iterations']
 
     for i in range(iterations):
@@ -54,6 +55,60 @@ def main(args):
             get_database().update_metadata(item)
         except RuntimeError as e:
             print(e)
+=======
+    manager.start()
+
+    work_queue = manager.list()
+    context = {
+        **kwargs,
+        'work_queue': work_queue,
+    }
+    queue_lock = manager.Lock()
+    workers = [
+        PipelineWorker(context, name=f"worker-{i}", queue_lock=queue_lock)
+        for i in range(0, num_workers)
+    ]
+
+    iterations = context.get('max_iterations', 10000)
+    filter_str = context.get('filter')
+    filter_cond = None
+    if filter_str:
+        filter_cond = FilterCondition(filter_str)
+
+    for i in range(iterations):
+        executor = source_executors[i % len(source_executors)]
+        work_executor = executor.share(manager) if executor.stateful else executor
+        work_executor.set_lock(manager.Lock())
+        work_queue.append(Work(work_executor, filter_cond))
+
+    print("signal complete")
+
+    # A null job signals the end of work
+    for _ in range(num_workers):
+        work_queue.append(None)
+
+    # Start all workers
+    for worker in workers:
+        worker.start()
+
+    for worker in workers:
+        worker.join()
+
+
+def main():
+    config = PipelineConfiguration()
+    parser = PipelineCLIParser()
+    args = parser.parse_args()
+
+    print(args)
+    if args.config is None:
+        args.config = "default_configuration.yml"
+
+    config.read(args.config)
+
+    run(config, **vars(args))
+
+>>>>>>> upstream/master
 
 if __name__ == "__main__":
     
