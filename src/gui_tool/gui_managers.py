@@ -4,9 +4,10 @@ import cv2
 from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
 from .additional_tags import AdditionalTagWindow
-from .popup import PopUpWindow
+from .id_input_popup import PopUpWindow
 from .label_popup import LabelPopup
 from enum import Enum, auto
+import cv2
 
 class ManualTaggingAbortedException(Exception):
     '''Raise when user aborts the tagging'''
@@ -44,15 +45,11 @@ t: opens window for user customizable tags
         self.frame_rate = 25
         self.result = self.context.result
         self.logger = RotatingLog(self.LOG_LINES)
-        self.bbm = BoundingBoxManager(
-            frames=["1"],
-            ids=[1],
-            clss=["testCls"],
-            x1s=[50],
-            y1s=[50],
-            x2s=[100],
-            y2s=[100],
-        )
+
+        self.bbm = BoundingBoxManager()
+        # TODO: remove when testing complete
+        # self.bbm.add_or_update_id(5, "None")
+        # self.bbm.replace_in_range(5, 0, [(50, 50), (100, 100)], 100, [(50, 50), (150, 150)])
 
         self.mode_handlers = [
             InternaSelectionMode(self),
@@ -94,11 +91,13 @@ t: opens window for user customizable tags
 
     def play_video(self):
         while True:
-            frame = self.vcm.next()
-            frame = self.bbm.modify_frame(frame, self.vcm.get_frame_index())
+            frame = self.vcm.next().copy()
+            frame_index = self.vcm.get_frame_index()
+            frame = self.bbm.modify_frame(frame, frame_index)
+            frame = self.get_mode_handler().modify_frame(frame, frame_index)
             cv2.imshow(self.WINDOW_NAME, self.build_frame(frame))
 
-            cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, self.vcm.get_frame_index())
+            cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, frame_index)
 
             received_key = cv2.waitKey(self.frame_rate) & 0xFF
             if received_key == get_ord("esc"):  # Escape key
@@ -179,6 +178,10 @@ class InternalMode(object):
         raise NotImplementedError()
     def get_state_message(self):
         raise NotImplementedError()
+    def modify_frame(self, frame, i):
+        return frame
+    def log(self, msg):
+        self.par.logger.log(msg)
 
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
@@ -218,45 +221,126 @@ u: untag (Remove tags)
         ]
 
 class InternalBBoxMode(InternalMode):
+    BOX_DRAWING_DISPLAY = {
+        "color": (150, 255, 150),
+        "lineType": 2,
+        "thickness": 2
+    }
+
     def __init__(self, parent: VideoPlayerGUIManager):
         super().__init__(parent,
 """
-i: Select a new integer ID to work on. If ID already exists, will modify original
+i: Select a new integer ID to work on, as will as cls. If ID already exists, will modify original
+r: reset current task
+c: Clear existing bounding boxes over frames
+v: Re-interpolate over frames [NOT implemented]
+b: Define bounding boxes over range
+u: Update class of current id based on popup input
 """)
-        self.ref_point = []
+        self.mouse_position = None
+        self.selected_locations = []
+        self.curr_ref_point = []
         self.selected_id = 1
+        self.selected_cls = ""
 
     def handle_click(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            self.ref_point = [(x, y)]
+            self.curr_ref_point = [(x, y)]
+        elif event == cv2.EVENT_MOUSEMOVE:
+            self.mouse_position = (x, y)
         elif event == cv2.EVENT_LBUTTONUP:
-            self.ref_point.append((x, y))
+            if len(self.curr_ref_point) == 1:
+                curr_frame = self.par.vcm.get_frame_index()
+                self.curr_ref_point.append((x, y))
+                self.log("Manually Selected bounding box {0} on frame {1}".format(
+                    self.curr_ref_point, curr_frame))
+
+                self.selected_locations.append([
+                    curr_frame,
+                    self.curr_ref_point
+                ])
+                if len(self.selected_locations) > 2:
+                    self.selected_locations = self.selected_locations[-2:]
+                if len(self.selected_locations) == 2:
+                    if self.selected_locations[0][0] > self.selected_locations[1][0]:
+                        self.selected_locations = [self.selected_locations[1], self.selected_locations[0]]
+                    self.log("Use keyboard controls to manipulate BBox {0} from frames {1} to {2}".format(
+                        self.selected_id,
+                        self.selected_locations[0][0],
+                        self.selected_locations[1][0]))
 
     def handle_keyboard(self, received_key: int):
         par = self.par
+        bbm = self.par.bbm
         if received_key == get_ord("i"):  # Select id
-            res = PopUpWindow("Select the new ID").run()
-            if res is None or res == "":
-                self.par.logger.log("Select ID operation canceled. Still on {0}".format(self.selected_id))
+            id, cls = PopUpWindow().run()
+            if id is None or id == "":
+                self.log("Select ID operation canceled. Still on {0}".format(self.selected_id))
             else:
                 try:
-                    res = int(res)
-                    self.par.logger.log("Switched id from {0} to {1}".format(self.selected_id, res))
-                    self.selected_id = res
+                    id = int(id)
+                    self.log("Switched id from {0} to {1}".format(self.selected_id, id))
+                    self.selected_id = id
+                    self.selected_cls = cls
                 except:
-                    self.par.logger.log("Input ID not valid. Still on {0}".format(self.selected_id))
+                    self.log("Input ID not valid. Still on {0}".format(self.selected_id))
+        elif received_key == get_ord("r"):
+            self.reset_task()
+            self.log("Selected bounding boxes reset".format(self.selected_id))
+        elif received_key == get_ord("b"):
+            if len(self.selected_locations) == 2:
+                if not bbm.has_id(self.selected_id):
+                    bbm.add_or_update_id(self.selected_id, self.selected_cls)
+                    self.log("New id {0} for class {1} added".format(self.selected_id, self.selected_cls))
+                bbm.replace_in_range(
+                    self.selected_id,
+                    self.selected_locations[0][0],
+                    self.selected_locations[0][1],
+                    self.selected_locations[1][0],
+                    self.selected_locations[1][1])
+                self.log("Bounding box for ID {0} set over range [{1}, {2}]".format(
+                    self.selected_id, self.selected_locations[0][0], self.selected_locations[1][0]))
+                self.reset_task()
+        elif received_key == get_ord("c"):
+            if len(self.selected_locations) == 2 and bbm.has_id(self.selected_id):
+                i1 = self.selected_locations[0][0]
+                i2 = self.selected_locations[1][0]
+                bbm.clear_in_range(self.selected_id, i1, i2)
+                self.log("Bbox for ID {0} cleared over [{1}, {2}]".format(self.selected_id, i1, i2))
+                self.reset_task()
+            elif not len(self.selected_locations) == 2:
+                self.log("Please draw in two locations")
+            elif bbm.has_id(self.selected_id):
+                self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
+
+        elif received_key == get_ord("u"):
+            if not bbm.has_id(self.selected_id):
+                self.log("ID {0} does not exist".format(self.selected_id))
+            else:
+                bbm.add_or_update_id(self.selected_id, self.selected_cls)
+                self.log("Class for ID {0} updated to {1}".format(self.selected_id, self.selected_cls))
+
+    def reset_task(self):
+        self.selected_locations = []
+        self.curr_ref_point = []
+
+    def modify_frame(self, frame, i):
+        if len(self.curr_ref_point) == 1:
+            cv2.rectangle(frame, self.curr_ref_point[0], self.mouse_position, **self.BOX_DRAWING_DISPLAY)
+        return frame
 
     def get_state_message(self):
         bbm = self.par.bbm
         messages = [
             "BBox Mode:",
             "{0} BBoxes total".format(bbm.get_n_ids()),
-            "Working on {0} id {1}".format(
+            "Target: {0} id {1} [{2}]".format(
                 "existing" if bbm.has_id(self.selected_id) else "new",
-                self.selected_id
+                self.selected_id,
+                bbm.get_cls(self.selected_id) if bbm.has_id(self.selected_id) else self.selected_cls
             )
         ]
-        if len(self.ref_point) == 1:
-            messages.append("Drawing from {0}".format(str(self.ref_point[0])))
+        if len(self.curr_ref_point) == 1:
+            messages.append("Drawing from {0}".format(str(self.curr_ref_point[0])))
         return messages
 
