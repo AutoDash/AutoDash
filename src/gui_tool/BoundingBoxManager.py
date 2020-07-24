@@ -33,7 +33,32 @@ class BoundingBoxManager(object):
 
 
     def extract(self):
-        pass
+        def format_frame(i):
+            return "{0:0>5}".format(i+1)
+
+        frames = []
+        ids = []
+        clss = []
+        x1s = []
+        y1s = []
+        x2s = []
+        y2s = []
+        selected = []
+
+        for id in self.bboxes.keys():
+            for frame in self.bboxes[id]:
+                frames.append(format_frame(frame))
+                ids.append(id)
+                clss.append(self.get_cls(id))
+                x1s.append(self.bboxes[id][frame][0][0])
+                y1s.append(self.bboxes[id][frame][0][1])
+                x2s.append(self.bboxes[id][frame][1][0])
+                y2s.append(self.bboxes[id][frame][1][1])
+                selected.append(1 if id in self.selected else 0)
+
+        return frames, ids, clss, x1s, y1s, x2s, y2s, selected
+
+
 
     def modify_frame(self, frame, i):
         for id, frame_data in self.bboxes.items():
