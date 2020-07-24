@@ -8,21 +8,23 @@ Navigation:
     Space: Pause/unpause
     Enter: Finish and continue
     Esc:   Abort. Will raise ManualTaggingAbortedException
+    t: opens window for user customizable tags
 
-Tagging:
+Selection Mode:
     m: Mark current location as accident location
     n: Toggle whether it is a dashcam video
         NOTE: by default, all videos will be dashcam
         Pressing n the first time will mark the video as not dashcam
-    t: opens window for user customizable tags
     u: untag (Remove tags)
     ,: Remove the last marked accident location
 
-REVIEW GUI CONTROLS
-    Enter:     Approve and continue
-    Backspace: Reject and redo
-    Esc:       Abort. Will raise ManualTaggingAbortedException
-    aswd:      Works the same way as in the tagging UI
+BBox Mode:
+    i: Select a new integer ID to work on, as will as cls. If ID already exists, will modify original
+    r: reset current task
+    c: Clear existing bounding boxes over frames
+    v: Re-interpolate over frames [NOT implemented]
+    b: Define bounding boxes over range
+    u: Update class of current id based on popup input
 
 Note:
     By default, video are assumed to be dashcam video
