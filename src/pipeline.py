@@ -2,9 +2,9 @@
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 
-from data.FilterCondition import FilterCondition
-from PipelineConfiguration import PipelineConfiguration
-from database import get_database, DatabaseConfigOption
+from .data.FilterCondition import FilterCondition
+from .PipelineConfiguration import PipelineConfiguration
+from .database import get_database, DatabaseConfigOption
 
 
 class Work:

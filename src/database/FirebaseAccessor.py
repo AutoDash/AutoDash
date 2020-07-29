@@ -7,7 +7,7 @@ from firebase_admin.db import Reference
 
 from data.FilterCondition import FilterCondition
 from data.MetaDataItem import MetaDataItem
-from database.iDatabase import iDatabase, AlreadyExistsException, NotExistingException
+from .iDatabase import iDatabase, AlreadyExistsException, NotExistingException
 from utils import get_project_root
 
 
