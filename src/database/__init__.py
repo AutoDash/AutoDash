@@ -2,9 +2,9 @@ import enum
 import os
 
 from utils import get_project_root
-from database.FirebaseAccessor import FirebaseAccessor, FIREBASE_CRED_FILENAME
-from database.ReadOnlyFirebaseAccessor import ReadOnlyFirebaseAccessor
-from database.LocalStorageAccessor import LocalStorageAccessor
+from .FirebaseAccessor import FirebaseAccessor, FIREBASE_CRED_FILENAME
+from .ReadOnlyFirebaseAccessor import ReadOnlyFirebaseAccessor
+from .LocalStorageAccessor import LocalStorageAccessor
 
 
 class DatabaseConfigOption(enum.Enum):

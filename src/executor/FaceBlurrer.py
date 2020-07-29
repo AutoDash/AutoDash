@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-from src.lib.anonymization.auto_face_blurring import AutoFaceBlurrer
-from ..data.VideoItem import VideoItem
-from .iExecutor import iExecutor
-=======
 from lib.anonymization.auto_face_blurring import AutoFaceBlurrer
 from data.VideoItem import VideoItem
 from executor.iExecutor import iExecutor
->>>>>>> move executors + imports changing back
 
 
 class FaceBlurrer(iExecutor):

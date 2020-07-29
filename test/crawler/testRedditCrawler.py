@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-from src.crawler.RedditCrawler import RedditCrawler
+from executor.RedditCrawler import RedditCrawler
 
 
 class TestRedditCrawler(unittest.TestCase):
