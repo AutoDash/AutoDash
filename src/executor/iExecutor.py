@@ -3,7 +3,7 @@ from ..data.VideoItem import VideoItem
 
 
 class iExecutor(ABC):
-    def __init__(self, *parents, stateful=False):
+    def __init__(self, parents=[], stateful=False):
         self.stateful = stateful
         self.prev = parents
         self.next = None

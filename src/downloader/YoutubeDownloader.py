@@ -7,8 +7,8 @@ import os
 
 class YoutubeDownloader(iDownloader):
 
-    def __init__(self, *args, dl_archive=os.path.join(os.getcwd(), 'ydl_archive.txt'), **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parents=[], *args, dl_archive=os.path.join(os.getcwd(), 'ydl_archive.txt'), **kwargs):
+        super().__init__(parents, *args, **kwargs)
         self.file_name = None
         self.dl_opts = {
             'nocheckcertificate': True,

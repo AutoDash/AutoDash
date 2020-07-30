@@ -10,7 +10,7 @@ events = Queue()
 
 class TestExecutor(iExecutor):
     def __init__(self, event_num, *parents):
-        super().__init__(*parents)
+        super().__init__(parents)
         self.event_num = event_num
 
     def run(self, obj):

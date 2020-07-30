@@ -32,10 +32,12 @@ class ExecutorFactory:
     def build(cls, executor_name, args, parents=[]):
         local = {}
         res = executor_name.rsplit(".",1)
-        exec(f'from executor.{executor_name} import {executor_name}', globals(), local)
+        exec(f'from .executor.{executor_name} import {executor_name}', globals(), local)
         exec(f'executor_class = {executor_name}', globals(), local)
+        print(f"parnets: {parents}")
         executor_class = local['executor_class']
-        executor = executor_class(*parents, **args)
+        print(f"executor class {executor_class}")
+        executor = executor_class(parents, **args)
         return executor
 
 class PipelineConfiguration:
