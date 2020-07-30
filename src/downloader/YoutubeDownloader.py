@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from .iDownloader import iDownloader, DownloadException
-from data.MetaDataItem import MetaDataItem
-from data.VideoItem import VideoItem
+from ..data.MetaDataItem import MetaDataItem
+from ..data.VideoItem import VideoItem
 import youtube_dl
 import os
 

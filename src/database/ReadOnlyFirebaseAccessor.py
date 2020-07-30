@@ -2,8 +2,8 @@ from typing import List
 
 import requests
 
-from data.FilterCondition import FilterCondition
-from data.MetaDataItem import MetaDataItem
+from ..data.FilterCondition import FilterCondition
+from ..data.MetaDataItem import MetaDataItem
 from .iDatabase import iReadOnlyDatabase
 
 firebase_url = 'https://autodash-9dccb.firebaseio.com/metadata'

@@ -2,7 +2,7 @@ import os
 import praw
 from dotenv import load_dotenv
 
-from ..utils import get_project_root
+from utils import get_project_root
 
 
 CRAWLABLE_SUBREDDITS = [
