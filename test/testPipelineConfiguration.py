@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import unittest, os
-from src.PipelineConfiguration import PipelineConfiguration
+from src.PipelineConfiguration import PipelineConfiguration, InvalidPipelineException
 from src.executor.iExecutor import iExecutor
 
 class testExecutorA(iExecutor):
@@ -27,6 +27,10 @@ class TestExecutorFactory:
         executor_class = local['executor_class']
         executor = executor_class(*parents)
         return executor
+
+
+def filepath(filename):
+    return os.path.join(os.path.dirname(__file__), "test_data", filename)
 
 class TestUnitTest(unittest.TestCase):
 
@@ -93,7 +97,7 @@ class TestUnitTest(unittest.TestCase):
 
         exA = testExecutorA()
         exB = testExecutorB()
-        exC = testExecutorC(exA, exB)
+        exC = testExecutorC([exA, exB])
         exD = testExecutorD(exC)
 
         pc.load_graph(exD)
@@ -125,16 +129,32 @@ class TestUnitTest(unittest.TestCase):
         exA = testExecutorA()
         exB = testExecutorB(exA)
         exD = testExecutorD()
-        exC = testExecutorC(exB, exD)
+        exC = testExecutorC([exB, exD])
 
         self.assertRaises(RuntimeError, pc.load_graph, exC)
 
     def test_pipelineConfig_with_args(self):
         pc = PipelineConfiguration()
-        pc.read(os.path.join(__file__ ,"test_data", "pipelineConfigWithArgs.yaml"))
+        pc.read(filepath("pipelineConfigWithArgs.yaml"))
         source_executors, _ = pc.generate_graph()
-        self.assertEqual(len(source_executors()), 1)
+        self.assertEqual(len(source_executors), 1)
         self.assertEqual(source_executors[0].msg, "TEST MESSAGE")
+
+    def test_config_bad_file(self):
+        pc = PipelineConfiguration()
+        self.assertRaises(InvalidPipelineException, pc.read, filepath("old_config.yaml"))
+
+    def test_config_no_sources(self):
+        pc = PipelineConfiguration()
+        self.assertRaises(InvalidPipelineException, pc.read, filepath("no_sources_config.yaml"))
+
+    def test_config_no_stages(self):
+        pc = PipelineConfiguration()
+        self.assertRaises(InvalidPipelineException, pc.read, filepath("no_stages_config.yaml"))
+
+    def test_config_no_list(self):
+        pc = PipelineConfiguration()
+        self.assertRaises(InvalidPipelineException, pc.read, filepath("no_list_config.yaml"))
 
 
 if __name__ == '__main__':

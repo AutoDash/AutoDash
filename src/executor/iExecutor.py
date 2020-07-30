@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from ..data.VideoItem import VideoItem
+from collections import Iterable
 
 
 class iExecutor(ABC):
     def __init__(self, parents=[], stateful=False):
         self.stateful = stateful
-        self.prev = parents
+        self.prev = parents if isinstance(parents, Iterable) else [parents]
         self.next = None
-        for parent in parents:
+        for parent in self.prev:
             parent.set_next(self)
 
         super().__init__()
