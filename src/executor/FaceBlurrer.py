@@ -1,4 +1,4 @@
-from lib.anonymization.auto_face_blurring import AutoFaceBlurrer
+from ..lib.anonymization.auto_face_blurring import AutoFaceBlurrer
 from ..data.VideoItem import VideoItem
 from .iExecutor import iExecutor
 
