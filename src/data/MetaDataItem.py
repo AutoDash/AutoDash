@@ -13,7 +13,7 @@ class MetaDataItem:
         self.collision_type = kwargs.get("collision_type")
         self.description = kwargs.get("description")
         self.location = kwargs.get("location")
-        self.accident_index = kwargs.get("accident_index")
+        self.accident_indexes = kwargs.get("accident_indexes")
         self.tags = kwargs.get("tags", {})
         self.is_cancelled = kwargs.get("is_cancelled", False)
 
@@ -30,7 +30,7 @@ class MetaDataItem:
             'collision_type' : str,
             'description' : str,
             'location' : str,
-            'accident_index': int,
+            'accident_indexes': list,
             'tags': dict,
             'is_cancelled': bool,
         }
@@ -46,7 +46,7 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
-            'accident_index': self.accident_index,
+            'accident_indexes': self.accident_index,
             'is_cancelled': self.is_cancelled,
             'tags': self.tags
         }

@@ -3,6 +3,7 @@ from service import ModelManager
 import numpy as np
 import tensorflow as tf
 from pprint import pprint
+from signals import CancelSignal
 
 class ObjectDetector(iExecutor):
 

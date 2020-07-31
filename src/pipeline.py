@@ -2,7 +2,7 @@
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
 from PipelineConfiguration import PipelineConfiguration
-from database import get_database, DatabaseConfigOption
+from database import get_database, get_firebase_access, DatabaseConfigOption
 from data.FilterCondition import FilterCondition
 from signals import CancelSignal
 import tensorflow as tf
@@ -28,6 +28,9 @@ class PipelineCLIParser(ArgumentParser):
         return intval
 
 def main(args):
+    
+    if not tf.test.is_gpu_available():
+        print("WARNING: You are running tensorflow in CPU mode.")    
     
     # Set up pipeline configuration
     config = PipelineConfiguration()
@@ -57,14 +60,11 @@ def main(args):
                     executor = executor.get_next()
         except CancelSignal:
             item.is_cancelled = True
-            get_database().update_metadata(item)
+            get_firebase_access().update_metadata(item)
         except RuntimeError as e:
             print(e)
 
 if __name__ == "__main__":
-    
-    if not tf.test.is_gpu_available():
-        print("WARNING: You are running tensorflow in CPU mode.")    
 
     args = { **vars(PipelineCLIParser().parse_args()) }
     main(args)
