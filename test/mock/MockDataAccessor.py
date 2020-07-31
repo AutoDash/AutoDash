@@ -1,5 +1,6 @@
 from typing import List
 
+from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem
 from src.database.iDatabase import iDatabase, NotExistingException, AlreadyExistsException
 
@@ -7,28 +8,50 @@ from src.database.iDatabase import iDatabase, NotExistingException, AlreadyExist
 class MockDataAccessor(iDatabase):
 
     def __init__(self):
-        self.metadata_dict = {}
+        self.metadata_list = []
 
     async def publish_new_metadata(self, metadata: MetaDataItem) -> str:
-        if id in self.metadata_dict.keys():
-            raise AlreadyExistsException()
-        await self.update_metadata(metadata)
+        id = str(len(self.metadata_list))
+        metadata.id = id
+        self.metadata_list.append(metadata)
+        return id
 
     async def update_metadata(self, metadata: MetaDataItem):
-        self.metadata_dict[metadata.id] = metadata
+        self.metadata_list[int(metadata.id)] = metadata
 
-    async def fetch_metadata(self, id: str) -> MetaDataItem:
-        if id not in self.metadata_dict.keys():
+    def fetch_metadata(self, id: str) -> MetaDataItem:
+        if int(id) >= len(self.metadata_list):
             raise NotExistingException()
-        return self.metadata_dict[id]
+        return self.metadata_list[int(id)]
 
     async def delete_metadata(self, id: str):
-        if id not in self.metadata_dict.keys():
+        if int(id) >= len(self.metadata_list):
             raise NotExistingException()
-        self.metadata_dict[id] = None
+        self.metadata_list[int(id)] = None
 
-    async def fetch_video_id_list(self) -> List[str]:
-        return list(self.metadata_dict.keys())
+    def fetch_video_id_list(self) -> List[str]:
+        id_list = []
+        for i, metadata in enumerate(self.metadata_list):
+            if metadata is not None:
+                id_list.append(i)
+        return id_list
 
-    async def fetch_video_url_list(self) -> List[str]:
-        return list(map(lambda metadata: metadata.url, self.metadata_dict.values()))
+    def fetch_video_url_list(self) -> List[str]:
+        url_list = []
+        for metadata in self.metadata_list:
+            if metadata is not None:
+                url_list.append(metadata.url)
+        return url_list
+
+    def fetch_newest_videos(self, last_id: str = None,
+                                  filter_cond: FilterCondition = None) -> List[MetaDataItem]:
+        if last_id is not None:
+            metadata_list = self.metadata_list[int(last_id):]
+        else:
+            metadata_list = self.metadata_list
+
+        metadata_list = list(filter(None, metadata_list))
+        if filter_cond is not None:
+            return filter_cond.filter(metadata_list)
+        else:
+            return metadata_list

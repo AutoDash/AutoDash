@@ -1,37 +1,38 @@
-import os
-import praw
-from dotenv import load_dotenv
+from .RedditAccessor import get_posts, reload_posts
+from .iCrawler import iCrawler, CrawlerException
+from ..data.MetaDataItem import MetaDataItem
 
-from src.crawler.iCrawler import iCrawler, CrawlerException
-from src.data.MetaDataItem import MetaDataItem
-from src.utils import get_project_root
-
-CRAWLABLE_SUBREDDITS = [
-    'CarCrash'
-]
 
 class RedditCrawler(iCrawler):
 
-    def __init__(self):
-        load_dotenv(os.path.join(get_project_root(), '.env'))
-        self.reddit = praw.Reddit(client_id=os.getenv("REDDIT_CLIENT_ID"),
-                                  client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
-                                  user_agent='CarCrashScraper')
+    def __init__(self, *parents):
+        super().__init__(*parents)
 
-    async def next_downloadable(self) -> MetaDataItem:
-        for subreddit in CRAWLABLE_SUBREDDITS:
-            hot_posts = self.reddit.subreddit(subreddit).hot()
-            for index, post in enumerate(hot_posts):
-                if post.media is not None and 'oembed' in post.media.keys():
-                    if await self.check_new_url(post.url):
-                        title = post.media['oembed']['title']
-                        video_source = post.media['type']
-                        reddit_tag = {
-                            'id': post.id,
-                            'title': post.title
-                        }
-                        metadata = MetaDataItem(title, post.url, video_source, "", "", "")
-                        metadata.add_tag('reddit_post_info', reddit_tag)
-                        return metadata
+
+    async def find_next_downloadable(self, posts) -> MetaDataItem:
+        while len(posts):
+            post = posts.pop(0)
+            if post.media is not None and 'oembed' in post.media.keys():
+                if await self.check_new_url(post.url):
+                    title = post.media['oembed']['title']
+                    video_source = post.media['type']
+                    reddit_tag = {
+                        'id': post.id,
+                        'title': post.title
+                    }
+                    metadata = MetaDataItem(title, post.url, video_source)
+                    metadata.add_tag('reddit_post_info', reddit_tag)
+                    return metadata
 
         raise CrawlerException("Reddit crawler could not find any new videos")
+
+    async def next_downloadable(self) -> MetaDataItem:
+        posts = get_posts()
+
+        try:
+            return await self.find_next_downloadable(posts)
+        except CrawlerException:
+            reload_posts()
+            posts = get_posts()
+        # Try to find a new downloadable after updating posts, but if this fails then give up
+        return await self.find_next_downloadable(posts)

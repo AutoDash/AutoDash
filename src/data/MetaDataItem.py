@@ -5,7 +5,7 @@ import os
 
 
 class MetaDataItem:
-    def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_index=None, tags={}):
+    def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_indexes=None, is_dashcam=None, tags={}):
         self.id = id
         self.title = title
         self.url = url
@@ -13,7 +13,8 @@ class MetaDataItem:
         self.description = description
         self.location = location
         self.download_src = download_src
-        self.accident_index = accident_index
+        self.accident_indexes = accident_indexes
+        self.is_dashcam = is_dashcam
 
         if tags is None:
             self.tags = {}
@@ -34,10 +35,11 @@ class MetaDataItem:
             'collision_type' : str,
             'description' : str,
             'location' : str,
-            'accident_index': int,
+            'accident_indexes': list,
+            'is_dashcam': bool,
             'tags': dict
         }
-      
+
     def encode(self) -> str:
         return hashlib.sha224(self.url.encode()).hexdigest()
 
@@ -49,7 +51,8 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
-            'accident_index': self.accident_index,
+            'accident_indexes': self.accident_indexes,
+            'is_dashcam': self.is_dashcam,
             'tags': self.tags
         }
 

@@ -1,8 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Dict, Any
-from src.executor.iExecutor import iExecutor
+from .iExecutor import iExecutor
 
 
 class Printer(iExecutor):
-    def run(self, obj: Dict[str, Any]):
-        print(obj["videoItem"])
+    def __init__(self, *parents, msg=""):
+        self.msg = msg
+        super().__init__(*parents)
+
+    def run(self, item):
+        print(f"printer loaded, item {item}, message: {self.msg}")
+        return item

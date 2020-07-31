@@ -1,8 +1,10 @@
 language: python
+cache: pip
 matrix:
   include:
     - os: linux
       name: Linux Test
-      python: 3.7
-      script: 
+      python: 3.8
+      script:
+        - ./tools/setup.sh
         - ./tools/run_tests.sh
