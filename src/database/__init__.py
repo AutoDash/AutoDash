@@ -15,10 +15,6 @@ def get_firebase_access():
     dirname = get_project_root()
     cred_file = os.path.join(dirname, FIREBASE_CRED_FILENAME)
 
-if DATABASE_CONFIG is DatabaseConfigOption['firebase_metadata']:
-    database_access = FirebaseAccessor()
-else:
-    database_access = LocalStorageAccessor()
     if os.path.exists(cred_file):
         return FirebaseAccessor()
     else:
