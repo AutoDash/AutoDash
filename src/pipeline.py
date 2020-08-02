@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
-from PipelineConfiguration import PipelineConfiguration
-from database import get_database, get_firebase_access, DatabaseConfigOption
-from data.FilterCondition import FilterCondition
-from signals import CancelSignal
+from .PipelineConfiguration import PipelineConfiguration
+from .database import get_database, get_firebase_access, DatabaseConfigOption
+from .data.FilterCondition import FilterCondition
+from .signals import CancelSignal
 import tensorflow as tf
 import copy
 
@@ -27,7 +27,8 @@ class PipelineCLIParser(ArgumentParser):
             raise ArgumentTypeError("%s is not a positive integer" % val)
         return intval
 
-def main(args):
+def main():
+    args = { **vars(PipelineCLIParser().parse_args()) }
     
     if not tf.test.is_gpu_available():
         print("WARNING: You are running tensorflow in CPU mode.")    
@@ -35,10 +36,13 @@ def main(args):
     # Set up pipeline configuration
     config = PipelineConfiguration()
     config.read(args['config'])
+    run(config, **args)
+
+def run(pipeline, **args):
     
     # Set up services
     parser = PipelineCLIParser()
-    source_executors, output_executor = config.generate_graph()
+    source_executors, output_executor = pipeline.generate_graph()
     database = get_database(args['storage'])
 
     for executor in source_executors:
@@ -64,7 +68,6 @@ def main(args):
         except RuntimeError as e:
             print(e)
 
-if __name__ == "__main__":
 
-    args = { **vars(PipelineCLIParser().parse_args()) }
-    main(args)
+if __name__ == "__main__":
+    main()

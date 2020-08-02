@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import re
 import os
-from downloader.iDownloader import iDownloader
-from data.VideoItem import VideoItem
-from data.MetaDataItem import MetaDataItem
-from executor.iExecutor import iExecutor
-from downloader.YoutubeDownloader import YoutubeDownloader
-from downloader.ImgurDownloader import ImgurDownloader
+from .iDownloader import iDownloader
+from ..data.VideoItem import VideoItem
+from ..data.MetaDataItem import MetaDataItem
+from ..executor.iExecutor import iExecutor
+from .YoutubeDownloader import YoutubeDownloader
+from .ImgurDownloader import ImgurDownloader
 
 class UniversalDownloader(iExecutor):
     def __init__(self, *args):

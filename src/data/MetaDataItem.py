@@ -46,7 +46,7 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
-            'accident_indexes': self.accident_index,
+            'accident_indexes': self.accident_indexes,
             'is_cancelled': self.is_cancelled,
             'tags': self.tags
         }

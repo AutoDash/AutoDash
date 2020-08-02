@@ -29,7 +29,7 @@ class TestAdministrator(unittest.TestCase):
 
         pc.load_graph(ptr)
 
-        administrator(pc, n_workers=1, max_iterations=1)
+        administrator(pc, n_workers=1, max_iterations=1, storage='local')
 
         for i in range(num_items):
             self.assertEqual(events.get(timeout=2), i, "items in wrong order")
@@ -47,7 +47,7 @@ class TestAdministrator(unittest.TestCase):
 
         pc.load_graph(ptr)
 
-        administrator(pc, n_workers=2, max_iterations=3)
+        administrator(pc, n_workers=2, max_iterations=3, storage='local')
         for i in range(num_items*3):
             events.get(timeout=2)
 

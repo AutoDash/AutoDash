@@ -1,9 +1,9 @@
-from executor.iExecutor import iExecutor
-from service import ModelManager
+from .iExecutor import iExecutor
+from ..service import ModelManager
 import numpy as np
 import tensorflow as tf
 from pprint import pprint
-from signals import CancelSignal
+from ..signals import CancelSignal
 
 class ObjectDetector(iExecutor):
 

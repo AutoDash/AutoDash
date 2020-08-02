@@ -1,4 +1,4 @@
-from executor.iExecutor import iExecutor
+from .iExecutor import iExecutor
 
 class uTaskCollector(iExecutor):
     def __init__(self, *parents):

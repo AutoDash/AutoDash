@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from data.VideoItem import VideoItem
-from executor.iExecutor import iExecutor
-from data.MetaDataItem import MetaDataItem
+from ..data.VideoItem import VideoItem
+from ..executor.iExecutor import iExecutor
+from ..data.MetaDataItem import MetaDataItem
 import asyncio
 import os
 

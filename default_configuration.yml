@@ -1,13 +1,13 @@
-- - executor: database.FirebaseSource.FirebaseSource
-- - executor: executor.Printer.Printer
+- - executor: .database.FirebaseSource.FirebaseSource
+- - executor: .executor.Printer.Printer
     config:
       msg: "firebase src complete"
-- - executor: downloader.UniversalDownloader.UniversalDownloader
-- - executor: executor.Printer.Printer
-- - executor: executor.ObjectDetector.ObjectDetector
+- - executor: .downloader.UniversalDownloader.UniversalDownloader
+- - executor: .executor.Printer.Printer
+- - executor: .executor.ObjectDetector.ObjectDetector
     config:
       skip_n: 60
       batch_size: 10
       confidence_threshold: 0.85
-- - executor: executor.FaceBlurrer.FaceBlurrer
-- - executor: executor.labeler.Labeler
+- - executor: .executor.FaceBlurrer.FaceBlurrer
+- - executor: .executor.labeler.Labeler

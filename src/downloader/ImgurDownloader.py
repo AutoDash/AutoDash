@@ -1,5 +1,5 @@
-from downloader.iDownloader import iDownloader
-from data.VideoItem import VideoItem
+from ..downloader.iDownloader import iDownloader
+from ..data.VideoItem import VideoItem
 from imgur_downloader import ImgurDownloader as imgur
 
 class ImgurDownloader(iDownloader):

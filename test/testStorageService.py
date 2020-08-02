@@ -12,7 +12,8 @@ class TestUnitTest(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), "storage")))
 
     def test_store_load_delete_video(self):
-        metaData = MetaDataItem("title","url","youtube","car-v-car","desc","loc")
+        metaData = MetaDataItem(title="title", url="url", download_src="youtube", 
+                collision_type="car-v-car", description="desc", location="loc")
         vidItem = VideoItem(metadata=metaData)
 
         self.storage.store_video(vidItem)
@@ -30,8 +31,9 @@ class TestUnitTest(unittest.TestCase):
         for vid in videos:
             self.storage.store_video(
                 VideoItem(metadata=MetaDataItem(
-                        "title",vid,"youtube","comp","desc","loc"
-                    )
+                        title="title", url=vid, download_src="youtube",
+                        collision_type="comp", description="desc", location="loc"
+                    ), filepath=None
                 )
             )
 
