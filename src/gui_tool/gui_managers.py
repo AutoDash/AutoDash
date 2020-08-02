@@ -45,6 +45,7 @@ t: opens window for user customizable tags
         self.frame_rate = 25
         self.result = self.context.result
         self.logger = RotatingLog(self.LOG_LINES)
+        self.ignore_index_change_interval = self.vcm.get_frames_count() // 50
 
         self.bbm = BoundingBoxManager()
         if context.bbox_fields is not None:
@@ -76,17 +77,17 @@ t: opens window for user customizable tags
         def set_frame_rate_callback(value):
             self.frame_rate = max(1, value)
         def set_progress_rate_callback(value):
-            if abs(value - self.vcm.get_frame_index()) < 5:
+            if abs(value - self.vcm.get_frame_index()) <= self.ignore_index_change_interval:
                 return
             self.vcm.start_from(value)
         def set_paused_callback(value):
             if self.vcm is not None:
                 self.vcm.set_paused(value)
 
-        cv2.createTrackbar(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, 0, max(0, self.vcm.get_frames_count()),
+        cv2.createTrackbar(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, 0, max(0, self.vcm.get_frames_count()-1),
                            set_progress_rate_callback)
         cv2.createTrackbar(self.FRAME_RATE_BAR_NAME, self.WINDOW_NAME,
-                           self.frame_rate, 60, set_frame_rate_callback)
+                           self.frame_rate, 200, set_frame_rate_callback)
         cv2.createTrackbar(self.PAUSE_BUTTON_NAME,  self.WINDOW_NAME,
                            False, 1, set_paused_callback)
 

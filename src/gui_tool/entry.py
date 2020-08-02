@@ -31,8 +31,9 @@ Note:
     By default, video are assumed to be dashcam video
 
 """
-from .gui_managers import VideoPlayerGUIManager, VideoTaggingContext
-from ..data.MetaDataItem import MetaDataItem
+from gui_tool.gui_managers import VideoPlayerGUIManager
+from gui_tool.VideoTaggingContext import VideoTaggingContext
+from data.MetaDataItem import MetaDataItem
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
@@ -50,7 +51,7 @@ def tag_file(file_loc, mdi:MetaDataItem):
 
 def test():
     import sys
-    tag_file(sys.argv[1], MetaDataItem(None, None, None, None))
+    tag_file(sys.argv[1], MetaDataItem(**{"title": None, "download_src": None, "url": None}))
 
 if __name__ == "__main__":
     test()
