@@ -13,9 +13,17 @@ class MetaDataItem:
         self.collision_type = kwargs.get("collision_type", None)
         self.description = kwargs.get("description", None)
         self.location = kwargs.get("location", None)
-        self.accident_indexes = kwargs.get("accident_indexes", None)
         self.tags = kwargs.get("tags", {})
         self.is_cancelled = kwargs.get("is_cancelled", False)
+
+        self.bb_frames = kwargs.get("bb_frames", None)
+        self.bb_ids = kwargs.get("bb_ids", None)
+        self.bb_clss = kwargs.get("bb_clss", None)
+        self.bb_x1s = kwargs.get("bb_x1s", None)
+        self.bb_y1s = kwargs.get("bb_y1s", None)
+        self.bb_x2s = kwargs.get("bb_x2s", None)
+        self.bb_y2s = kwargs.get("bb_y2s", None)
+        self.bb_selected = kwargs.get("bb_selected", None)
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -30,9 +38,16 @@ class MetaDataItem:
             'collision_type' : str,
             'description' : str,
             'location' : str,
-            'accident_indexes': list,
             'tags': dict,
             'is_cancelled': bool,
+            'bb_frames': list,
+            'bb_ids': list,
+            'bb_clss': list,
+            'bb_x1s': list,
+            'bb_y1s': list,
+            'bb_x2s': list,
+            'bb_y2s': list,
+            'bb_selected': list,
         }
 
     def encode(self) -> str:
@@ -46,9 +61,16 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
-            'accident_indexes': self.accident_indexes,
             'is_cancelled': self.is_cancelled,
-            'tags': self.tags
+            'tags': self.tags,
+            'bb_frames': self.bb_frames,
+            'bb_ids': self.bb_ids,
+            'bb_clss': self.bb_clss,
+            'bb_x1s': self.bb_x1s,
+            'bb_y1s': self.bb_y1s,
+            'bb_x2s': self.bb_x2s,
+            'bb_y2s': self.bb_y2s,
+            'bb_selected': self.bb_selected,
         }
 
     def to_json_str(self) -> str:

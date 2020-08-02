@@ -120,3 +120,24 @@ class BoundingBoxManager(object):
         if id in self.id_to_cls:
             return self.id_to_cls[id]
         return None
+    def get_unused_ids(self):
+        unused_ids = set()
+        for id, d in self.bboxes.items():
+            if len(d) == 0:
+                unused_ids.add(id)
+        for id in self.id_to_cls.keys():
+            if id not in self.bboxes:
+                unused_ids.add(id)
+        return unused_ids
+
+    def remove_unused_ids(self):
+        unused_ids = self.get_unused_ids()
+        for i in unused_ids:
+            if i in self.bboxes:
+                del self.bboxes[i]
+            if i in self.id_to_cls:
+                del self.id_to_cls[i]
+        return unused_ids
+
+
+
