@@ -8,7 +8,7 @@ from .id_input_popup import PopUpWindow
 from .label_popup import LabelPopup
 from enum import Enum, auto
 import cv2
-from .ManualTaggingAbortedException import ManualTaggingAbortedException
+from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 
 GENERAL_INSTRUCTIONS = [
     ["tab", "Switch mode"],
@@ -112,7 +112,7 @@ class VideoPlayerGUIManager(object):
         shown_for_first_time = False
         while True:
             if shown_for_first_time and cv2.getWindowProperty(self.WINDOW_NAME, cv2.WND_PROP_VISIBLE) <= 0:  # Window closed. Abort
-                raise ManualTaggingAbortedException("Tagging operation aborted by closing window")
+                raise ManualTaggingExitedException("Tagging operation aborted by closing window")
 
             frame = self.vcm.next().copy()
             frame_index = self.vcm.get_frame_index()
