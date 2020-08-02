@@ -22,14 +22,17 @@ class BoundingBoxManager(object):
         self.id_to_cls = {}
         self.selected = set()
 
-    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s):
+    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s, selected):
         self.bboxes = {}
         self.id_to_cls = {}
-        for frame, id, cls, x1, y1, x2, y2 in zip(frames, ids, clss, x1s, y1s, x2s, y2s):
+        for frame, id, cls, x1, y1, x2, y2, selected in zip(frames, ids, clss, x1s, y1s, x2s, y2s, selected):
             self.add_or_update_id(id, cls)
 
             frame = int(frame) - 1
             self.bboxes[id][frame] = [(x1, y1), (x2, y2)]
+
+            if selected:
+                self.selected.add(id)
 
 
     def extract(self):
@@ -97,10 +100,11 @@ class BoundingBoxManager(object):
         for o in range(i2-i1+1):
             frame = i1+o
             new_pt = [pts1[i] + int(slopes[i]*o) for i in range(4)]
-            print(new_pt)
             self.bboxes[id][frame] = (new_pt[0], new_pt[1]), (new_pt[2], new_pt[3])
 
     def clear_in_range(self, id, i1, i2):
+        if i2 < i1:
+            i1, i2 = i2, i1
         for i in range(i1, i2+1):
             if i in self.bboxes[id]:
                 del self.bboxes[id][i]

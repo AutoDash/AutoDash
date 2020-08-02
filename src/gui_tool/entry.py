@@ -11,11 +11,20 @@ from gui_tool.ManualTaggingAbortedException import ManualTaggingAbortedException
 def tag_file(file_loc, mdi:MetaDataItem):
     while True:
         try:
-            context = VideoTaggingContext(file_loc, None)
+            context = VideoTaggingContext(file_loc, (
+                mdi.bb_frames,
+                mdi.bb_ids,
+                mdi.bb_clss,
+                mdi.bb_x1s,
+                mdi.bb_y1s,
+                mdi.bb_x2s,
+                mdi.bb_y2s,
+                mdi.bb_selected,
+            ))
             gui = VideoPlayerGUIManager(context)
             gui.start()
 
-            bbox_fields = context.bbox_fields
+            bbox_fields = context.get_bbox_fields()
             frames, ids, clss, x1s, y1s, x2s, y2s, selected = bbox_fields
             mdi.bb_frames = frames
             mdi.bb_ids = ids
