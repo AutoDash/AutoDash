@@ -4,15 +4,13 @@ import numpy as np
 import skvideo.io
 
 class VideoItem:
-    def __init__(self, filepath=None, metadata=None):
-        self.filepath=filepath
-        self.metadata=metadata
-        self.npy=None
+    def __init__(self, metadata, filepath=None):
+        self.filepath = filepath
+        self.metadata = metadata
+        self.npy = None
         # TODO: use cv2 to read mp4
-        if self.filepath:
+        if filepath:
             self.npy = skvideo.io.vread(self.filepath)
-        elif self.metadata and self.metadata.location:
-            self.npy = skvideo.io.vread(self.metadata.location)
 
 
     def encode(self):

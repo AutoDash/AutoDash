@@ -9,5 +9,4 @@
       skip_n: 60
       batch_size: 10
       confidence_threshold: 0.85
-- - executor: .executor.FaceBlurrer.FaceBlurrer
-- - executor: .executor.labeler.Labeler
+- - executor: .executor.DeferTaskExecutor.DeferTaskExecutor

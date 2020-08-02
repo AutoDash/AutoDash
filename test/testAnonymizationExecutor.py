@@ -4,6 +4,7 @@ import os
 import shutil
 
 from src.data.VideoItem import VideoItem
+from src.data.MetaDataItem import MetaDataItem
 from src.executor.FaceBlurrer import FaceBlurrer
 from numpy.testing import assert_array_equal, assert_raises
 
@@ -31,7 +32,7 @@ class TestAnonymizationExecutor(unittest.TestCase):
     def test_face_blurrer_single(self):
         # Copy video to test directory
         shutil.copy2(os.path.join(os.getcwd(), self.DATASET_PATH, "man_face.mp4"), self.TEST_FILE_PATH)
-        video = VideoItem(self.TEST_FILE_PATH)
+        video = VideoItem(filepath = self.TEST_FILE_PATH, metadata=None)
 
         original_data = video.npy
 

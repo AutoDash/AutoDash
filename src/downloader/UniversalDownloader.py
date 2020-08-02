@@ -13,7 +13,7 @@ class UniversalDownloader(iExecutor):
         super().__init__(*args);
         self.registered_downloaders = []
         self.pathname = os.getcwd()
-        self.register_downloader(".*youtube.*", YoutubeDownloader())
+        self.register_downloader("(.*youtube.*|.*youtu\.be.*)", YoutubeDownloader())
         self.register_downloader(".*imgur.*", ImgurDownloader())
 
     def register_downloader(self, regex: str, downloader: iDownloader):

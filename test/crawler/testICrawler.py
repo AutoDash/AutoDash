@@ -13,7 +13,10 @@ class MockCrawler(iCrawler):
         super().__init__()
 
     async def next_downloadable(self):
-        return MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        return MetaDataItem(
+                title="title", 
+                url="fake url 1", 
+                download_src="youtube") 
 
 class TestICrawler(unittest.TestCase):
 

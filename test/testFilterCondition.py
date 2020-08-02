@@ -87,11 +87,11 @@ class TestFilterCondition(unittest.TestCase):
         
     def test_filtering(self):
         mdi_list = [
-            MetaDataItem("Vid1", "c.com", "youtube", 1, "bike", "blank", "China"),
-            MetaDataItem("Vid2", "c.com", "youtube", 2, "car", "blank", "Canada"),
-            MetaDataItem("Vid3", "c.com", "youtube", 3, "bike", "blank", "Canada"),
-            MetaDataItem("Vid4", "c.com", "youtube", 4, "car", "blank", "China"),
-            MetaDataItem("Vid5", "c.com", "youtube", 5, "walking", "blank", "Canada")
+            MetaDataItem(title="Vid1", url="c.com", download_src="youtube", id=1, collision_type="bike", location="China"),
+            MetaDataItem(title="Vid2", url="c.com", download_src="youtube", id=2, collision_type="car", location="Canada"),
+            MetaDataItem(title="Vid3", url="c.com", download_src="youtube", id=3, collision_type="bike", location="Canada"),
+            MetaDataItem(title="Vid4", url="c.com", download_src="youtube", id=4, collision_type="car", location="China"),
+            MetaDataItem(title="Vid5", url="c.com", download_src="youtube", id=5, collision_type="walking", location="Canada")
         ]
         
         fc1 = FilterCondition("location == 'Canada' and collision_type != 'car'")
