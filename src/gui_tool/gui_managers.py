@@ -43,7 +43,6 @@ t: opens window for user customizable tags
         self.context = context
         self.vcm = self.context.vcm
         self.frame_rate = 25
-        self.result = self.context.result
         self.logger = RotatingLog(self.LOG_LINES)
         self.ignore_index_change_interval = self.vcm.get_frames_count() // 50
 
@@ -60,7 +59,7 @@ t: opens window for user customizable tags
     def start(self):
         self.set_GUI()
         try:
-            self.logger.log("Starting with: " + str(self.result))
+            self.logger.log("Starting with: {0} bounding box ids".format(self.bbm.get_n_ids()))
             self.play_video()
         except ManualTaggingAbortedException:
             raise
@@ -68,6 +67,7 @@ t: opens window for user customizable tags
             self.cleanup()
 
         self.context.bbox_fields = self.bbm.extract()
+        assert(len(set([len(f) for f in self.context.bbox_fields])) == 1)
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
@@ -109,7 +109,7 @@ t: opens window for user customizable tags
             elif received_key == ord("t"):
                 window = AdditionalTagWindow()
                 tags = window.get_user_tags()
-                self.result.set_additional_tags(tags)
+                self.context.set_additional_tags(tags)
             elif received_key == ord("h"):
                 window = LabelPopup(
                     "GUI controls reference",
@@ -201,25 +201,14 @@ u: untag (Remove tags)
             self.par.bbm.handleClickSelection(self.par.vcm.get_frame_index(), x, y)
     def handle_keyboard(self, received_key: int):
         par = self.par
-        mark_changed = False
-        if received_key == get_ord("u"):
-            par.result.unmark()
-            mark_changed = True
-        elif received_key == get_ord("n"):
-            par.result.mark_is_dashcam(not par.result.is_dashcam)
-            mark_changed = True
-        elif received_key == get_ord("m"):
-            par.result.mark_accident(par.vcm.get_frame_index())
-            mark_changed = True
-        elif received_key == get_ord(","):  # , Key
-            par.result.unmark_last()
-            mark_changed = True
-        if mark_changed:
-            par.logger.log(str(par.result))
+        if received_key == get_ord("n"):
+            par.context.mark_is_dashcam(not par.context.is_dashcam)
+            par.logger.log("Marked video as {0}".format("dashcam" if par.context.bbox_fields else "not dishcam"))
     def get_state_message(self):
         return [
             "Selection Mode",
-            "{0} Selected".format(self.par.bbm.get_n_selected())
+            "{0} Selected".format(self.par.bbm.get_n_selected()),
+            "{0} Total".format(self.par.bbm.get_n_ids()),
         ]
 
 class InternalBBoxMode(InternalMode):
@@ -238,6 +227,7 @@ c: Clear existing bounding boxes over frames
 v: Re-interpolate over frames [NOT implemented]
 b: Define bounding boxes over range
 u: Update class of current id based on popup input
+p: Remove all unused bounding box ids (ids without bounding box)
 """)
         self.mouse_position = None
         self.selected_locations = []
@@ -310,11 +300,18 @@ u: Update class of current id based on popup input
                 bbm.clear_in_range(self.selected_id, i1, i2)
                 self.log("Bbox for ID {0} cleared over [{1}, {2}]".format(self.selected_id, i1, i2))
                 self.reset_task()
+
+                unused_ids = bbm.get_unused_ids()
+                if len(unused_ids) > 0:
+                    self.log("WARNING: Exists ids without bounding box: {0}".format(list(unused_ids)))
+                    self.log("Press p to remove")
             elif not len(self.selected_locations) == 2:
                 self.log("Please draw in two locations")
             elif bbm.has_id(self.selected_id):
                 self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
-
+        elif received_key == get_ord("p"):
+            deleted_ids = bbm.remove_unused_ids()
+            self.log("Remove {0} ids without bounding boxes: {1}".format(len(deleted_ids), list(deleted_ids)))
         elif received_key == get_ord("u"):
             if not bbm.has_id(self.selected_id):
                 self.log("ID {0} does not exist".format(self.selected_id))
