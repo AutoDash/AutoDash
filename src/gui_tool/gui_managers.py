@@ -49,7 +49,7 @@ class VideoPlayerGUIManager(object):
     PAUSE_BUTTON_NAME = "pause"
     WINDOW_NAME = 'tagger'
 
-    LOG_LINES = 5
+    LOG_LINES = 6
     LOG_LINE_HEIGHT = 17
     LOG_LINE_MARGIN = 2
     LOG_START_X = 250
@@ -60,7 +60,7 @@ class VideoPlayerGUIManager(object):
         self.vcm = self.context.vcm
         self.frame_rate = 25
         self.logger = RotatingLog(self.LOG_LINES)
-        self.ignore_index_change_interval = self.vcm.get_frames_count() // 100
+        self.ignore_index_change_interval = self.vcm.get_frames_count() // 200
 
         self.bbm = BoundingBoxManager()
         if context.get_bbox_fields() is not None:
@@ -212,7 +212,12 @@ class InternaSelectionMode(InternalMode):
         super().__init__(parent, SELECTION_MODE_INSTRUCTIONS)
     def handle_click(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            self.par.bbm.handleClickSelection(self.par.vcm.get_frame_index(), x, y)
+            modified_id = self.par.bbm.handleClickSelection(self.par.vcm.get_frame_index(), x, y)
+            if modified_id is not None:
+                self.log("Set object {0} as {1}".format(
+                    modified_id,
+                    "part of collision" if self.par.bbm.get_is_selected(modified_id) else "not part of collision"
+                ))
     def handle_keyboard(self, received_key: int):
         par = self.par
         if received_key == get_ord("n"):
@@ -223,6 +228,7 @@ class InternaSelectionMode(InternalMode):
             "Selection Mode",
             "{0} Selected".format(self.par.bbm.get_n_selected()),
             "{0} Total".format(self.par.bbm.get_n_ids()),
+            "Is dashcam" if self.par.context.is_dashcam else "Not dashcam"
         ]
 
 class InternalBBoxMode(InternalMode):
@@ -352,7 +358,6 @@ class InternalBBoxMode(InternalMode):
             raise Exception("Invalid state")
         messages = [
             "BBox Mode:",
-            "{0} BBoxes total".format(bbm.get_n_ids()),
             "Target: {0} id {1} [{2}]".format(
                 "existing" if bbm.has_id(self.selected_id) else "new",
                 self.selected_id,
@@ -362,5 +367,7 @@ class InternalBBoxMode(InternalMode):
         ]
         if len(self.curr_ref_point) == 1:
             messages.append("Drawing from {0}".format(str(self.curr_ref_point[0])))
+            messages.append("Drawing to {0}".format(str(self.mouse_position)))
+
         return messages
 

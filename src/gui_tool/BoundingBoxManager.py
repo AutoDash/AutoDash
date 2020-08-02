@@ -83,10 +83,13 @@ class BoundingBoxManager(object):
                         self.selected.remove(id)
                     else:
                         self.selected.add(id)
+                    return id
+        return None
 
     def replace_in_range(self, id, i1, pts1, i2, pts2):
         if i2 < i1:
             i1, pts1, i2, pts2 = i2, pts2, i1, pts1
+
         r = i2-i1
         if r == 0:
             r = 1
@@ -94,6 +97,11 @@ class BoundingBoxManager(object):
         # Unravel
         pts1 = [pts1[0][0], pts1[0][1], pts1[1][0], pts1[1][1]]
         pts2 = [pts2[0][0], pts2[0][1], pts2[1][0], pts2[1][1]]
+
+        if pts1[0] > pts1[2]: pts1[0], pts1[2] = pts1[2], pts1[0]
+        if pts2[0] > pts2[2]: pts2[0], pts2[2] = pts2[2], pts2[0]
+        if pts1[1] > pts1[3]: pts1[1], pts1[3] = pts1[3], pts1[1]
+        if pts2[1] > pts2[3]: pts2[1], pts2[3] = pts2[3], pts2[1]
 
         slopes = [(pts2[i] - pts1[i]) / r for i in range(4)]
 
@@ -113,7 +121,8 @@ class BoundingBoxManager(object):
         self.id_to_cls[id] = cls
         if id not in self.bboxes:
             self.bboxes[id] = {}
-
+    def get_is_selected(self, id):
+        return id in self.selected
     def get_n_selected(self):
         return len(self.selected)
     def get_n_ids(self):
