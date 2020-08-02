@@ -6,14 +6,14 @@ import os
 
 class MetaDataItem:
     def __init__(self, **kwargs):
-        self.id = kwargs.get("id")
         self.title = kwargs["title"]
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
-        self.collision_type = kwargs.get("collision_type")
-        self.description = kwargs.get("description")
-        self.location = kwargs.get("location")
-        self.accident_indexes = kwargs.get("accident_indexes")
+        self.id = kwargs.get("id", None)
+        self.collision_type = kwargs.get("collision_type", None)
+        self.description = kwargs.get("description", None)
+        self.location = kwargs.get("location", None)
+        self.accident_indexes = kwargs.get("accident_indexes", None)
         self.tags = kwargs.get("tags", {})
         self.is_cancelled = kwargs.get("is_cancelled", False)
 
