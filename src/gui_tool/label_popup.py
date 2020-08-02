@@ -1,17 +1,21 @@
 from tkinter import Tk, Frame, Label, BOTH, LEFT
 class LabelPopup:
-    def __init__(self, title: str, text: str):
+    def __init__(self, title: str, list_of_instructions: list):
         self.tags = []
         self.entries = []
         self.root = Tk()
         self.root.title(title)
-        self.root.minsize(width=800, height=400)
+        self.root.minsize(width=400, height=400)
 
 
         self.frame = Frame(self.root)
         self.frame.pack(fill=BOTH, expand=1, padx=20, pady=20)
-        self.label = Label(self.frame, text=text, anchor="e", justify=LEFT)
-        self.label.place(x=0, y=0)
+
+        i = 0
+        for instructions in list_of_instructions:
+            Label(self.frame, text=instructions[0], anchor="nw", justify=LEFT).grid(sticky="nw", row=i, column=0, ipady=5, ipadx=10)
+            Label(self.frame, text="\n".join(instructions[1:]), anchor="nw", justify=LEFT).grid(sticky="nw", row=i, column=1, ipady=3, ipadx=10)
+            i += 1
 
     def run(self):
         self.root.mainloop()
