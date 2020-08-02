@@ -5,7 +5,7 @@ from gui_tool.gui_managers import VideoPlayerGUIManager
 from gui_tool.VideoTaggingContext import VideoTaggingContext
 from data.MetaDataItem import MetaDataItem
 from signals import CancelSignal
-from gui_tool.ManualTaggingAbortedException import ManualTaggingAbortedException
+from gui_tool.GUIExceptions import ManualTaggingAbortedException
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
