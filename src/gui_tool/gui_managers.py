@@ -60,11 +60,11 @@ class VideoPlayerGUIManager(object):
         self.vcm = self.context.vcm
         self.frame_rate = 25
         self.logger = RotatingLog(self.LOG_LINES)
-        self.ignore_index_change_interval = self.vcm.get_frames_count() // 50
+        self.ignore_index_change_interval = self.vcm.get_frames_count() // 100
 
         self.bbm = BoundingBoxManager()
-        if context.bbox_fields is not None:
-            self.bbm.set_to(*context.bbox_fields)
+        if context.get_bbox_fields() is not None:
+            self.bbm.set_to(*context.get_bbox_fields())
 
         self.mode_handlers = [
             InternaSelectionMode(self),
@@ -84,8 +84,7 @@ class VideoPlayerGUIManager(object):
         finally:
             self.cleanup()
 
-        self.context.bbox_fields = self.bbm.extract()
-        assert(len(set([len(f) for f in self.context.bbox_fields])) == 1)
+        self.context.set_bbox_fields(self.bbm.extract())
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
@@ -95,9 +94,9 @@ class VideoPlayerGUIManager(object):
         def set_frame_rate_callback(value):
             self.frame_rate = max(1, value)
         def set_progress_rate_callback(value):
-            if abs(value - self.vcm.get_frame_index()) <= self.ignore_index_change_interval:
-                return
-            self.vcm.start_from(value)
+            if abs(value - self.vcm.get_frame_index()) > self.ignore_index_change_interval or \
+                    value == 0 or value == self.vcm.get_frames_count()-1:
+                self.vcm.start_from(value)
         def set_paused_callback(value):
             if self.vcm is not None:
                 self.vcm.set_paused(value)
@@ -218,7 +217,7 @@ class InternaSelectionMode(InternalMode):
         par = self.par
         if received_key == get_ord("n"):
             par.context.mark_is_dashcam(not par.context.is_dashcam)
-            par.logger.log("Marked video as {0}".format("dashcam" if par.context.bbox_fields else "not dishcam"))
+            par.logger.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
     def get_state_message(self):
         return [
             "Selection Mode",
@@ -260,8 +259,6 @@ class InternalBBoxMode(InternalMode):
                 if len(self.selected_locations) > 2:
                     self.selected_locations = self.selected_locations[-2:]
                 if len(self.selected_locations) == 2:
-                    if self.selected_locations[0][0] > self.selected_locations[1][0]:
-                        self.selected_locations = [self.selected_locations[1], self.selected_locations[0]]
                     self.log("Use keyboard controls to manipulate BBox {0} from frames {1} to {2}".format(
                         self.selected_id,
                         self.selected_locations[0][0],
@@ -287,6 +284,7 @@ class InternalBBoxMode(InternalMode):
                         self.log("Press u to replace")
                 except:
                     self.log("Input ID not valid. Still on {0}".format(self.selected_id))
+            self.reset_task()
         elif received_key == get_ord("r"):
             self.reset_task()
             self.log("Selected bounding boxes reset".format(self.selected_id))
