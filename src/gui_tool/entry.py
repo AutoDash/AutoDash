@@ -19,7 +19,7 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 mdi.bb_y1s,
                 mdi.bb_x2s,
                 mdi.bb_y2s,
-                mdi.bb_selected,
+                mdi.bb_has_accident,
             ))
             gui = VideoPlayerGUIManager(context)
             gui.start()
@@ -33,7 +33,7 @@ def tag_file(file_loc, mdi:MetaDataItem):
             mdi.bb_y1s = y1s
             mdi.bb_x2s = x2s
             mdi.bb_y2s = y2s
-            mdi.bb_selected = selected
+            mdi.bb_has_accident = selected
 
             for key, val in context.additional_tags:
                 mdi.add_tag(key, val)

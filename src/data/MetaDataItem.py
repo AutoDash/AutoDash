@@ -23,7 +23,7 @@ class MetaDataItem:
         self.bb_y1s = kwargs.get("bb_y1s", None)
         self.bb_x2s = kwargs.get("bb_x2s", None)
         self.bb_y2s = kwargs.get("bb_y2s", None)
-        self.bb_selected = kwargs.get("bb_selected", None)
+        self.bb_has_accident = kwargs.get("bb_has_accident", None)
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -47,7 +47,7 @@ class MetaDataItem:
             'bb_y1s': list,
             'bb_x2s': list,
             'bb_y2s': list,
-            'bb_selected': list,
+            'bb_has_accident': list,
         }
 
     def encode(self) -> str:
@@ -70,7 +70,7 @@ class MetaDataItem:
             'bb_y1s': self.bb_y1s,
             'bb_x2s': self.bb_x2s,
             'bb_y2s': self.bb_y2s,
-            'bb_selected': self.bb_selected,
+            'bb_has_accident': self.bb_has_accident,
         }
 
     def to_json_str(self) -> str:
