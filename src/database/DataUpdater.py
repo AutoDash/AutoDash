@@ -7,7 +7,7 @@ from ..executor.iDatabaseExecutor import iDatabaseExecutor
 # Not abstract, so a user can choose to default what database to interact with using this Executor
 class DataUpdater(iDatabaseExecutor):
 
-    def __init__(self, parents=[]):
+    def __init__(self, parents=None):
         super().__init__(parents)
 
 

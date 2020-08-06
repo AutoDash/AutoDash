@@ -4,7 +4,9 @@ from collections import Iterable
 
 
 class iExecutor(ABC):
-    def __init__(self, parents=[], stateful=False):
+    def __init__(self, parents=None, stateful=False):
+        if parents == None:
+            parents = []
         self.stateful = stateful
         self.prev = parents if isinstance(parents, Iterable) else [parents]
         self.next = None
