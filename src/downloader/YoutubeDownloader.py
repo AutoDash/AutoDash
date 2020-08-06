@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from .iDownloader import iDownloader, DownloadException
 from ..data.MetaDataItem import MetaDataItem
 from ..data.VideoItem import VideoItem

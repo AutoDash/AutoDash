@@ -1,6 +1,5 @@
 from ..crawler.iCrawler import iCrawler, CrawlerException
 from ..data.MetaDataItem import MetaDataItem
-from ..pipeline import StatefulExecutorProxy
 import youtube_dl
 
 
@@ -57,7 +56,7 @@ class YoutubeCrawler(iCrawler):
                     title = "TitleUnknown"
                     tags['title_extraction_failed'] = True
 
-                return MetaDataItem(title, url, self.YOUTUBE_SRC_IDENTIFIER, tags=tags)
+                return MetaDataItem(title=title, url=url, download_src=self.YOUTUBE_SRC_IDENTIFIER, tags=tags)
 
     def log(self, log):
         self.log_func("[Youtube Crawler] {0}".format(log))

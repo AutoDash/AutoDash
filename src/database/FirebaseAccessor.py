@@ -74,7 +74,10 @@ class FirebaseAccessor(iDatabase):
         metadata_list = await self.__query_list(ref)
         urls = map(lambda metadata: metadata['url'], metadata_list)
         return list(urls)
-
+    
+    async def fetch_all_metadata(self) -> List[dict]:
+        ref = self.__metadata_reference()
+        return [ *zip(await self.__query_keys(ref), await self.__query_list(ref)) ]
 
     async def fetch_video_id_list(self) -> List[str]:
         ref = self.__metadata_reference()

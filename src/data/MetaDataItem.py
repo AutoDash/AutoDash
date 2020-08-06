@@ -5,22 +5,17 @@ import os
 
 
 class MetaDataItem:
-    def __init__(self, title, url, download_src, id=None, collision_type=None, description=None, location=None, accident_indexes=None, is_dashcam=None, tags={}):
-        self.id = id
-        self.title = title
-        self.url = url
-        self.collision_type = collision_type
-        self.description = description
-        self.location = location
-        self.download_src = download_src
-        self.accident_indexes = accident_indexes
-        self.is_dashcam = is_dashcam
-
-        if tags is None:
-            self.tags = {}
-        else:
-            self.tags = tags
-
+    def __init__(self, **kwargs):
+        self.id = kwargs.get("id")
+        self.title = kwargs["title"]
+        self.url = kwargs["url"]
+        self.download_src = kwargs["download_src"]
+        self.collision_type = kwargs.get("collision_type")
+        self.description = kwargs.get("description")
+        self.location = kwargs.get("location")
+        self.accident_indexes = kwargs.get("accident_indexes")
+        self.tags = kwargs.get("tags", {})
+        self.is_cancelled = kwargs.get("is_cancelled", False)
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -36,8 +31,8 @@ class MetaDataItem:
             'description' : str,
             'location' : str,
             'accident_indexes': list,
-            'is_dashcam': bool,
-            'tags': dict
+            'tags': dict,
+            'is_cancelled': bool,
         }
 
     def encode(self) -> str:
@@ -52,7 +47,7 @@ class MetaDataItem:
             'description': self.description,
             'location': self.location,
             'accident_indexes': self.accident_indexes,
-            'is_dashcam': self.is_dashcam,
+            'is_cancelled': self.is_cancelled,
             'tags': self.tags
         }
 

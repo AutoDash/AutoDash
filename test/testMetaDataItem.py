@@ -10,7 +10,8 @@ class TestMetaDataItem(unittest.TestCase):
         self.assertEqual(True, True)
 
     def test_tag_overwrite(self):
-        metadata =  MetaDataItem("title", "fake url 1", "youtube", "car-v-car", "desc", "loc")
+        metadata =  MetaDataItem(title="title", url="fake url 1", download_src="youtube", 
+                collision_type="car-v-car", description="desc", location="loc")
 
         simple_tag = {
             "hello": "world",

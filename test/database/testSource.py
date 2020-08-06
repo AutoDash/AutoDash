@@ -16,8 +16,8 @@ class TestSource(unittest.TestCase):
         src = Source()
 
         mockdb = MockDataAccessor()
-        asyncio.run(mockdb.publish_new_metadata(MetaDataItem("first", "fake url 1", "youtube")))
-        asyncio.run(mockdb.publish_new_metadata(MetaDataItem("second", "fake url 2", "youtube")))
+        asyncio.run(mockdb.publish_new_metadata(MetaDataItem(title="first", url="fake url 1", download_src="youtube")))
+        asyncio.run(mockdb.publish_new_metadata(MetaDataItem(title="second", url="fake url 2", download_src="youtube")))
         src.set_database(mockdb)
 
         item = src.run()

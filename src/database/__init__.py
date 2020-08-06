@@ -6,7 +6,6 @@ from .FirebaseAccessor import FirebaseAccessor, FIREBASE_CRED_FILENAME
 from .ReadOnlyFirebaseAccessor import ReadOnlyFirebaseAccessor
 from .LocalStorageAccessor import LocalStorageAccessor
 
-
 class DatabaseConfigOption(enum.Enum):
     firebase = 1
     local = 2

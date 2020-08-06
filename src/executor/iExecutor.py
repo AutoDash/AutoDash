@@ -11,7 +11,8 @@ class iExecutor(ABC):
         self.prev = parents if isinstance(parents, Iterable) else [parents]
         self.next = None
         for parent in self.prev:
-            parent.set_next(self)
+            if parent:
+                parent.set_next(self)
 
         super().__init__()
 
