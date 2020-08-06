@@ -9,8 +9,8 @@ class DownloadException(RuntimeError):
     '''Raise on download failure'''
 
 class iDownloader(iExecutor):
-    def __init__(self, *args, pathname:str = os.getcwd(), **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parents=[], pathname:str = os.getcwd(), **kwargs):
+        super().__init__(parents, **kwargs)
         self.pathname = pathname
 
     @abstractmethod

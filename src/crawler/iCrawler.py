@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 import asyncio
 
-from src.data.MetaDataItem import MetaDataItem
-from src.executor.iDatabaseExecutor import iDatabaseExecutor, UndefinedDatabaseException
+from ..data.MetaDataItem import MetaDataItem
+from ..executor.iDatabaseExecutor import iDatabaseExecutor, UndefinedDatabaseException
 
 
 class CrawlerException(RuntimeError):

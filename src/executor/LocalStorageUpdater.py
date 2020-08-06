@@ -1,5 +1,5 @@
-from .LocalStorageAccessor import LocalStorageAccessor
-from .DataUpdater import DataUpdater
+from ..database.LocalStorageAccessor import LocalStorageAccessor
+from ..database.DataUpdater import DataUpdater
 
 
 class LocalStorageUpdater(DataUpdater):

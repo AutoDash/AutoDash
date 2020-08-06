@@ -26,16 +26,41 @@ Usage:
 
 """
 
+
+class InvalidPipelineException(RuntimeError):
+    '''Raise on invalid pipeline configuration file'''
+
+
+def parse_list(dict, name, min_size=1):
+    if name not in dict:
+        raise InvalidPipelineException(f"Could not find {name}")
+
+    obj = dict[name]
+
+    if type(obj) not in [list, tuple]:
+        raise InvalidPipelineException(f"{name} is not a list")
+    if len(obj) < min_size:
+        raise InvalidPipelineException(f"{name} must contain at more than {min_size-1} objects")
+
+    return obj
+
+
+class ConfigDict(yaml.YAMLObject):
+    def __init__(self, dict):
+        self.sources = parse_list(dict, 'dataSources')
+        self.stages = parse_list(dict, 'processingStages')
+
+
 class ExecutorFactory:
     # TODO: this should probably be improved
     @classmethod
     def build(cls, executor_name, args, parents=[]):
         local = {}
         res = executor_name.rsplit(".",1)
-        exec(f'from {res[0]} import {res[1]}', globals(), local)
-        exec(f'executor_class = {res[1]}', globals(), local)
+        exec(f'from .executor.{executor_name} import {executor_name}', globals(), local)
+        exec(f'executor_class = {executor_name}', globals(), local)
         executor_class = local['executor_class']
-        executor = executor_class(*parents, **args)
+        executor = executor_class(parents, **args)
         return executor
 
 class PipelineConfiguration:
@@ -46,7 +71,7 @@ class PipelineConfiguration:
     def __init__(self, ExecutorFactory=ExecutorFactory):
         self.input_nodes = None
         self.output_node = None
-        self.graph_dict = None
+        self.config_dict = None
         self.ExecutorFactory=ExecutorFactory
 
     def _read_pickle(self, fpath):
@@ -60,19 +85,19 @@ class PipelineConfiguration:
 
     def _read_json(self, fpath):
         with open(fpath, 'r') as fin:
-            self.graph_dict = json.load(fin)
+            self.config_dict = ConfigDict(json.load(fin))
 
     def _read_yaml(self, fpath):
         with open(fpath, 'r') as fin:
-            self.graph_dict = yaml.load(fin, Loader=yaml.FullLoader)
+            self.config_dict = ConfigDict(yaml.load(fin))
 
     def _write_json(self, fpath):
         with open(fpath, 'w') as fin:
-            json.dump(self.graph_dict, fin)
+            json.dump(self.config_dict, fin)
 
     def _write_yaml(self, fpath):
         with open(fpath, 'w') as fin:
-            yaml.dump(self.graph_dict, fin)
+            yaml.dump(self.config_dict, fin)
 
     def _execute_rw(self, fpath, ffmt, rw_dict):
         if ffmt is None: _, ffmt=os.path.splitext(fpath)
@@ -116,27 +141,24 @@ class PipelineConfiguration:
             while len(queue) > 0:
                 node, depth = queue.pop(0)
                 if depth > cur_depth:
-                    graph_dict.append([])
                     cur_depth = depth
 
-                graph_dict[depth].append(node.get_name())
                 if len(node.prev) == 0: input_nodes.append(node)
 
                 for parent in node.prev:
                     queue.append((parent, depth+1))
 
-            return graph_dict, input_nodes
+            return input_nodes
 
         if output_node is None: raise ValueError("Missing input.")
 
-        graph_dict, input_nodes = get_input_nodes(output_node)
+        input_nodes = get_input_nodes(output_node)
         for inode in input_nodes:
             if inode.next != input_nodes[0].next:
                 raise RuntimeError("All input executors must have the same child executor")
 
         self.input_nodes = input_nodes
         self.output_node = output_node
-        self.graph_dict = graph_dict
 
 
     def generate_graph(self) -> [iExecutor, List[iExecutor]]:
@@ -147,19 +169,23 @@ class PipelineConfiguration:
         """
 
         def traverse_and_generate(index=0, parents=[]):
-            print(f"graph: {self.graph_dict}")
-            root_executor = [self.ExecutorFactory.build(executor_name=node["executor"], args=node.get("config", {}), parents=parents) for node in self.graph_dict[index]]
+            if index >= len(self.config_dict.stages):
+                return parents[0]
 
-            if index == len(self.graph_dict) - 1:
-                return [root_executor, root_executor]
+            node = self.config_dict.stages[index]
+            root_executor = [self.ExecutorFactory.build(executor_name=node["executor"], args=node.get("config", {}), parents=parents)]
 
-            _, sink = traverse_and_generate(index+1, parents=root_executor)
-            return [root_executor, sink]
+            return traverse_and_generate(index+1, parents=root_executor)
 
         if self.input_nodes and self.output_node:
             return self.input_nodes, self.output_node
 
-        if self.graph_dict is None:
+        if self.config_dict is None:
             raise RuntimeError("Graph not loaded.")
 
-        return traverse_and_generate()
+        self.input_nodes = [self.ExecutorFactory.build(executor_name=node["executor"], args=node.get("config", {})) for node in self.config_dict.sources]
+        self.output_node = traverse_and_generate(parents=self.input_nodes)
+
+        print(f"input: {self.input_nodes}, output: {self.output_node}")
+
+        return self.input_nodes, self.output_node

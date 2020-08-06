@@ -42,6 +42,7 @@ class TestAnonymizationExecutor(unittest.TestCase):
 
         # Now we check that the video data has changed
         assert_raises(AssertionError, assert_array_equal, original_data, new_data)
+        
 
 if __name__ == '__main__':
     unittest.main()

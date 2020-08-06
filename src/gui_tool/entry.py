@@ -31,7 +31,7 @@ Note:
     By default, video are assumed to be dashcam video
 
 """
-from .gui_managers import VideoPlayerGUIManager
+from .gui_managers import VideoPlayerGUIManager, VideoTaggingContext
 from ..data.MetaDataItem import MetaDataItem
 
 # Lets the user tag the file. Modifies MetaDataItem in place

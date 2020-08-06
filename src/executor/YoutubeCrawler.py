@@ -1,6 +1,7 @@
-from .iCrawler import iCrawler, CrawlerException
+from ..crawler.iCrawler import iCrawler, CrawlerException
 from ..data.MetaDataItem import MetaDataItem
 import youtube_dl
+
 
 class YoutubeCrawler(iCrawler):
     YOUTUBE_SRC_IDENTIFIER = "YouTube"

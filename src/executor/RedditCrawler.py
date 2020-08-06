@@ -1,5 +1,5 @@
-from .RedditAccessor import get_posts, reload_posts
-from .iCrawler import iCrawler, CrawlerException
+from ..crawler.RedditAccessor import get_posts, reload_posts
+from ..crawler.iCrawler import iCrawler, CrawlerException
 from ..data.MetaDataItem import MetaDataItem
 
 

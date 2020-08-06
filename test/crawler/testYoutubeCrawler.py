@@ -2,7 +2,7 @@
 import unittest
 import asyncio
 
-from src.crawler.YoutubeCrawler import YoutubeCrawler
+from src.executor.YoutubeCrawler import YoutubeCrawler
 
 
 class TestYouTubeCrawler(unittest.TestCase):
