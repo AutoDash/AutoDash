@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import os.path
+from gui_tool.GUIExceptions import VideoNotFoundException, VideoCouldNotBeOpenedException
 
 """
 A utility class for retrieving frames from local file
@@ -12,11 +14,16 @@ class VideoFileManager(object):
         self.file_loc = file_loc
         self.capture = None
         self.current_frame = None
+        if not (os.path.isfile(file_loc)):
+            raise VideoNotFoundException("Requested video file does not exist")
 
     def _set_capture(self, skip_n: int = 0):
         if self.capture is not None:
             self.capture.release()
         self.capture = cv2.VideoCapture(self.file_loc)
+
+        if not (self.is_open()):
+            raise VideoCouldNotBeOpenedException("Video format could not be read by opencv")
 
         if skip_n > 0:
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, skip_n-1)
