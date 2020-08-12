@@ -63,8 +63,8 @@ class VideoPlayerGUIManager(object):
         self.ignore_index_change_interval = self.vcm.get_frames_count() // 200
 
         self.bbm = BoundingBoxManager()
-        if context.get_bbox_fields() is not None:
-            self.bbm.set_to(*context.get_bbox_fields())
+        bb_fields = context.get_bbox_fields()
+        self.bbm.set_to(*context.get_bbox_fields_as_list())
 
         self.mode_handlers = [
             InternaSelectionMode(self),
@@ -84,7 +84,7 @@ class VideoPlayerGUIManager(object):
         finally:
             self.cleanup()
 
-        self.context.set_bbox_fields(self.bbm.extract())
+        self.context.set_bbox_fields_from_list(self.bbm.extract())
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
