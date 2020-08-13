@@ -1,11 +1,11 @@
 """
 Press h in GUI tool to see commands
 """
-from gui_tool.gui_managers import VideoPlayerGUIManager
-from gui_tool.VideoTaggingContext import VideoTaggingContext
-from data.MetaDataItem import MetaDataItem
-from signals import CancelSignal
-from gui_tool.GUIExceptions import ManualTaggingAbortedException
+from .gui_managers import VideoPlayerGUIManager
+from .VideoTaggingContext import VideoTaggingContext
+from ..data.MetaDataItem import MetaDataItem
+from ..signals import CancelSignal
+from .GUIExceptions import ManualTaggingAbortedException
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
@@ -28,12 +28,3 @@ def tag_file(file_loc, mdi:MetaDataItem):
 
         except ManualTaggingAbortedException as e:
             print("Aborted. Will restart")
-
-def test():
-    import sys
-    mdi = MetaDataItem(**{"title": None, "download_src": None, "url": None})
-    tag_file(sys.argv[1], mdi)
-    print(mdi)
-
-if __name__ == "__main__":
-    test()
