@@ -26,25 +26,29 @@ class IndexedRectBuilder(object):
         return self.last_rect
 
 class BoundingBoxInputManager(object):
+    MAX_KEPT = 20
     def __init__(self):
         self.curr_inputs = []
         self.reset()
 
     def add(self, ir: IndexedRect):
         self.curr_inputs.append(ir)
-        self.curr_inputs = self.curr_inputs[-2:]
+        self.curr_inputs = self.curr_inputs[-self.MAX_KEPT:]
 
     def get_n(self):
-        return len(self.curr_inputs)
+        return min(len(self.curr_inputs), 2)
 
     def has_n(self, n):
-        return len(self.curr_inputs) == n
+        return len(self.curr_inputs) >= n
 
     def reset(self):
         self.curr_inputs = []
 
     def __getitem__(self, key):
-        return self.curr_inputs[key]
+        return self.curr_inputs[-2:][key]
 
-    def get_all_sorted(self):
-        return sorted(self.curr_inputs, key=lambda r: r.i)
+    def get_2_sorted(self):
+        return sorted(self.curr_inputs[-2:], key=lambda r: r.i)
+
+    def remove_last(self):
+        self.curr_inputs = self.curr_inputs[-1:]
