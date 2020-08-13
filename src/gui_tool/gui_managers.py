@@ -9,6 +9,7 @@ from .label_popup import LabelPopup
 from enum import Enum, auto
 import cv2
 from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
+from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
 GENERAL_INSTRUCTIONS = [
     ["tab", "Switch mode"],
@@ -241,34 +242,29 @@ class InternalBBoxMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
         super().__init__(parent, BBOX_MODE_INSTRUCTIONS)
         self.mouse_position = None
-        self.selected_locations = []
-        self.curr_ref_point = []
+        self.im = BoundingBoxInputManager()
+        self.irb = IndexedRectBuilder()
         self.selected_id = 1
         self.selected_cls = ""
 
     def handle_click(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            self.curr_ref_point = [(x, y)]
+            self.irb.set_initial_point(x, y)
         elif event == cv2.EVENT_MOUSEMOVE:
             self.mouse_position = (x, y)
         elif event == cv2.EVENT_LBUTTONUP:
-            if len(self.curr_ref_point) == 1:
-                curr_frame = self.par.vcm.get_frame_index()
-                self.curr_ref_point.append((x, y))
-                self.log("Manually Selected bounding box {0} on frame {1}".format(
-                    self.curr_ref_point, curr_frame))
+            if self.irb.has_initial_point():
+                ir = self.irb.to_rect(self.par.vcm.get_frame_index(), x, y)
+                self.im.add(ir)
 
-                self.selected_locations.append([
-                    curr_frame,
-                    self.curr_ref_point
-                ])
-                if len(self.selected_locations) > 2:
-                    self.selected_locations = self.selected_locations[-2:]
-                if len(self.selected_locations) == 2:
+                self.log("Manually Selected bounding box {0} on frame {1}".format(
+                    ir.get_points(), ir.i))
+
+                if self.im.has_n(2):
                     self.log("Use keyboard controls to manipulate BBox {0} from frames {1} to {2}".format(
                         self.selected_id,
-                        self.selected_locations[0][0],
-                        self.selected_locations[1][0]))
+                        self.im[0].i,
+                        self.im[1].i))
 
     def handle_keyboard(self, received_key: int):
         par = self.par
@@ -295,24 +291,23 @@ class InternalBBoxMode(InternalMode):
             self.reset_task()
             self.log("Selected bounding boxes reset".format(self.selected_id))
         elif received_key == get_ord("b"):
-            if len(self.selected_locations) == 2:
+            if self.im.has_n(2):
                 if not bbm.has_id(self.selected_id):
                     bbm.add_or_update_id(self.selected_id, self.selected_cls)
                     self.log("New id {0} for class {1} added".format(self.selected_id, self.selected_cls))
-                bbm.replace_in_range(
-                    self.selected_id,
-                    self.selected_locations[0][0],
-                    self.selected_locations[0][1],
-                    self.selected_locations[1][0],
-                    self.selected_locations[1][1])
+                bbm.replace_in_range(self.selected_id, *self.im.get_all_sorted())
                 self.log("Bounding box for ID {0} set over index range [{1}, {2}]".format(
-                    self.selected_id, self.selected_locations[0][0], self.selected_locations[1][0]))
+                    self.selected_id, self.im[0].i, self.im[1].i))
             else:
                 self.log("Not enough inputs. Command ignored. Please draw 2 bounding boxes")
         elif received_key == get_ord("c"):
-            if len(self.selected_locations) == 2 and bbm.has_id(self.selected_id):
-                i1 = self.selected_locations[0][0]
-                i2 = self.selected_locations[1][0]
+            if not self.im.has_n(2):
+                self.log("Not enough inputs. Command ignored. Please click on 2 frames")
+            elif bbm.has_id(self.selected_id):
+                self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
+            else:
+                i1 = self.im[0].i
+                i2 = self.im[1].i
                 bbm.clear_in_range(self.selected_id, i1, i2)
                 self.log("Bbox for ID {0} cleared over index range [{1}, {2}]".format(self.selected_id, i1, i2))
 
@@ -320,10 +315,6 @@ class InternalBBoxMode(InternalMode):
                 if len(unused_ids) > 0:
                     self.log("WARN: Exists ids without bounding box: {0}".format(list(unused_ids)))
                     self.log("Press p to remove")
-            elif not len(self.selected_locations) == 2:
-                self.log("Not enough inputs. Command ignored. Please click on 2 frames")
-            elif bbm.has_id(self.selected_id):
-                self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
         elif received_key == get_ord("p"):
             deleted_ids = bbm.remove_unused_ids()
             self.log("Remove {0} ids without bounding boxes: {1}".format(len(deleted_ids), list(deleted_ids)))
@@ -337,23 +328,23 @@ class InternalBBoxMode(InternalMode):
                     self.selected_id, prev, self.selected_cls))
 
     def reset_task(self):
-        self.selected_locations = []
-        self.curr_ref_point = []
+        self.im.reset()
+        self.irb.reset()
 
     def modify_frame(self, frame, i):
-        if len(self.curr_ref_point) == 1:
-            cv2.rectangle(frame, self.curr_ref_point[0], self.mouse_position, **self.BOX_DRAWING_DISPLAY)
+        if self.irb.has_initial_point():
+            cv2.rectangle(frame, self.irb.get_initial_point(), self.mouse_position, **self.BOX_DRAWING_DISPLAY)
         return frame
 
     def get_state_message(self):
         bbm = self.par.bbm
         selected_msg = ""
-        if len(self.selected_locations) == 0:
+        if self.im.has_n(0):
             selected_msg = "No Input"
-        elif len(self.selected_locations) == 1:
-            selected_msg = "Input: From {0}".format(self.selected_locations[0][0])
-        elif len(self.selected_locations) == 2:
-            selected_msg = "Input: {0} to {1}".format(self.selected_locations[0][0], self.selected_locations[1][0])
+        elif self.im.has_n(1):
+            selected_msg = "Input: From {0}".format(self.im[0].i)
+        elif self.im.has_n(2):
+            selected_msg = "Input: {0} to {1}".format(self.im[0].i, self.im[1].i)
         else:
             raise Exception("Invalid state")
         messages = [
@@ -365,8 +356,8 @@ class InternalBBoxMode(InternalMode):
             ),
             selected_msg
         ]
-        if len(self.curr_ref_point) == 1:
-            messages.append("Drawing from {0}".format(str(self.curr_ref_point[0])))
+        if self.irb.has_initial_point():
+            messages.append("Drawing from {0}".format(self.irb.get_initial_point()))
             messages.append("Drawing to {0}".format(str(self.mouse_position)))
 
         return messages

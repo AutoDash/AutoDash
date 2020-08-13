@@ -1,5 +1,5 @@
 import cv2
-from collections import OrderedDict
+from .IndexedRect import IndexedRect
 
 class BoundingBoxManager(object):
     BOX_DISPLAY = {
@@ -86,27 +86,19 @@ class BoundingBoxManager(object):
                     return id
         return None
 
-    def replace_in_range(self, id, i1, pts1, i2, pts2):
-        if i2 < i1:
-            i1, pts1, i2, pts2 = i2, pts2, i1, pts1
-
-        r = i2-i1
+    def replace_in_range(self, id, ir1: IndexedRect, ir2: IndexedRect):
+        r = ir2.i - ir1.i
         if r == 0:
             r = 1
 
         # Unravel
-        pts1 = [pts1[0][0], pts1[0][1], pts1[1][0], pts1[1][1]]
-        pts2 = [pts2[0][0], pts2[0][1], pts2[1][0], pts2[1][1]]
-
-        if pts1[0] > pts1[2]: pts1[0], pts1[2] = pts1[2], pts1[0]
-        if pts2[0] > pts2[2]: pts2[0], pts2[2] = pts2[2], pts2[0]
-        if pts1[1] > pts1[3]: pts1[1], pts1[3] = pts1[3], pts1[1]
-        if pts2[1] > pts2[3]: pts2[1], pts2[3] = pts2[3], pts2[1]
+        pts1 = ir1.get_flat_points()
+        pts2 = ir2.get_flat_points()
 
         slopes = [(pts2[i] - pts1[i]) / r for i in range(4)]
 
-        for o in range(i2-i1+1):
-            frame = i1+o
+        for o in range(ir2.i-ir1.i+1):
+            frame = ir1.i+o
             new_pt = [pts1[i] + int(slopes[i]*o) for i in range(4)]
             self.bboxes[id][frame] = (new_pt[0], new_pt[1]), (new_pt[2], new_pt[3])
 
