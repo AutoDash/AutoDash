@@ -1,4 +1,4 @@
-from src.gui_tool.utils import get_ord, RotatingLog
+from src.gui_tool.utils import get_ord, RotatingLog, KeyMapper
 import numpy as np
 import cv2
 from .VideoTaggingContext import VideoTaggingContext
@@ -74,6 +74,7 @@ class VideoPlayerGUIManager(object):
         self.mode_handler_i = 0
 
         self.instructions = GENERAL_INSTRUCTIONS
+        self.key_mapper = KeyMapper()
 
     def start(self):
         self.set_GUI()
@@ -124,38 +125,38 @@ class VideoPlayerGUIManager(object):
 
             cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, frame_index)
 
-            received_key = cv2.waitKey(self.frame_rate) & 0xFF
-            if received_key == get_ord("esc"):  # Escape key
+            self.key_mapper.append(cv2.waitKey(self.frame_rate) & 0xFF)
+            if self.key_mapper.consume("esc"):  # Escape key
                 raise ManualTaggingAbortedException("Tagging operation aborted")
-            elif received_key == get_ord("enter"):  # Enter
+            elif self.key_mapper.consume("enter"):  # Enter
                 break
-            elif received_key == ord("t"):
+            elif self.key_mapper.consume("t"):
                 window = AdditionalTagWindow()
                 tags = window.get_user_tags()
                 self.context.set_additional_tags(tags)
-            elif received_key == ord("h"):
+            elif self.key_mapper.consume("h"):
                 window = LabelPopup(
                     "GUI controls reference",
                     self.instructions + [["", ""]] + self.get_mode_handler().instructions
                 )
                 window.run()
-            elif received_key == get_ord("a"):
+            elif self.key_mapper.consume("a"):
                 self.vcm.shift_frame_index(-1)
-            elif received_key == get_ord("s"):
+            elif self.key_mapper.consume("s"):
                 self.vcm.shift_frame_index(-10)
-            elif received_key == get_ord("d"):
+            elif self.key_mapper.consume("d"):
                 self.vcm.shift_frame_index(1)
-            elif received_key == get_ord("w"):
+            elif self.key_mapper.consume("w"):
                 self.vcm.shift_frame_index(10)
-            elif received_key == get_ord(" "):
+            elif self.key_mapper.consume(" "):
                 cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, 0 if self.vcm.get_paused() else 1)
 
-            if received_key == get_ord("tab"):
+            if self.key_mapper.consume("tab"):
                 self.mode_handler_i += 1
                 self.mode_handler_i %= len(self.mode_handlers)
                 self.logger.log("Changed mode")
             else:
-                self.get_mode_handler().handle_keyboard(received_key)
+                self.get_mode_handler().handle_keyboard(self.key_mapper)
 
     def build_frame(self, frame):
         img = np.zeros((
@@ -199,7 +200,7 @@ class InternalMode(object):
         self.instructions = instructions
     def handle_click(self, event, x, y, flags, param):
         raise NotImplementedError()
-    def handle_keyboard(self, received_key: int):
+    def handle_keyboard(self, key_mapper: KeyMapper):
         raise NotImplementedError()
     def get_state_message(self):
         raise NotImplementedError()
@@ -219,9 +220,9 @@ class InternaSelectionMode(InternalMode):
                     modified_id,
                     "part of collision" if self.par.bbm.get_is_selected(modified_id) else "not part of collision"
                 ))
-    def handle_keyboard(self, received_key: int):
+    def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
-        if received_key == get_ord("n"):
+        if key_mapper.consume("n"):
             par.context.mark_is_dashcam(not par.context.is_dashcam)
             par.logger.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
     def get_state_message(self):
@@ -266,10 +267,10 @@ class InternalBBoxMode(InternalMode):
                         self.im[0].i,
                         self.im[1].i))
 
-    def handle_keyboard(self, received_key: int):
+    def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
         bbm = self.par.bbm
-        if received_key == get_ord("i"):  # Select id
+        if key_mapper.consume("i"):  # Select id
             id, cls = PopUpWindow().run()
             if id is None or id == "":
                 self.log("Select ID operation canceled. Still on {0}".format(self.selected_id))
@@ -287,20 +288,20 @@ class InternalBBoxMode(InternalMode):
                 except:
                     self.log("Input ID not valid. Still on {0}".format(self.selected_id))
             self.reset_task()
-        elif received_key == get_ord("r"):
+        elif key_mapper.consume("r"):
             self.reset_task()
             self.log("Selected bounding boxes reset".format(self.selected_id))
-        elif received_key == get_ord("b"):
+        elif key_mapper.consume("b"):
             if self.im.has_n(2):
                 if not bbm.has_id(self.selected_id):
                     bbm.add_or_update_id(self.selected_id, self.selected_cls)
                     self.log("New id {0} for class {1} added".format(self.selected_id, self.selected_cls))
-                bbm.replace_in_range(self.selected_id, *self.im.get_all_sorted())
+                bbm.replace_in_range(self.selected_id, *self.im.get_2_sorted())
                 self.log("Bounding box for ID {0} set over index range [{1}, {2}]".format(
                     self.selected_id, self.im[0].i, self.im[1].i))
             else:
                 self.log("Not enough inputs. Command ignored. Please draw 2 bounding boxes")
-        elif received_key == get_ord("c"):
+        elif key_mapper.consume("c"):
             if not self.im.has_n(2):
                 self.log("Not enough inputs. Command ignored. Please click on 2 frames")
             elif bbm.has_id(self.selected_id):
@@ -315,10 +316,10 @@ class InternalBBoxMode(InternalMode):
                 if len(unused_ids) > 0:
                     self.log("WARN: Exists ids without bounding box: {0}".format(list(unused_ids)))
                     self.log("Press p to remove")
-        elif received_key == get_ord("p"):
+        elif key_mapper.consume("p"):
             deleted_ids = bbm.remove_unused_ids()
             self.log("Remove {0} ids without bounding boxes: {1}".format(len(deleted_ids), list(deleted_ids)))
-        elif received_key == get_ord("u"):
+        elif key_mapper.consume("u"):
             if not bbm.has_id(self.selected_id):
                 self.log("ID {0} does not exist".format(self.selected_id))
             else:
