@@ -1,5 +1,5 @@
 from tkinter import Tk, Frame, Label, BOTH, LEFT
-class LabelPopup:
+class HelpPopup:
     def __init__(self, title: str, list_of_instructions: list):
         self.tags = []
         self.entries = []
