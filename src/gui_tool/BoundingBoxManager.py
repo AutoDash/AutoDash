@@ -17,10 +17,11 @@ class BoundingBoxManager(object):
         "fontScale": 0.5,
         "color": (255, 255, 255)
     }
-    def __init__(self):
+    def __init__(self, total_frames):
         self.bboxes = {}
         self.id_to_cls = {}
         self.selected = set()
+        self.total_frames = total_frames
 
     def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s, selected):
         self.bboxes = {}
@@ -143,6 +144,24 @@ class BoundingBoxManager(object):
             if i in self.id_to_cls:
                 del self.id_to_cls[i]
         return unused_ids
-
+    def get_last_bounding_box_i(self, id, starting_i):
+        if id not in self.bboxes:
+            return None
+        for i in range(starting_i, 0-1, -1):
+            if i in self.bboxes[id]:
+                return i
+        return None
+    def get_next_bounding_box_i(self, id, starting_i):
+        if id not in self.bboxes:
+            return None
+        for i in range(starting_i, self.total_frames):
+            if i in self.bboxes[id]:
+                return i
+        return None
+    def get_ir(self, id, i):
+        if id not in self.bboxes or i not in self.bboxes[id]:
+            return None
+        p = self.bboxes[id][i]
+        return IndexedRect(i, p[0][0], p[0][1], p[1][0], p[1][1])
 
 
