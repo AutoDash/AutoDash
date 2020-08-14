@@ -56,4 +56,9 @@ class BoundingBoxInputManager(object):
         return self.curr_inputs[-1]
 
     def remove_last(self):
-        self.curr_inputs = self.curr_inputs[-1:]
+        if self.has_n(1):
+            last = self.curr_inputs[-1]
+        else:
+            last = None
+        self.curr_inputs = self.curr_inputs[:-1]
+        return last
