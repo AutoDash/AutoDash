@@ -37,7 +37,6 @@ class KeyMapper(object):
         if inp == 255:
             return # No input
         self.curr.append(inp)
-        print(self.curr)
 
     def reset(self):
         self.curr = []
@@ -54,4 +53,3 @@ class KeyMapper(object):
             return True
         else:
             return False
-

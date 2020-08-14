@@ -1,12 +1,10 @@
-from src.gui_tool.utils import get_ord, RotatingLog, KeyMapper
+from src.gui_tool.utils import RotatingLog, KeyMapper
 import numpy as np
-import cv2
 from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
-from .additional_tags import AdditionalTagWindow
-from .id_input_popup import PopUpWindow
-from .label_popup import LabelPopup
-from enum import Enum, auto
+from gui_tool.tinker_subuis.additional_tags import AdditionalTagWindow
+from gui_tool.tinker_subuis.text_popup import PopUpWindow
+from gui_tool.tinker_subuis.help_popup import HelpPopup
 import cv2
 from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
@@ -21,20 +19,31 @@ GENERAL_INSTRUCTIONS = [
     ["Space", "Pause/unpause"],
     ["Enter", "Finish and continue"],
     ["Esc", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
-    ["t", "Opens window for user customizable tags"],
 ]
 BBOX_MODE_INSTRUCTIONS = [
     ["click & drag", "Create bounding box range for commands"],
-    ["i",
-        "Select a new integer ID to work on, as well as its class",
-        "If ID already exists, will select original",
-        "If ID already exists, the class for the original will not be replaced until u is pressed"],
     ["r", "Reset current task"],
-    ["c", "Clear existing bounding boxes over frames", "Press after clicking on 2 frames"],
-    # ["v", "Re-interpolate over frames [NOT implemented]"],
-    ["b", "Define bounding boxes over range", "Press after selecting 2 bounding boxes"],
-    ["u", "Update class of current id based on popup input"],
+    # ["q", "Select the previous existing bounding box for this object id as input"],
+    # ["e", "Select the next existing bounding box for this object id as input"],
+    # ["z", "Undo click and drag action (Remove drawn box from input)"],
+    # ["x", "Change frame index of the last bounding box input to the current frame"],
     ["p", "Remove all unused bounding box ids (ids without any bounding boxes)"],
+    # ["gf", "Re-interpolate over all frames.",
+    #       "Will not reinterpolate to the beginning or end of video"],
+    # ["gg", "Re-interpolate here through current empty frame",
+    #       "will not reinterpolate to the beginning or end of video"],
+
+    ["b", "Category: 2-input bounding box commands"],
+    ["bb", "Define bounding boxes over range", "Press after selecting 2 bounding boxes"],
+    ["bc", "Clear existing bounding boxes over frames", "Press after clicking on 2 frames"],
+
+    ["v", "Category: Single input bounding box commands"],
+    ["vv", "Define a single bounding box"],
+    ["vc", "Clear a single bounding box on this frame only" "Does not require inputs"],
+
+    ["t", "Category: Object selection commands"],
+    ["ti", "Select a new integer ID to work on", "If ID already exists, will select original"],
+    ["ty", "Select a class for the current object id", "This will overwrite the original"],
 ]
 SELECTION_MODE_INSTRUCTIONS = [
     ["mouse click", "Select bounding box"],
@@ -42,6 +51,7 @@ SELECTION_MODE_INSTRUCTIONS = [
         "Toggle whether it is a dashcam video",
         "NOTE: by default, all videos will be dashcam",
         "Pressing n the first time will mark the video as not dashcam"],
+    ["t", "Opens window for user customizable tags"],
 ]
 
 class VideoPlayerGUIManager(object):
@@ -130,12 +140,8 @@ class VideoPlayerGUIManager(object):
                 raise ManualTaggingAbortedException("Tagging operation aborted")
             elif self.key_mapper.consume("enter"):  # Enter
                 break
-            elif self.key_mapper.consume("t"):
-                window = AdditionalTagWindow()
-                tags = window.get_user_tags()
-                self.context.set_additional_tags(tags)
             elif self.key_mapper.consume("h"):
-                window = LabelPopup(
+                window = HelpPopup(
                     "GUI controls reference",
                     self.instructions + [["", ""]] + self.get_mode_handler().instructions
                 )
@@ -225,6 +231,10 @@ class InternaSelectionMode(InternalMode):
         if key_mapper.consume("n"):
             par.context.mark_is_dashcam(not par.context.is_dashcam)
             par.logger.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
+        elif key_mapper.consume("t"):
+            window = AdditionalTagWindow()
+            tags = window.get_user_tags()
+            par.context.set_additional_tags(tags)
     def get_state_message(self):
         return [
             "Selection Mode",
@@ -239,6 +249,7 @@ class InternalBBoxMode(InternalMode):
         "lineType": 2,
         "thickness": 2
     }
+    DEFAULT_CLASS = "NONE"
 
     def __init__(self, parent: VideoPlayerGUIManager):
         super().__init__(parent, BBOX_MODE_INSTRUCTIONS)
@@ -246,7 +257,6 @@ class InternalBBoxMode(InternalMode):
         self.im = BoundingBoxInputManager()
         self.irb = IndexedRectBuilder()
         self.selected_id = 1
-        self.selected_cls = ""
 
     def handle_click(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -269,9 +279,9 @@ class InternalBBoxMode(InternalMode):
 
     def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
-        bbm = self.par.bbm
-        if key_mapper.consume("i"):  # Select id
-            id, cls = PopUpWindow().run()
+        bbm = par.bbm
+        if key_mapper.consume(("t", "t")):  # Select id
+            id = PopUpWindow("Enter ID. If ID exists, will work on original").run()
             if id is None or id == "":
                 self.log("Select ID operation canceled. Still on {0}".format(self.selected_id))
             else:
@@ -279,32 +289,35 @@ class InternalBBoxMode(InternalMode):
                     id = int(id)
                     self.log("Switched id from {0} to {1}".format(self.selected_id, id))
                     self.selected_id = id
-                    self.selected_cls = cls
-
-                    if bbm.has_id(id) and bbm.get_cls(id) != self.selected_cls:
-                        self.log("WARN: class input for existing id {0} ({1}) differ from current ({2})".format(
-                            id, self.selected_cls, bbm.get_cls(id)))
-                        self.log("Press u to replace")
+                    self.reset_task()
                 except:
                     self.log("Input ID not valid. Still on {0}".format(self.selected_id))
-            self.reset_task()
+        elif key_mapper.consume(("t", "y")):  # Overwrite class
+            if not bbm.has_id(self.selected_id):
+                self.log("ID {0} does not exist".format(self.selected_id))
+            else:
+                cls = PopUpWindow("Enter new class for the selected object").run()
+                prev = bbm.get_cls(self.selected_id)
+                bbm.add_or_update_id(self.selected_id, cls)
+                self.log("Class for ID {0} updated from {1} to {2}".format(
+                    self.selected_id, prev, cls))
         elif key_mapper.consume("r"):
             self.reset_task()
             self.log("Selected bounding boxes reset".format(self.selected_id))
-        elif key_mapper.consume("b"):
+        elif key_mapper.consume(("b", "b")):
             if self.im.has_n(2):
                 if not bbm.has_id(self.selected_id):
-                    bbm.add_or_update_id(self.selected_id, self.selected_cls)
-                    self.log("New id {0} for class {1} added".format(self.selected_id, self.selected_cls))
+                    bbm.add_or_update_id(self.selected_id, self.DEFAULT_CLASS)
+                    self.log("New id {0} for class {1} added".format(self.selected_id, self.DEFAULT_CLASS))
                 bbm.replace_in_range(self.selected_id, *self.im.get_2_sorted())
                 self.log("Bounding box for ID {0} set over index range [{1}, {2}]".format(
                     self.selected_id, self.im[0].i, self.im[1].i))
             else:
                 self.log("Not enough inputs. Command ignored. Please draw 2 bounding boxes")
-        elif key_mapper.consume("c"):
+        elif key_mapper.consume(("b", "c")):
             if not self.im.has_n(2):
                 self.log("Not enough inputs. Command ignored. Please click on 2 frames")
-            elif bbm.has_id(self.selected_id):
+            elif not bbm.has_id(self.selected_id):
                 self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
             else:
                 i1 = self.im[0].i
@@ -316,17 +329,31 @@ class InternalBBoxMode(InternalMode):
                 if len(unused_ids) > 0:
                     self.log("WARN: Exists ids without bounding box: {0}".format(list(unused_ids)))
                     self.log("Press p to remove")
+        elif key_mapper.consume(("v", "v")):
+            if self.im.has_n(1):
+                if not bbm.has_id(self.selected_id):
+                    bbm.add_or_update_id(self.selected_id, self.DEFAULT_CLASS)
+                    self.log("New id {0} for class {1} added".format(self.selected_id, self.DEFAULT_CLASS))
+                bbm.replace_in_range(self.selected_id, self.im.get_last(), self.im.get_last())
+                self.log("Bounding box for ID {0} set on single frame {1}".format(
+                    self.selected_id, self.im.get_last().i))
+            else:
+                self.log("Not enough inputs. Command ignored. Please draw 1 bounding box")
+        elif key_mapper.consume(("v", "c")):
+            if not bbm.has_id(self.selected_id):
+                self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
+            else:
+                i = self.par.vcm.get_frame_index()
+                bbm.clear_in_range(self.selected_id, i, i)
+                self.log("Bbox for ID {0} cleared for a single frame".format(self.selected_id, i))
+
+                unused_ids = bbm.get_unused_ids()
+                if len(unused_ids) > 0:
+                    self.log("WARN: Exists ids without bounding box: {0}".format(list(unused_ids)))
+                    self.log("Press p to remove")
         elif key_mapper.consume("p"):
             deleted_ids = bbm.remove_unused_ids()
             self.log("Remove {0} ids without bounding boxes: {1}".format(len(deleted_ids), list(deleted_ids)))
-        elif key_mapper.consume("u"):
-            if not bbm.has_id(self.selected_id):
-                self.log("ID {0} does not exist".format(self.selected_id))
-            else:
-                prev = bbm.get_cls(self.selected_id)
-                bbm.add_or_update_id(self.selected_id, self.selected_cls)
-                self.log("Class for ID {0} updated from {1} to {2}".format(
-                    self.selected_id, prev, self.selected_cls))
 
     def reset_task(self):
         self.im.reset()
@@ -340,20 +367,18 @@ class InternalBBoxMode(InternalMode):
     def get_state_message(self):
         bbm = self.par.bbm
         selected_msg = ""
-        if self.im.has_n(0):
-            selected_msg = "No Input"
-        elif self.im.has_n(1):
-            selected_msg = "Input: From {0}".format(self.im[0].i)
-        elif self.im.has_n(2):
+        if self.im.has_n(2):
             selected_msg = "Input: {0} to {1}".format(self.im[0].i, self.im[1].i)
-        else:
-            raise Exception("Invalid state")
+        elif self.im.has_n(1):
+            selected_msg = "Input: {0}".format(self.im[0].i)
+        elif self.im.has_n(0):
+            selected_msg = "No Input"
         messages = [
             "BBox Mode:",
             "Target: {0} id {1} [{2}]".format(
                 "existing" if bbm.has_id(self.selected_id) else "new",
                 self.selected_id,
-                bbm.get_cls(self.selected_id) if bbm.has_id(self.selected_id) else self.selected_cls
+                bbm.get_cls(self.selected_id) if bbm.has_id(self.selected_id) else self.DEFAULT_CLASS
             ),
             selected_msg
         ]

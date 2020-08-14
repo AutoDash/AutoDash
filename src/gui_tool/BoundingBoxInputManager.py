@@ -50,5 +50,10 @@ class BoundingBoxInputManager(object):
     def get_2_sorted(self):
         return sorted(self.curr_inputs[-2:], key=lambda r: r.i)
 
+    def get_last(self):
+        if len(self.curr_inputs) == 0:
+            return None
+        return self.curr_inputs[-1]
+
     def remove_last(self):
         self.curr_inputs = self.curr_inputs[-1:]
