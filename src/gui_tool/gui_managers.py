@@ -70,7 +70,6 @@ class VideoPlayerGUIManager(object):
         self.ignore_index_change_interval = self.vcm.get_frames_count() // 200
 
         self.bbm = BoundingBoxManager(self.vcm.get_frames_count())
-        bb_fields = context.get_bbox_fields()
         self.bbm.set_to(*context.get_bbox_fields_as_list())
 
         self.mode_handlers = [
@@ -210,6 +209,14 @@ class InternalMode(object):
         return frame
     def log(self, msg):
         self.par.logger.log(msg)
+    def hint(self, msg):
+        self.log("[HINT] {0}".format(msg))
+    def error(self, msg):
+        self.log("[ERROR] {0}".format(msg))
+    def warn(self, msg):
+        self.log("[WARN] {0}".format(msg))
+    def cancel(self, op, msg):
+        self.log("[CANCELLED: {0}] {1}".format(op, msg))
 
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
@@ -226,11 +233,12 @@ class InternaSelectionMode(InternalMode):
         par = self.par
         if key_mapper.consume("n"):
             par.context.mark_is_dashcam(not par.context.is_dashcam)
-            par.logger.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
+            self.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
         elif key_mapper.consume("t"):
             window = AdditionalTagWindow()
             tags = window.get_user_tags()
             par.context.set_additional_tags(tags)
+            self.log("Additional tags set")
     def get_state_message(self):
         return [
             "Selection Mode",
@@ -268,7 +276,7 @@ class InternalBBoxMode(InternalMode):
                     ir.get_points(), ir.i))
 
                 if self.im.has_n(2):
-                    self.log("Use keyboard controls to manipulate BBox {0} from frames {1} to {2}".format(
+                    self.hint("Use keyboard controls to manipulate BBox {0} from frames {1} to {2}".format(
                         self.selected_id,
                         self.im[0].i,
                         self.im[1].i))
@@ -279,7 +287,7 @@ class InternalBBoxMode(InternalMode):
         if key_mapper.consume("i"):  # Select id
             id = PopUpWindow("Enter ID. If ID exists, will work on original").run()
             if id is None or id == "":
-                self.log("Select ID operation canceled. Still on {0}".format(self.selected_id))
+                self.cancel("Select ID", "Still on {0}".format(self.selected_id))
             else:
                 try:
                     id = int(id)
@@ -287,15 +295,15 @@ class InternalBBoxMode(InternalMode):
                     self.selected_id = id
                     self.reset_task()
                 except:
-                    self.log("Input ID not valid. Still on {0}".format(self.selected_id))
+                    self.error("Input ID not valid. Still on {0}".format(self.selected_id))
         elif key_mapper.consume("u"):  # Overwrite class
             if not bbm.has_id(self.selected_id):
-                self.log("ERROR: Could not update class. ID {0} does not exist".format(self.selected_id))
+                self.error("Could not update class. ID {0} does not exist".format(self.selected_id))
             else:
                 cls = PopUpWindow("Enter new class for the selected object").run()
                 prev = bbm.get_cls(self.selected_id)
                 if cls == None:
-                    self.log("Change class operation cancelled for {0}. Still on class {1}".format(self.selected_id, prev))
+                    self.cancel("Class change", "{0} still on class {1}".format(self.selected_id, prev))
                 else:
                     bbm.add_or_update_id(self.selected_id, cls)
                     self.log("Class for ID {0} updated from {1} to {2}".format(
@@ -305,17 +313,17 @@ class InternalBBoxMode(InternalMode):
             self.log("Selected bounding boxes reset".format(self.selected_id))
         elif key_mapper.consume("p"):
             deleted_ids = bbm.remove_unused_ids()
-            self.log("Remove {0} ids without bounding boxes: {1}".format(len(deleted_ids), list(deleted_ids)))
+            self.log("Removed {0} ids without bounding boxes: {1}".format(len(deleted_ids), list(deleted_ids)))
         elif key_mapper.consume("z"):
             removed = self.im.remove_last()
             if removed is None:
-                self.log("No input to remove")
+                self.error("No input to remove")
             else:
                 self.log("Removed last bounding box input on frame {0}".format(removed.i))
         elif key_mapper.consume("x"):
             removed = self.im.remove_last()
             if removed is None:
-                self.log("No input to remove")
+                self.error("No input to change")
             else:
                 prev_i = removed.i
                 removed.i = self.par.vcm.get_frame_index()
@@ -325,14 +333,14 @@ class InternalBBoxMode(InternalMode):
             index = self.par.vcm.get_frame_index()
             retrived = bbm.get_last_bounding_box_i(self.selected_id, index)
             if retrived is None:
-                self.log("Retrieving previous frame with bounding box failed")
+                self.error("Retrieving previous frame with bounding box failed")
             else:
                 self.im.add(bbm.get_ir(self.selected_id, retrived))
         elif key_mapper.consume("e"):
             index = self.par.vcm.get_frame_index()
             retrived = bbm.get_next_bounding_box_i(self.selected_id, index)
             if retrived is None:
-                self.log("Retrieving next frame with bounding box failed")
+                self.error("Retrieving next frame with bounding box failed")
             else:
                 self.im.add(bbm.get_ir(self.selected_id, retrived))
         elif key_mapper.consume("b"):
@@ -351,12 +359,12 @@ class InternalBBoxMode(InternalMode):
                 self.log("Single bounding box for ID {0} set at {1}".format(
                     self.selected_id, self.im.get_last().i))
             else:
-                self.log("Not enough inputs. Command ignored. Please draw 2 bounding boxes")
+                self.error("Not enough inputs. Command ignored. Please draw at least 1 bounding box")
         elif key_mapper.consume("c"):
             if not self.im.has_n(2):
-                self.log("Not enough inputs. Command ignored. Please click on 2 frames")
+                self.error("Not enough inputs. Command ignored. Please click on 2 frames")
             elif not bbm.has_id(self.selected_id):
-                self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
+                self.error("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
             else:
                 i1 = self.im[0].i
                 i2 = self.im[1].i
@@ -365,11 +373,11 @@ class InternalBBoxMode(InternalMode):
 
                 unused_ids = bbm.get_unused_ids()
                 if len(unused_ids) > 0:
-                    self.log("WARN: Exists ids without bounding box: {0}".format(list(unused_ids)))
-                    self.log("Press p to remove")
+                    self.warn("Exists ids without bounding box: {0}".format(list(unused_ids)))
+                    self.hint("Press p to remove")
         elif key_mapper.consume("v"):
             if not bbm.has_id(self.selected_id):
-                self.log("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
+                self.error("Cannot clear bboxes - ID {0} does not exist".format(self.selected_id))
             else:
                 i = self.par.vcm.get_frame_index()
                 bbm.clear_in_range(self.selected_id, i, i)
@@ -377,8 +385,8 @@ class InternalBBoxMode(InternalMode):
 
                 unused_ids = bbm.get_unused_ids()
                 if len(unused_ids) > 0:
-                    self.log("WARN: Exists ids without bounding box: {0}".format(list(unused_ids)))
-                    self.log("Press p to remove")
+                    self.warn("Exists ids without bounding box: {0}".format(list(unused_ids)))
+                    self.hint("Press p to remove")
 
     def reset_task(self):
         self.im.reset()
