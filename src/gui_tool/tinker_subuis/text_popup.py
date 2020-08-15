@@ -17,8 +17,12 @@ class PopUpWindow:
         self.confirm_button.grid(row=3, column=1)
         self.frame.pack()
 
-        self.inp = None
+        self.field.focus_set()
+        self.field.bind('<Return>', lambda event: self.confirm_button.invoke())
 
+        self.inp = None
+        self.root.after(1, lambda: self.root.focus_force())
+        self.root.bind('<Escape>', lambda event: self.root.destroy())
 
     def submit(self):
         self.inp = self.field.get()

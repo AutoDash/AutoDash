@@ -294,9 +294,12 @@ class InternalBBoxMode(InternalMode):
             else:
                 cls = PopUpWindow("Enter new class for the selected object").run()
                 prev = bbm.get_cls(self.selected_id)
-                bbm.add_or_update_id(self.selected_id, cls)
-                self.log("Class for ID {0} updated from {1} to {2}".format(
-                    self.selected_id, prev, cls))
+                if cls == None:
+                    self.log("Change class operation cancelled for {0}. Still on class {1}".format(self.selected_id, prev))
+                else:
+                    bbm.add_or_update_id(self.selected_id, cls)
+                    self.log("Class for ID {0} updated from {1} to {2}".format(
+                        self.selected_id, prev, cls))
         elif key_mapper.consume("r"):
             self.reset_task()
             self.log("Selected bounding boxes reset".format(self.selected_id))
