@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+
+from VideoStorageService import VideoStorageService
 from ..data.VideoItem import VideoItem
 from ..executor.iExecutor import iExecutor
 from ..data.MetaDataItem import MetaDataItem
@@ -9,9 +11,9 @@ class DownloadException(RuntimeError):
     '''Raise on download failure'''
 
 class iDownloader(iExecutor):
-    def __init__(self, parents=[], pathname:str = os.getcwd(), **kwargs):
+    def __init__(self, parents=[], **kwargs):
         super().__init__(parents, **kwargs)
-        self.pathname = pathname
+        self.video_storage = None
 
     @abstractmethod
     async def download(self, md_item: MetaDataItem) -> VideoItem:
@@ -20,6 +22,6 @@ class iDownloader(iExecutor):
     def run(self, md_item: MetaDataItem):
         return asyncio.run(self.download(md_item))
 
-    def set_pathname(self, pathname):
-        self.pathname = pathname
+    def set_video_storage(self, video_storage: VideoStorageService):
+        self.video_storage = video_storage
         return self

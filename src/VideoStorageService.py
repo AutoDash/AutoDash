@@ -4,18 +4,36 @@ from src.data.VideoItem import VideoItem
 import os, pickle
 
 
-class StorageService():
+class VideoStorageService:
     def __init__(self):
         self.storage_dir = os.path.join(os.getcwd(), "storage")
         if not os.path.exists(self.storage_dir):
             os.mkdir(self.storage_dir)
 
+    def update_storage_dir(self, new_storage_dir):
+        old_dir = self.storage_dir
+        if not os.path.exists(new_storage_dir):
+            os.mkdir(self.storage_dir)
+
+        self.storage_dir = new_storage_dir
+
+        for file in os.listdir(old_dir):
+            self.move_video(old_dir, file)
+
+
+    def get_storage_dir(self):
+        return self.storage_dir
+
     def __repr__(self):
-        return f"StorageService({self.storage_dir})"
+        return f"VideoStorageService({self.storage_dir})"
 
     def store_video(self, item: VideoItem) -> None:
         with open(self.get_file(item), 'wb') as output:
             pickle.dump(item, output, pickle.HIGHEST_PROTOCOL)
+
+    def move_video(self, cur_loc, new_name):
+        new_path = os.path.join(self.storage_dir, new_name)
+        os.system(f"mv {cur_loc}* {new_path}")
 
     def video_exists(self, item: MetaDataItem) -> bool:
         return os.path.exists(self.get_file(item))
@@ -40,5 +58,9 @@ class StorageService():
         for video in self.list_videos():
             self.delete_video(video)
 
+    @staticmethod
+    def get_file_name(item):
+        return item.encode()
+
     def get_file(self, item) -> str:
-        return os.path.join(self.storage_dir, item.encode())
+        return os.path.join(self.storage_dir, self.get_file_name(item))
