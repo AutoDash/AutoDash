@@ -5,8 +5,12 @@ import os, pickle
 
 
 class VideoStorageService:
-    def __init__(self):
-        self.storage_dir = os.path.join(os.getcwd(), "storage")
+    def __init__(self, storage_dir=None):
+        if storage_dir is None:
+            self.storage_dir = os.path.join(os.getcwd(), "storage")
+        else:
+            self.storage_dir = storage_dir
+
         if not os.path.exists(self.storage_dir):
             os.mkdir(self.storage_dir)
 
