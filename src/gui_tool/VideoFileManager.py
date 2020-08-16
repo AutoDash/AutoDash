@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os.path
-from gui_tool.GUIExceptions import VideoNotFoundException, VideoCouldNotBeOpenedException
+from .GUIExceptions import VideoNotFoundException, VideoCouldNotBeOpenedException
 
 """
 A utility class for retrieving frames from local file

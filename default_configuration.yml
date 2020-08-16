@@ -6,5 +6,5 @@ processingStages:
       msg: "firebase src complete"
   - executor: UniversalDownloader
   - executor: Printer
-  - executor: FaceBlurrer
+  - executor: ObjectDetector
   - executor: Labeler
