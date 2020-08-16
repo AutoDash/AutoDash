@@ -31,7 +31,7 @@ class YoutubeDownloader(iDownloader):
         base_filename, ext = os.path.splitext(self.file_name)
         os.system(f"mv {base_filename}* {self.pathname}")
 
-        return VideoItem(os.path.join(self.pathname, self.file_name))
+        return VideoItem(metadata=md_item, filepath=os.path.join(self.pathname, self.file_name))
 
     def on_download_callback(self, download):
         print("In callback: ", download)

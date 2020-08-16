@@ -32,12 +32,9 @@ elif [ "$(expr substr "$(uname -s)" 1 5)" == "Linux" ]; then
       # Ubuntu distro version is trusty
       sudo add-apt-repository -y ppa:mc3man/trusty-media
     fi
-    # Packages needed for anonymization modules:
-    sudo apt-get update
-    sudo apt-get install -y ffmpeg
-    sudo apt-get install -y libmediainfo-dev
-    # Packages needed for GUI tool:
-    sudo apt install python3-tk
+    # Packages needed
+    sudo apt update
+    sudo apt install -y ffmpeg libmediainfo-dev python3-tk curl tar
 elif [ "$(expr substr "$(uname -s)" 1 10)" == "MINGW32_NT" ]; then
     # Do something under 32 bits Windows NT platform
     echo "Windows unsupported"
@@ -45,3 +42,12 @@ elif [ "$(expr substr "$(uname -s)" 1 10)" == "MINGW64_NT" ]; then
     # Do something under 64 bits Windows NT platform
     echo "Windows unsupported"
 fi
+
+# Download model
+if [[ -z "${CI}" ]] ; then
+  mkdir "${BASEDIR}/../model"
+  cd "${BASEDIR}/../model"
+  curl -O http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_kitti_2018_01_28.tar.gz
+  tar -xvf faster_rcnn_resnet101_kitti_2018_01_28.tar.gz
+  rm faster_rcnn_resnet101_kitti_2018_01_28.tar.gz
+fi 

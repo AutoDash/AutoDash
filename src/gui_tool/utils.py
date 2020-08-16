@@ -27,3 +27,29 @@ class RotatingLog(object):
     def get_logs(self):
         ret = self.logs[self.index:] + self.logs[:self.index]
         return ret
+
+class KeyMapper(object):
+    def __init__(self):
+        self.reverse_ord = {}
+        self.curr = []
+
+    def append(self, inp: int):
+        if inp == 255:
+            return # No input
+        self.curr.append(inp)
+
+    def reset(self):
+        self.curr = []
+
+    def consume(self, keys):
+        if isinstance(keys, str):
+            keys = (get_ord(keys),)
+        else:
+            keys = tuple([get_ord(key) for key in keys])
+        l = len(keys)
+
+        if tuple(self.curr[-l:]) == keys:
+            self.reset()
+            return True
+        else:
+            return False

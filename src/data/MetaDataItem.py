@@ -6,16 +6,17 @@ import os
 
 class MetaDataItem:
     def __init__(self, **kwargs):
-        self.id = kwargs.get("id")
         self.title = kwargs["title"]
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
-        self.collision_type = kwargs.get("collision_type")
-        self.description = kwargs.get("description")
-        self.location = kwargs.get("location")
-        self.accident_indexes = kwargs.get("accident_indexes")
+        self.id = kwargs.get("id", None)
+        self.collision_type = kwargs.get("collision_type", None)
+        self.description = kwargs.get("description", None)
+        self.location = kwargs.get("location", None)
         self.tags = kwargs.get("tags", {})
         self.is_cancelled = kwargs.get("is_cancelled", False)
+
+        self.bb_fields = kwargs.get("bb_fields", None)
 
     def __repr__(self) -> str:
         return self.to_json_str()
@@ -30,9 +31,9 @@ class MetaDataItem:
             'collision_type' : str,
             'description' : str,
             'location' : str,
-            'accident_indexes': list,
             'tags': dict,
             'is_cancelled': bool,
+            'bb_fields': dict,
         }
 
     def encode(self) -> str:
@@ -46,9 +47,9 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
-            'accident_indexes': self.accident_indexes,
             'is_cancelled': self.is_cancelled,
-            'tags': self.tags
+            'tags': self.tags,
+            'bb_fields': self.bb_fields,
         }
 
     def to_json_str(self) -> str:

@@ -1,5 +1,5 @@
 import cv2
-from collections import OrderedDict
+from .IndexedRect import IndexedRect
 
 class BoundingBoxManager(object):
     BOX_DISPLAY = {
@@ -17,19 +17,23 @@ class BoundingBoxManager(object):
         "fontScale": 0.5,
         "color": (255, 255, 255)
     }
-    def __init__(self):
+    def __init__(self, total_frames):
         self.bboxes = {}
         self.id_to_cls = {}
         self.selected = set()
+        self.total_frames = total_frames
 
-    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s):
+    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s, selected):
         self.bboxes = {}
         self.id_to_cls = {}
-        for frame, id, cls, x1, y1, x2, y2 in zip(frames, ids, clss, x1s, y1s, x2s, y2s):
+        for frame, id, cls, x1, y1, x2, y2, selected in zip(frames, ids, clss, x1s, y1s, x2s, y2s, selected):
             self.add_or_update_id(id, cls)
 
             frame = int(frame) - 1
             self.bboxes[id][frame] = [(x1, y1), (x2, y2)]
+
+            if selected:
+                self.selected.add(id)
 
 
     def extract(self):
@@ -80,27 +84,28 @@ class BoundingBoxManager(object):
                         self.selected.remove(id)
                     else:
                         self.selected.add(id)
+                    return id
+        return None
 
-    def replace_in_range(self, id, i1, pts1, i2, pts2):
-        if i2 < i1:
-            i1, pts1, i2, pts2 = i2, pts2, i1, pts1
-        r = i2-i1
+    def replace_in_range(self, id, ir1: IndexedRect, ir2: IndexedRect):
+        r = ir2.i - ir1.i
         if r == 0:
             r = 1
 
         # Unravel
-        pts1 = [pts1[0][0], pts1[0][1], pts1[1][0], pts1[1][1]]
-        pts2 = [pts2[0][0], pts2[0][1], pts2[1][0], pts2[1][1]]
+        pts1 = ir1.get_flat_points()
+        pts2 = ir2.get_flat_points()
 
         slopes = [(pts2[i] - pts1[i]) / r for i in range(4)]
 
-        for o in range(i2-i1+1):
-            frame = i1+o
+        for o in range(ir2.i-ir1.i+1):
+            frame = ir1.i+o
             new_pt = [pts1[i] + int(slopes[i]*o) for i in range(4)]
-            print(new_pt)
             self.bboxes[id][frame] = (new_pt[0], new_pt[1]), (new_pt[2], new_pt[3])
 
     def clear_in_range(self, id, i1, i2):
+        if i2 < i1:
+            i1, i2 = i2, i1
         for i in range(i1, i2+1):
             if i in self.bboxes[id]:
                 del self.bboxes[id][i]
@@ -109,7 +114,8 @@ class BoundingBoxManager(object):
         self.id_to_cls[id] = cls
         if id not in self.bboxes:
             self.bboxes[id] = {}
-
+    def get_is_selected(self, id):
+        return id in self.selected
     def get_n_selected(self):
         return len(self.selected)
     def get_n_ids(self):
@@ -120,3 +126,42 @@ class BoundingBoxManager(object):
         if id in self.id_to_cls:
             return self.id_to_cls[id]
         return None
+    def get_unused_ids(self):
+        unused_ids = set()
+        for id, d in self.bboxes.items():
+            if len(d) == 0:
+                unused_ids.add(id)
+        for id in self.id_to_cls.keys():
+            if id not in self.bboxes:
+                unused_ids.add(id)
+        return unused_ids
+
+    def remove_unused_ids(self):
+        unused_ids = self.get_unused_ids()
+        for i in unused_ids:
+            if i in self.bboxes:
+                del self.bboxes[i]
+            if i in self.id_to_cls:
+                del self.id_to_cls[i]
+        return unused_ids
+    def get_last_bounding_box_i(self, id, starting_i):
+        if id not in self.bboxes:
+            return None
+        for i in range(starting_i, 0-1, -1):
+            if i in self.bboxes[id]:
+                return i
+        return None
+    def get_next_bounding_box_i(self, id, starting_i):
+        if id not in self.bboxes:
+            return None
+        for i in range(starting_i, self.total_frames):
+            if i in self.bboxes[id]:
+                return i
+        return None
+    def get_ir(self, id, i):
+        if id not in self.bboxes or i not in self.bboxes[id]:
+            return None
+        p = self.bboxes[id][i]
+        return IndexedRect(i, p[0][0], p[0][1], p[1][0], p[1][1])
+
+
