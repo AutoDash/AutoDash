@@ -2,9 +2,9 @@ from src.gui_tool.utils import RotatingLog, KeyMapper
 import numpy as np
 from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
-from gui_tool.tinker_subuis.additional_tags import AdditionalTagWindow
-from gui_tool.tinker_subuis.text_popup import PopUpWindow
-from gui_tool.tinker_subuis.help_popup import HelpPopup
+from .tinker_subuis.additional_tags import AdditionalTagWindow
+from .tinker_subuis.text_popup import PopUpWindow
+from .tinker_subuis.help_popup import HelpPopup
 import cv2
 from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
@@ -420,4 +420,3 @@ class InternalBBoxMode(InternalMode):
             messages.append("Drawing to {0}".format(str(self.mouse_position)))
 
         return messages
-
