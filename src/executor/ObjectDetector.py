@@ -31,7 +31,6 @@ class ObjectDetector(iExecutor):
         imported = ModelManager.get_model(self.model_id)
         network = imported.signatures['serving_default']
         X = np.asarray(item.npy)
-        print(X.shape)
         n_batches = int(math.ceil(X.shape[0] / self.batch_size))
         print(f"[ObjectDetector] Number of batches: {n_batches}")
         for i in range(0, n_batches):
