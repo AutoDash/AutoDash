@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import hashlib
 import unittest, os
 
 from VideoStorageService import VideoStorageService
@@ -13,12 +14,15 @@ class TestImgurDownloader(unittest.TestCase):
         self.assertEqual(True, True)
 
     def test_download_video(self):
+        test_url = "https://imgur.com/r/carcrash/tO6SNIo"
+        expected_title = hashlib.sha224(test_url.encode()).hexdigest() + ".mp4"
+
         file_path = TestImgurDownloader.download_location
         vid_str = VideoStorageService(file_path)
         downloader = ImgurDownloader()
         downloader.set_video_storage(vid_str)
-        video_item = downloader.run(MetaDataItem(title="title",url="https://imgur.com/r/carcrash/tO6SNIo", download_src="imgur"))
-        vid_filename = os.path.join(file_path,"httpsimgur.comrcarcrashtO6SNIo.mp4")
+        video_item = downloader.run(MetaDataItem(title="title",url=test_url, download_src="imgur"))
+        vid_filename = os.path.join(file_path, expected_title)
         self.assertTrue(os.path.exists(vid_filename))
         os.remove(vid_filename)
 
