@@ -3,6 +3,7 @@ from .MetaDataItem import MetaDataItem
 
 single_quote_str_regex = re.compile(r'\'([^\\\']|\\.)*\'')
 double_quote_str_regex = re.compile(r'"([^\\"]|\\.)*"')
+dict_regex = re.compile(r'.*\[\'.*\'\]')
 
 def is_string_token(token):
     if not token:
@@ -23,6 +24,13 @@ def is_number_token(token):
     except ValueError:
         return False
     return True
+
+def is_tags_token(token):
+    if token.split('[')[0] != "tags":
+        return False
+
+    match = dict_regex.match(token)
+    return match is not None and match.group(0) == token
 
 class FilterCondition(object):
     OPERATORS = {
@@ -51,6 +59,8 @@ class FilterCondition(object):
         return f"FilterCondition({self.filter_string})"
 
     def get_validated_token(self, token):
+        if is_tags_token(token):
+            return "v['tags']" + token[4:]
         if token in self.VALID_ATTRS:
             return "v['" + token + "']"
         elif not token or token in self.OPERATORS or is_string_token(token) or is_number_token(token):
@@ -124,6 +134,9 @@ class FilterCondition(object):
         data = {}
         for attr in self.VALID_ATTRS:
             data[attr] = self.VALID_ATTRS[attr]()
+
+        # Add common tag to consideration
+        data['tags']['state'] = "Hello world"
         self.filter_func(data)
 
 
