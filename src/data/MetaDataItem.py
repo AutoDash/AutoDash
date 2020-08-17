@@ -68,6 +68,12 @@ class MetaDataItem:
         else:
             self.tags[name] = val
 
+    def get_tag(self, name: str):
+        if name in self.tags.keys():
+            return self.tags[name]
+        else:
+            return None
+
 
 # For accessing metadata items stored in local storage
 def metadata_from_file(filename: str, directory: str) -> MetaDataItem:
