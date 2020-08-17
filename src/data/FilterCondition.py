@@ -60,7 +60,7 @@ class FilterCondition(object):
 
     def get_validated_token(self, token):
         if is_tags_token(token):
-            return "v['tags']" + token[4:]
+            return "v['tags'].get(" + token.split('[')[1].split(']')[0] + ")"
         if token in self.VALID_ATTRS:
             return "v['" + token + "']"
         elif not token or token in self.OPERATORS or is_string_token(token) or is_number_token(token):
@@ -135,8 +135,6 @@ class FilterCondition(object):
         for attr in self.VALID_ATTRS:
             data[attr] = self.VALID_ATTRS[attr]()
 
-        # Add common tag to consideration
-        data['tags']['state'] = "Hello world"
         self.filter_func(data)
 
 
