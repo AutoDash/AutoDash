@@ -1,3 +1,6 @@
-- - executor: .database.FirebaseSource.FirebaseSource
-- - executor: .downloader.UniversalDownloader.UniversalDownloader
-- - executor: .executor.FaceBlurrer.FaceBlurrer
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: UniversalDownloader
+  - executor: FaceBlurrer
+  - executor: LocalStorageUpdater
