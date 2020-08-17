@@ -1,56 +1,30 @@
 """
-TAGGING GUI CONTROLS
-Navigation:
-    a:     1 back
-    s:     10 back
-    d:     1 forward
-    w:     10 forward
-    Space: Pause/unpause
-    Enter: Finish and continue
-    Esc:   Abort. Will raise ManualTaggingAbortedException
-    t: opens window for user customizable tags
-    tab: Switch mode
-
-Selection Mode: [NOT IN USE ANY MORE. ONLY USE MOUSE]
-    m: Mark current location as accident location
-    n: Toggle whether it is a dashcam video
-        NOTE: by default, all videos will be dashcam
-        Pressing n the first time will mark the video as not dashcam
-    u: untag (Remove tags)
-    ,: Remove the last marked accident location
-
-BBox Mode:
-    i: Select a new integer ID to work on, as will as cls. If ID already exists, will modify original
-    r: reset current task
-    c: Clear existing bounding boxes over frames
-    v: Re-interpolate over frames [NOT implemented]
-    b: Define bounding boxes over range
-    u: Update class of current id based on popup input
-
-Note:
-    By default, video are assumed to be dashcam video
-
+Press h in GUI tool to see commands
 """
-from .gui_managers import VideoPlayerGUIManager, VideoTaggingContext
+from .gui_managers import VideoPlayerGUIManager
+from .VideoTaggingContext import VideoTaggingContext
 from ..data.MetaDataItem import MetaDataItem
+from ..signals import CancelSignal
+from .GUIExceptions import ManualTaggingAbortedException
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
-    context = VideoTaggingContext(file_loc, None)
-    gui = VideoPlayerGUIManager(context)
-    gui.start()
+    while True:
+        try:
+            context = VideoTaggingContext(file_loc, mdi.bb_fields)
+            gui = VideoPlayerGUIManager(context)
+            gui.start()
 
-    # mdi.accident_indexes = context.result.accident_frame_numbers
-    # mdi.is_dashcam = context.result.is_dashcam
-    bbox_fields = context.bbox_fields
+            mdi.bb_fields = context.get_bbox_fields()
 
-    for key, val in context.result.additional_tags:
-        mdi.add_tag(key, val)
-    return mdi
+            for key, val in context.additional_tags:
+                mdi.add_tag(key, val)
 
-def test():
-    import sys
-    tag_file(sys.argv[1], MetaDataItem(None, None, None, None))
+            if not context.is_dashcam:
+                mdi.is_cancelled = True
+                raise CancelSignal("Marked as not a dashcam video")
 
-if __name__ == "__main__":
-    test()
+            return mdi
+
+        except ManualTaggingAbortedException as e:
+            print("Aborted. Will restart")

@@ -29,7 +29,7 @@ class YoutubeDownloader(iDownloader):
         new_name = self.video_storage.get_file_name(md_item)
         self.video_storage.move_video(self.file_name, new_name + '.' + ext)
 
-        return VideoItem(os.path.join(self.pathname, self.file_name))
+        return VideoItem(metadata=md_item, filepath=os.path.join(self.pathname, self.file_name))
 
     def on_download_callback(self, download):
         print("In callback: ", download)
