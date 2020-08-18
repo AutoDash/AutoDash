@@ -16,11 +16,7 @@ class Filterer(iExecutor):
 
 
     def run(self, item: Union[VideoItem, MetaDataItem]):
-        if isinstance(item, VideoItem):
-            metadata = item.metadata
-        else:
-            # Therefore item is a MetadataItem
-            metadata = item
+        metadata = self.get_metadata(item)
 
         res = self.filter_cond.filter([metadata])
 
