@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from VideoStorageService import VideoStorageService
+from ..VideoStorageService import VideoStorageService
 from ..data.VideoItem import VideoItem
 from ..executor.iExecutor import iExecutor
 from ..data.MetaDataItem import MetaDataItem

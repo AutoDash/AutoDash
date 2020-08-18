@@ -1,3 +1,6 @@
+from typing import Union
+
+from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from ..data.VideoItem import VideoItem
 from ..data.FilterCondition import FilterCondition
@@ -12,8 +15,14 @@ class Filterer(iExecutor):
         self.filter_cond = FilterCondition(filter_str)
 
 
-    def run(self, item: VideoItem):
-        res = self.filter_cond.filter([item.metadata])
+    def run(self, item: Union[VideoItem, MetaDataItem]):
+        if isinstance(item, VideoItem):
+            metadata = item.metadata
+        else:
+            # Therefore item is a MetadataItem
+            metadata = item
+
+        res = self.filter_cond.filter([metadata])
 
         if len(res) == 0:
             raise CancelSignal
