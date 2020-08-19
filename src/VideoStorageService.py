@@ -37,7 +37,7 @@ class VideoStorageService:
 
     def move_video(self, cur_loc, new_name):
         new_path = os.path.join(self.storage_dir, new_name)
-        os.system(f"mv {cur_loc}* {new_path}")
+        os.rename(cur_loc, new_path)
 
     def video_exists(self, item: MetaDataItem) -> bool:
         return os.path.exists(self.get_file(item))
