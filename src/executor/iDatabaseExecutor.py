@@ -1,6 +1,8 @@
 from abc import abstractmethod
-from typing import Dict, Any
+from typing import Union, Any
 
+from ..data.VideoItem import VideoItem
+from ..data.MetaDataItem import MetaDataItem
 from .iExecutor import iExecutor
 
 class UndefinedDatabaseException(Exception):
@@ -17,7 +19,7 @@ class iDatabaseExecutor(iExecutor):
         return self
 
     @abstractmethod
-    def run(self, obj: Dict[str, Any]):
+    def run(self, item: Union[MetaDataItem, VideoItem]):
         pass
 
     def requires_database(self):

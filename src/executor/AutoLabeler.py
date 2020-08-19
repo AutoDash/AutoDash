@@ -1,3 +1,6 @@
+from typing import Union
+
+from ..data.MetaDataItem import MetaDataItem
 from ..data.VideoItem import VideoItem
 from .iExecutor import iExecutor
 
@@ -8,6 +11,7 @@ class AutoLabeler(iExecutor):
         self.key = key
         self.val = val
 
-    def run(self, item: VideoItem):
-        item.metadata.add_tag(self.key, self.val)
+    def run(self, item: Union[VideoItem, MetaDataItem]):
+        metadata = self.get_metadata(item)
+        metadata.add_tag(self.key, self.val)
         return item

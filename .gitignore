@@ -4,3 +4,5 @@ __pycache__/
 autodash-9dccb-add3cdae62ea.json
 *.pyc
 .env
+model/
+storage/

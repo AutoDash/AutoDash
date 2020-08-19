@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-from src.signals import CancelSignal
+from src.signals import StopSignal
 from src.executor.AutoLabeler import AutoLabeler
 from src.data.MetaDataItem import MetaDataItem
 from src.data.VideoItem import VideoItem
@@ -28,6 +28,6 @@ class TestFilterer(unittest.TestCase):
         try:
             f.run(v)
             self.assertTrue(False)
-        except CancelSignal:
+        except StopSignal:
             #expected path
             pass

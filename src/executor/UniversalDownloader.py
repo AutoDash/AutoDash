@@ -2,7 +2,7 @@
 import re
 import os
 
-from VideoStorageService import VideoStorageService
+from ..VideoStorageService import VideoStorageService
 from ..downloader.iDownloader import iDownloader
 from ..data.VideoItem import VideoItem
 from ..data.MetaDataItem import MetaDataItem

@@ -1,7 +1,6 @@
 dataSources:
   - executor: FirebaseSource
   - executor: RedditCrawler
-  - executor: YoutubeCrawler
 processingStages:
   - executor: Printer
     config:
