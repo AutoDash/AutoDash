@@ -11,7 +11,7 @@ class TestYouTubeCrawler(unittest.TestCase):
 
     def test_crawl(self):
         async def __sub():
-            crawler = YoutubeCrawler(None, ["dashcam crash", "accident footage dashcam"], check_url=False)
+            crawler = YoutubeCrawler([], ["dashcam crash", "accident footage dashcam"], check_url=False)
             await crawler.next_downloadable()
 
         asyncio.run(__sub())
