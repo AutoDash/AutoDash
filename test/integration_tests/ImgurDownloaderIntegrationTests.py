@@ -6,6 +6,7 @@ from VideoStorageService import VideoStorageService
 from src.downloader.ImgurDownloader import ImgurDownloader
 from src.data.MetaDataItem import MetaDataItem
 
+# These tests are flaky as they rely on a response from a request to imgur
 
 class TestImgurDownloader(unittest.TestCase):
     download_location = os.path.join(os.path.dirname(__file__), "test_data")
