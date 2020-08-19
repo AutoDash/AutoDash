@@ -1,0 +1,3 @@
+
+class StopSignal(Exception):
+    pass

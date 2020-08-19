@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser, ArgumentTypeError
 from multiprocessing import Process, managers
+
+from .executor.iExecutor import iExecutor
 from .PipelineConfiguration import PipelineConfiguration
-from .database import get_database, get_firebase_access, DatabaseConfigOption
+from .database import get_database
 from .data.FilterCondition import FilterCondition
-from .signals import CancelSignal
+from .signals import CancelSignal, StopSignal
 import tensorflow as tf
 import copy
 
@@ -62,9 +64,12 @@ def run(pipeline, **args):
             while executor is not None:
                     item = executor.run(item)
                     executor = executor.get_next()
+        except StopSignal:
+            pass
         except CancelSignal:
-            item.is_cancelled = True
-            get_firebase_access().update_metadata(item)
+            metadata = iExecutor.get_metadata(item)
+            metadata.is_cancelled = True
+            database.update_metadata(metadata)
         except RuntimeError as e:
             print(e)
 

@@ -20,7 +20,7 @@ class RedditCrawler(iCrawler):
                         'id': post.id,
                         'title': post.title
                     }
-                    metadata = MetaDataItem(title, post.url, video_source)
+                    metadata = MetaDataItem(title=title, url=post.url, download_src=video_source)
                     metadata.add_tag('reddit_post_info', reddit_tag)
                     return metadata
 

@@ -1,7 +1,7 @@
 from typing import Union
 
 from ..data.MetaDataItem import MetaDataItem
-from ..signals import CancelSignal
+from ..signals import StopSignal
 from ..data.VideoItem import VideoItem
 from ..data.FilterCondition import FilterCondition
 from .iExecutor import iExecutor
@@ -21,6 +21,6 @@ class Filterer(iExecutor):
         res = self.filter_cond.filter([metadata])
 
         if len(res) == 0:
-            raise CancelSignal
+            raise StopSignal
 
         return item
