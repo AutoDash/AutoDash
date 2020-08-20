@@ -69,7 +69,7 @@ def run(pipeline, **args):
         except CancelSignal:
             metadata = iExecutor.get_metadata(item)
             metadata.is_cancelled = True
-            await database.update_metadata(metadata)
+            database.update_metadata(metadata)
         except RuntimeError as e:
             print(e)
 
