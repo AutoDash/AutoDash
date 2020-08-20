@@ -10,7 +10,7 @@ from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedExc
 from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
 GENERAL_INSTRUCTIONS = [
-    ["tab", "Switch mode"],
+    ["m", "Switch mode"],
     ["h", "Open instructions page"],
     ["a", "1 back"],
     ["s", "10 back"],
@@ -152,7 +152,7 @@ class VideoPlayerGUIManager(object):
             elif self.key_mapper.consume(" "):
                 cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, 0 if self.vcm.get_paused() else 1)
 
-            if self.key_mapper.consume("tab"):
+            if self.key_mapper.consume("m"):
                 self.mode_handler_i += 1
                 self.mode_handler_i %= len(self.mode_handlers)
                 self.logger.log("Changed mode")

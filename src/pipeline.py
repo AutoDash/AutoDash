@@ -31,17 +31,17 @@ class PipelineCLIParser(ArgumentParser):
 
 def main():
     args = { **vars(PipelineCLIParser().parse_args()) }
-    
+
     if not tf.test.is_gpu_available():
-        print("WARNING: You are running tensorflow in CPU mode.")    
-    
+        print("WARNING: You are running tensorflow in CPU mode.")
+
     # Set up pipeline configuration
     config = PipelineConfiguration()
     config.read(args['config'])
     run(config, **args)
 
 def run(pipeline, **args):
-    
+
     # Set up services
     parser = PipelineCLIParser()
     source_executors, output_executor = pipeline.generate_graph()
@@ -69,7 +69,7 @@ def run(pipeline, **args):
         except CancelSignal:
             metadata = iExecutor.get_metadata(item)
             metadata.is_cancelled = True
-            database.update_metadata(metadata)
+            await database.update_metadata(metadata)
         except RuntimeError as e:
             print(e)
 
