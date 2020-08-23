@@ -4,11 +4,17 @@ from multiprocessing import Process, managers
 
 from .executor.iExecutor import iExecutor
 from .PipelineConfiguration import PipelineConfiguration
-from .database import get_database
+from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .signals import CancelSignal, StopSignal
+from .database.DataUpdater import DataUpdater
 import tensorflow as tf
 import copy
+import asyncio
+
+database_arg_mapper = {'firebase': DatabaseConfigOption.firebase,
+                       'local': DatabaseConfigOption.local}
+
 
 class PipelineCLIParser(ArgumentParser):
     def __init__(self, *args, **kwargs):
@@ -17,7 +23,7 @@ class PipelineCLIParser(ArgumentParser):
                 help="Number of times to run pipeline loop", dest='max_iterations')
         self.add_argument('--mode', choices={'crawler', 'ucrawler', 'user'}, default='user',
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
-        self.add_argument('--storage', choices={'firebase', 'local'}, default='local',
+        self.add_argument('--storage', choices=database_arg_mapper, default='local',
                 help="Data storage used. Either 'firebase' or 'local")
         self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull, overrides any conditions set by executors')
         self.add_argument('--config', type=str, default='default_configuration.yml', dest='config')
@@ -45,7 +51,10 @@ def run(pipeline, **args):
     # Set up services
     parser = PipelineCLIParser()
     source_executors, output_executor = pipeline.generate_graph()
-    database = get_database(args['storage'])
+    database = get_database(database_arg_mapper.get(args['storage'], None))
+    dataUpdater = DataUpdater()
+    dataUpdater.set_database(database)
+    print(database)
 
     for executor in source_executors:
         if executor.requires_database():
@@ -69,7 +78,7 @@ def run(pipeline, **args):
         except CancelSignal:
             metadata = iExecutor.get_metadata(item)
             metadata.is_cancelled = True
-            database.update_metadata(metadata)
+            dataUpdater.run(metadata)
         except RuntimeError as e:
             print(e)
 
