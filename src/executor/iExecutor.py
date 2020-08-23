@@ -8,7 +8,7 @@ from collections import Iterable
 
 class iExecutor(ABC):
     def __init__(self, parents=None, stateful=False):
-        if parents == None:
+        if parents is None:
             parents = []
         self.stateful = stateful
         self.prev = parents if isinstance(parents, Iterable) else [parents]

@@ -16,7 +16,7 @@ class DataUpdater(iDatabaseExecutor):
     def run(self, item: Union[MetaDataItem, VideoItem]) -> Union[MetaDataItem, VideoItem]:
         metadata = self.get_metadata(item)
 
-        if len(metadata.id) == 0 or metadata.id not in asyncio.run(self.database.fetch_video_id_list()):
+        if metadata.id is None or len(metadata.id) == 0 or metadata.id not in asyncio.run(self.database.fetch_video_id_list()):
             # metadata item is not in the database, therefore create it in the database
             asyncio.run(self.database.publish_new_metadata(metadata))
         else:
