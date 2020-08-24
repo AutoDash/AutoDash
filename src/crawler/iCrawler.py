@@ -23,7 +23,7 @@ class iCrawler(iDatabaseExecutor):
         if self.database is None:
             raise UndefinedDatabaseException()
 
-        urls = await self.database.fetch_video_url_list()
+        urls = self.database.fetch_video_url_list()
         return url not in urls
 
     def run(self, obj : Dict[str, Any]):
