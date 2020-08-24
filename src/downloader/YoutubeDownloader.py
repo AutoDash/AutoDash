@@ -20,7 +20,10 @@ class YoutubeDownloader(iDownloader):
         ydl = youtube_dl.YoutubeDL(self.dl_opts)
 
         link = md_item.url
-        ydl.download([link])
+        try:
+            ydl.download([link])
+        except youtube_dl.utils.YoutubeDLError:
+            raise DownloadException("Failed to download youtube link " + link)
         # TODO self.file_name doesn't initialize when file already exists locally
         if self.file_name is None:
             raise DownloadException("Failed to download youtube link " + link)
