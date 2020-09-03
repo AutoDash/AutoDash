@@ -57,7 +57,7 @@ class ExecutorFactory:
     def build(cls, executor_name, args, parents=[]):
         local = {}
         res = executor_name.rsplit(".",1)
-        exec(f'from .executor.{executor_name} import {executor_name}', globals(), local)
+        exec(f'from src.executor.{executor_name} import {executor_name}', globals(), local)
         exec(f'executor_class = {executor_name}', globals(), local)
         executor_class = local['executor_class']
         executor = executor_class(parents, **args)
@@ -89,7 +89,7 @@ class PipelineConfiguration:
 
     def _read_yaml(self, fpath):
         with open(fpath, 'r') as fin:
-            self.config_dict = ConfigDict(yaml.load(fin))
+            self.config_dict = ConfigDict(yaml.load(fin, Loader=yaml.FullLoader))
 
     def _write_json(self, fpath):
         with open(fpath, 'w') as fin:

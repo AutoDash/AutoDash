@@ -5,8 +5,12 @@ from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, get_firebase_access, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .signals import CancelSignal
+from .utils import get_project_root
 import tensorflow as tf
 import copy
+
+# Needed for PyInstaller to work :(
+from src.executor import FirebaseSource, FaceBlurrer, Filterer, Labeler, LocalStorageSource, LocalStorageUpdater, ObjectDetector, Printer, RedditCrawler, UniversalDownloader, YoutubeCrawler
 
 class PipelineCLIParser(ArgumentParser):
     def __init__(self, *args, **kwargs):
@@ -35,7 +39,7 @@ def main():
     
     # Set up pipeline configuration
     config = PipelineConfiguration()
-    config.read(args['config'])
+    config.read(f"{get_project_root()}/{args['config']}")
     run(config, **args)
 
 def run(pipeline, **args):
