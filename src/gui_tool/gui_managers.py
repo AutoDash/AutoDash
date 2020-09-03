@@ -5,20 +5,21 @@ from .BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.text_popup import PopUpWindow
 from .tinker_subuis.help_popup import HelpPopup
+from .tinker_subuis.button_popup import ButtonPopup
 import cv2
 from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
 GENERAL_INSTRUCTIONS = [
-    ["tab", "Switch mode"],
+    ["m", "Switch mode"],
     ["h", "Open instructions page"],
     ["a", "1 back"],
     ["s", "10 back"],
     ["d", "1 forward"],
     ["w", "10 forward"],
     ["Space", "Pause/unpause"],
-    ["Enter", "Finish and continue"],
-    ["Esc", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
+    ["Enter * 2", "Finish and continue"],
+    ["Esc * 2", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
 ]
 BBOX_MODE_INSTRUCTIONS = [
     ["click & drag", "Create bounding box range for commands"],
@@ -131,10 +132,22 @@ class VideoPlayerGUIManager(object):
             cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, frame_index)
 
             self.key_mapper.append(cv2.waitKey(self.frame_rate) & 0xFF)
-            if self.key_mapper.consume("esc"):  # Escape key
-                raise ManualTaggingAbortedException("Tagging operation aborted")
-            elif self.key_mapper.consume("enter"):  # Enter
-                break
+            if self.key_mapper.consume(("esc", "esc")):  # Escape key
+                res = ButtonPopup(
+                    "Confirm restart",
+                    "Hitting confirm will destroy all progress. You will have to restart. Continue?",
+                    ["Confirm", "Cancel"]
+                ).run()
+                if res == "Confirm":
+                    raise ManualTaggingAbortedException("Tagging operation aborted")
+            elif self.key_mapper.consume(("enter", "enter")):  # Enter
+                res = ButtonPopup(
+                    "Confirm commit",
+                    "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?",
+                    ["Confirm", "Cancel"]
+                ).run()
+                if res == "Confirm":
+                    break
             elif self.key_mapper.consume("h"):
                 window = HelpPopup(
                     "GUI controls reference",
@@ -152,7 +165,7 @@ class VideoPlayerGUIManager(object):
             elif self.key_mapper.consume(" "):
                 cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, 0 if self.vcm.get_paused() else 1)
 
-            if self.key_mapper.consume("tab"):
+            if self.key_mapper.consume("m"):
                 self.mode_handler_i += 1
                 self.mode_handler_i %= len(self.mode_handlers)
                 self.logger.log("Changed mode")

@@ -1,5 +1,7 @@
 import asyncio
+from typing import Union
 
+from ..data.VideoItem import VideoItem
 from ..data.MetaDataItem import MetaDataItem
 from ..executor.iDatabaseExecutor import iDatabaseExecutor
 
@@ -11,11 +13,13 @@ class DataUpdater(iDatabaseExecutor):
         super().__init__(parents)
 
 
-    def run(self, metadata: MetaDataItem) -> MetaDataItem:
-        if len(metadata.id) == 0 or metadata.id not in asyncio.run(self.database.fetch_video_id_list()):
+    def run(self, item: Union[MetaDataItem, VideoItem]) -> Union[MetaDataItem, VideoItem]:
+        metadata = self.get_metadata(item)
+
+        if metadata.id is None or len(metadata.id) == 0 or metadata.id not in asyncio.run(self.database.fetch_video_id_list()):
             # metadata item is not in the database, therefore create it in the database
             asyncio.run(self.database.publish_new_metadata(metadata))
         else:
             asyncio.run(self.database.update_metadata(metadata))
         # Return saved metadata item
-        return metadata
+        return item

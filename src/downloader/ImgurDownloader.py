@@ -6,14 +6,16 @@ import os, re, shutil
 
 
 class ImgurDownloader(iDownloader):
-    allowed_chars = re.compile('\W')
 
     async def download(self, md_item: MetaDataItem) -> VideoItem:
         link = md_item.url
-        filename = self.get_filename(link)
+        pathname = self.video_storage.get_storage_dir()
+        filename = self.video_storage.get_file_name(md_item)
 
         print(f"downloading file {filename}")
-        downloader = imgur(link, dir_download=self.pathname, file_name=filename)
+        downloader = imgur(link,
+                           dir_download=pathname,
+                           file_name=filename)
         files, idx = downloader.save_images()
         print(f"downloaded {files}")
 
@@ -24,20 +26,17 @@ class ImgurDownloader(iDownloader):
                 fname, ext = os.path.splitext(file)
                 print(fname, ext)
                 if ext in ['.mp4']:
-                    src = os.path.join(self.pathname, filename, file)
-                    dest = os.path.join(self.pathname,filename) + ".mp4"
+                    src = os.path.join(pathname, filename, file)
+                    dest = os.path.join(pathname,filename) + ".mp4"
                     print(f"moving from {src} to {dest}")
                     os.rename(src, dest)
                     break
             # remove old directory
-            shutil.rmtree(os.path.join(self.pathname, filename))
+            shutil.rmtree(os.path.join(pathname, filename))
 
-        filepath = os.path.join(self.pathname, filename) + ".mp4"
+        filepath = os.path.join(pathname, filename) + ".mp4"
 
         if not os.path.exists(filepath):
             raise DownloadException(f"could not download video from {link}")
 
         return VideoItem(filepath=filepath, metadata=md_item)
-
-    def get_filename(self, link):
-        return ImgurDownloader.allowed_chars.sub('', link)

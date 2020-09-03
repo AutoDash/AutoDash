@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import unittest, os
-from src.StorageService import StorageService
+from src.VideoStorageService import VideoStorageService
 from src.data.VideoItem import VideoItem
 from src.data.MetaDataItem import MetaDataItem
 
-class TestUnitTest(unittest.TestCase):
+class TestVideoStorageService(unittest.TestCase):
     def setUp(self):
-        self.storage = StorageService()
+        self.storage = VideoStorageService()
 
     def test_storage_file_created(self):
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), "storage")))

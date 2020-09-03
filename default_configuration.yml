@@ -1,21 +1,26 @@
 dataSources:
   - executor: FirebaseSource
   - executor: RedditCrawler
-  - executor: YoutubeCrawler
 processingStages:
   - executor: Printer
     config:
       msg: "firebase src complete"
   - executor: Filterer
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
   - executor: UniversalDownloader
   - executor: Printer
-  - executor: ObjectDetector
-    config:
-      model_id: faster_rcnn_resnet101_kitti_2018_01_28
-      skip_n: 60
-      batch_size: 10
-      confidence_threshold: 0.85
-  - executor: FaceBlurrer
+  # - executor: ObjectDetector
+  #   config:
+  #     model_id: faster_rcnn_resnet101_kitti_2018_01_28
+  #     skip_n: 60
+  #     batch_size: 10
+  #     confidence_threshold: 0.85
+  # - executor: FaceBlurrer
   - executor: Labeler
   - executor: AutoLabeler
+  - executor: Printer
+    config:
+      msg: "labelling complete"
   - executor: FirebaseUpdater

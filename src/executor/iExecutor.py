@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
+from typing import Union
+
+from ..data.MetaDataItem import MetaDataItem
 from ..data.VideoItem import VideoItem
 from collections import Iterable
 
 
 class iExecutor(ABC):
     def __init__(self, parents=None, stateful=False):
-        if parents == None:
+        if parents is None:
             parents = []
         self.stateful = stateful
         self.prev = parents if isinstance(parents, Iterable) else [parents]
@@ -55,3 +58,11 @@ class iExecutor(ABC):
 
     def requires_database(self) -> bool:
         return False
+
+    @staticmethod
+    def get_metadata(item: Union[VideoItem, MetaDataItem]) -> MetaDataItem:
+        if isinstance(item, VideoItem):
+            return item.metadata
+        else:
+            # Therefore item is a MetadataItem
+            return item

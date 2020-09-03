@@ -1,0 +1,6 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: UniversalDownloader
+  - executor: FaceBlurrer
+  - executor: LocalStorageUpdater

@@ -48,7 +48,7 @@ class FirebaseAccessor(iDatabase):
     def __metadata_reference(self):
         return db.reference('metadata')
 
-    async def __query_list(self, ref: Reference) -> List[str]:
+    def __query_list(self, ref: Reference) -> List[str]:
         vals = ref.get()
         if vals is None:
             return []
@@ -58,7 +58,7 @@ class FirebaseAccessor(iDatabase):
             result.append(val)
         return result
 
-    async def __query_keys(self, ref: Reference) -> List[str]:
+    def __query_keys(self, ref: Reference) -> List[str]:
         vals = ref.get()
         if vals is None:
             return []
@@ -69,19 +69,19 @@ class FirebaseAccessor(iDatabase):
         return keys
 
 
-    async def fetch_video_url_list(self) -> List[str]:
+    def fetch_video_url_list(self) -> List[str]:
         ref = self.__metadata_reference()
-        metadata_list = await self.__query_list(ref)
+        metadata_list = self.__query_list(ref)
         urls = map(lambda metadata: metadata['url'], metadata_list)
         return list(urls)
-    
+
     async def fetch_all_metadata(self) -> List[dict]:
         ref = self.__metadata_reference()
-        return [ *zip(await self.__query_keys(ref), await self.__query_list(ref)) ]
+        return [ *zip(self.__query_keys(ref), self.__query_list(ref)) ]
 
     async def fetch_video_id_list(self) -> List[str]:
         ref = self.__metadata_reference()
-        return await self.__query_keys(ref)
+        return self.__query_keys(ref)
 
 
     def fetch_newest_videos(self, last_id: str = None,
@@ -123,7 +123,7 @@ class FirebaseAccessor(iDatabase):
     async def update_metadata(self, metadata: MetaDataItem):
         ref = self.__metadata_reference()
 
-        existing_ids = await self.__query_keys(ref)
+        existing_ids = self.__query_keys(ref)
         if metadata.id not in existing_ids:
             raise NotExistingException()
 
@@ -133,7 +133,7 @@ class FirebaseAccessor(iDatabase):
     async def fetch_metadata(self, id: str) -> MetaDataItem:
         ref = self.__metadata_reference()
 
-        existing_ids = await self.__query_keys(ref)
+        existing_ids = self.__query_keys(ref)
         if id not in existing_ids:
             raise NotExistingException()
 
@@ -144,7 +144,7 @@ class FirebaseAccessor(iDatabase):
     async def delete_metadata(self, id: str):
         ref = self.__metadata_reference()
 
-        existing_ids = await self.__query_keys(ref)
+        existing_ids = self.__query_keys(ref)
         if id not in existing_ids:
             raise NotExistingException()
 
