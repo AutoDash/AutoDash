@@ -23,5 +23,8 @@ if __name__ == '__main__':
     system = platform.system()
     arch = platform.architecture()
     zf = ZipFile(f'{TOOL_DIR}/dist/AutoDash-pipeline-release-{system}-{arch[0]}.zip', 'w')
-    zf.write(f'{TOOL_DIR}/dist/AutoDash-pipeline', compress_type=ZIP_BZIP2)
+    exe_file = 'AutoDash-pipeline'
+    if system == 'Windows':
+        exe_file += '.exe'
+    zf.write(f'{TOOL_DIR}/dist/{exe_file}', compress_type=ZIP_BZIP2)
     zf.write(f'{TOOL_DIR}/dist/default_configuration.yml', compress_type=ZIP_BZIP2)
