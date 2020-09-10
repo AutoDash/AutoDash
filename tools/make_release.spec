@@ -6,7 +6,7 @@ extra_files = copy_metadata('google-api-python-client') + collect_data_files('te
 
 
 a = Analysis(["../run"] + [ str(fp) for fp in Path('../src').rglob('*.py')],
-             hiddenimports=collect_submodules('tensorflow'),
+             hiddenimports=collect_submodules('tensorflow') + ['scipy.special.cython_special'],
              hookspath=None,
              datas=extra_files,
              runtime_hooks=None)
