@@ -1,7 +1,9 @@
 import os
-
-def get_parent_dir(cur_dir):
-    return os.path.abspath(os.path.join(cur_dir, os.pardir))
+import sys
+from pathlib import Path
 
 def get_project_root():
-    return get_parent_dir(get_parent_dir(os.path.abspath(__file__)))
+    application_path = Path(os.path.abspath(__file__)).parent.absolute() / ".."
+    if getattr(sys, 'frozen', False):
+    	application_path = Path(sys.executable).parent.absolute()
+    return str(application_path)

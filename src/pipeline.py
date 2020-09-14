@@ -6,6 +6,7 @@ from .executor.iExecutor import iExecutor
 from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
+from .utils import get_project_root
 from .signals import CancelSignal, StopSignal
 from .database.DataUpdater import DataUpdater
 import tensorflow as tf
@@ -15,6 +16,10 @@ import asyncio
 database_arg_mapper = {'firebase': DatabaseConfigOption.firebase,
                        'local': DatabaseConfigOption.local}
 
+
+# Needed for PyInstaller to work :(
+from src.executor import FirebaseSource, FaceBlurrer, Filterer, Labeler, LocalStorageSource, LocalStorageUpdater, ObjectDetector, Printer, RedditCrawler, UniversalDownloader, YoutubeCrawler, AutoLabeler
+from src.executor import FirebaseUpdater
 
 class PipelineCLIParser(ArgumentParser):
     def __init__(self, *args, **kwargs):
@@ -43,7 +48,7 @@ def main():
 
     # Set up pipeline configuration
     config = PipelineConfiguration()
-    config.read(args['config'])
+    config.read(f"{get_project_root()}/{args['config']}")
     run(config, **args)
 
 def run(pipeline, **args):
