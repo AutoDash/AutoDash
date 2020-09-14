@@ -2,10 +2,14 @@ dataSources:
   - executor: FirebaseSource
   - executor: RedditCrawler
 processingStages:
-  - executor: Printer
+  - executor: Filterer
     config:
-      msg: "firebase src complete"
+      filter_str: "tags['state'] != 'in-progress'"
   - executor: FirebaseUpdater
+  - executor: AutoLabeler
+    config:
+      key: "state"
+      val: "in-progress"
   - executor: Filterer
   - executor: Filterer
     config:
