@@ -1,6 +1,8 @@
 """
 Press h in GUI tool to see commands
 """
+from tkinter import Tk
+
 from .gui_managers import VideoPlayerGUIManager
 from .VideoTaggingContext import VideoTaggingContext
 from ..data.MetaDataItem import MetaDataItem
@@ -9,6 +11,11 @@ from .GUIExceptions import ManualTaggingAbortedException
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
+
+    # Initial Tk to avoid macOS error
+    t = Tk()
+    t.destroy()
+
     while True:
         try:
             context = VideoTaggingContext(file_loc, mdi.bb_fields)
