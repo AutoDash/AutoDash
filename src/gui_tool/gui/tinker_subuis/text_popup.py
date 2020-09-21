@@ -1,6 +1,6 @@
 from tkinter import Tk, Frame, Entry, Button
 
-class PopUpWindow:
+class TextPopup:
     def __init__(self, title):
         self.tags = []
         self.entries = []

@@ -1,8 +1,8 @@
 """
 Press h in GUI tool to see commands
 """
-from .gui_managers import VideoPlayerGUIManager
-from .VideoTaggingContext import VideoTaggingContext
+from .gui.bb_gui import BBGUIManager
+from .gui.bb_context import BBContext
 from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from .GUIExceptions import ManualTaggingAbortedException
@@ -11,8 +11,8 @@ from .GUIExceptions import ManualTaggingAbortedException
 def tag_file(file_loc, mdi:MetaDataItem):
     while True:
         try:
-            context = VideoTaggingContext(file_loc, mdi.bb_fields)
-            gui = VideoPlayerGUIManager(context)
+            context = BBContext(file_loc, mdi.bb_fields)
+            gui = BBGUIManager(context)
             gui.start()
 
             mdi.bb_fields = context.get_bbox_fields()

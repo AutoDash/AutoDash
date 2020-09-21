@@ -1,26 +1,14 @@
-from src.gui_tool.utils import RotatingLog, KeyMapper
-import numpy as np
-from .VideoTaggingContext import VideoTaggingContext
-from .BoundingBoxManager import BoundingBoxManager
+from src.gui_tool.utils.key_mapper import KeyMapper
+from .context import GUIContext
+from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
-from .tinker_subuis.text_popup import PopUpWindow
-from .tinker_subuis.help_popup import HelpPopup
-from .tinker_subuis.button_popup import ButtonPopup
+from .tinker_subuis.text_popup import TextPopup
 import cv2
-from .GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
-from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
+from gui_tool.gui.bb.BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
-GENERAL_INSTRUCTIONS = [
-    ["m", "Switch mode"],
-    ["h", "Open instructions page"],
-    ["a", "1 back"],
-    ["s", "10 back"],
-    ["d", "1 forward"],
-    ["w", "10 forward"],
-    ["Space", "Pause/unpause"],
-    ["Enter * 2", "Finish and continue"],
-    ["Esc * 2", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
-]
+from .general_gui import VideoPlayerGUIManager
+from .gui_mode import InternalMode
+
 BBOX_MODE_INSTRUCTIONS = [
     ["click & drag", "Create bounding box range for commands"],
     ["r", "Reset current task"],
@@ -51,10 +39,7 @@ SELECTION_MODE_INSTRUCTIONS = [
     ["t", "Opens window for user customizable tags"],
 ]
 
-class VideoPlayerGUIManager(object):
-    PROGRESS_BAR_NAME = "progress"
-    FRAME_RATE_BAR_NAME = "frame_delay"
-    PAUSE_BUTTON_NAME = "pause"
+class BBGUIManager(VideoPlayerGUIManager):
     WINDOW_NAME = 'tagger'
 
     LOG_LINES = 6
@@ -63,173 +48,19 @@ class VideoPlayerGUIManager(object):
     LOG_START_X = 250
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
 
-    def __init__(self, context: VideoTaggingContext):
-        self.context = context
-        self.vcm = self.context.vcm
-        self.frame_rate = 25
-        self.logger = RotatingLog(self.LOG_LINES)
-        self.ignore_index_change_interval = self.vcm.get_frames_count() // 200
-
+    def __init__(self, context: GUIContext):
+        super(BBGUIManager, self).__init__(context,
+           [
+               InternaSelectionMode(self),
+               InternalBBoxMode(self)
+           ]
+        )
         self.bbm = BoundingBoxManager(self.vcm.get_frames_count())
         self.bbm.set_to(*context.get_bbox_fields_as_list())
 
-        self.mode_handlers = [
-            InternaSelectionMode(self),
-            InternalBBoxMode(self)
-        ]
-        self.mode_handler_i = 0
-
-        self.instructions = GENERAL_INSTRUCTIONS
-        self.key_mapper = KeyMapper()
-
     def start(self):
-        self.set_GUI()
-        try:
-            self.logger.log("Starting with: {0} bounding box ids".format(self.bbm.get_n_ids()))
-            self.play_video()
-        except ManualTaggingAbortedException:
-            raise
-        finally:
-            self.cleanup()
-
+        super(BBGUIManager, self).start()
         self.context.set_bbox_fields_from_list(self.bbm.extract())
-
-    def set_GUI(self):
-        cv2.namedWindow(self.WINDOW_NAME)
-        cv2.setMouseCallback(self.WINDOW_NAME,
-             lambda event, x, y, flags, param: self.handleClick(event, x, y, flags, param))
-
-        def set_frame_rate_callback(value):
-            self.frame_rate = max(1, value)
-        def set_progress_rate_callback(value):
-            if abs(value - self.vcm.get_frame_index()) > self.ignore_index_change_interval or \
-                    value == 0 or value == self.vcm.get_frames_count()-1:
-                self.vcm.start_from(value)
-        def set_paused_callback(value):
-            if self.vcm is not None:
-                self.vcm.set_paused(value)
-
-        cv2.createTrackbar(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, 0, max(0, self.vcm.get_frames_count()-1),
-                           set_progress_rate_callback)
-        cv2.createTrackbar(self.FRAME_RATE_BAR_NAME, self.WINDOW_NAME,
-                           self.frame_rate, 200, set_frame_rate_callback)
-        cv2.createTrackbar(self.PAUSE_BUTTON_NAME,  self.WINDOW_NAME,
-                           False, 1, set_paused_callback)
-
-    def play_video(self):
-        shown_for_first_time = False
-        while True:
-            if shown_for_first_time and cv2.getWindowProperty(self.WINDOW_NAME, cv2.WND_PROP_VISIBLE) <= 0:  # Window closed. Abort
-                raise ManualTaggingExitedException("Tagging operation aborted by closing window")
-
-            frame = self.vcm.next().copy()
-            frame_index = self.vcm.get_frame_index()
-            frame = self.bbm.modify_frame(frame, frame_index)
-            frame = self.get_mode_handler().modify_frame(frame, frame_index)
-            cv2.imshow(self.WINDOW_NAME, self.build_frame(frame))
-            shown_for_first_time = True
-
-            cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, frame_index)
-
-            self.key_mapper.append(cv2.waitKey(self.frame_rate) & 0xFF)
-            if self.key_mapper.consume(("esc", "esc")):  # Escape key
-                res = ButtonPopup(
-                    "Confirm restart",
-                    "Hitting confirm will destroy all progress. You will have to restart. Continue?",
-                    ["Confirm", "Cancel"]
-                ).run()
-                if res == "Confirm":
-                    raise ManualTaggingAbortedException("Tagging operation aborted")
-            elif self.key_mapper.consume(("enter", "enter")):  # Enter
-                res = ButtonPopup(
-                    "Confirm commit",
-                    "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?",
-                    ["Confirm", "Cancel"]
-                ).run()
-                if res == "Confirm":
-                    break
-            elif self.key_mapper.consume("h"):
-                window = HelpPopup(
-                    "GUI controls reference",
-                    self.instructions + [["", ""]] + self.get_mode_handler().instructions
-                )
-                window.run()
-            elif self.key_mapper.consume("a"):
-                self.vcm.shift_frame_index(-1)
-            elif self.key_mapper.consume("s"):
-                self.vcm.shift_frame_index(-10)
-            elif self.key_mapper.consume("d"):
-                self.vcm.shift_frame_index(1)
-            elif self.key_mapper.consume("w"):
-                self.vcm.shift_frame_index(10)
-            elif self.key_mapper.consume(" "):
-                cv2.setTrackbarPos(self.PAUSE_BUTTON_NAME, self.WINDOW_NAME, 0 if self.vcm.get_paused() else 1)
-
-            if self.key_mapper.consume("m"):
-                self.mode_handler_i += 1
-                self.mode_handler_i %= len(self.mode_handlers)
-                self.logger.log("Changed mode")
-            else:
-                self.get_mode_handler().handle_keyboard(self.key_mapper)
-
-    def build_frame(self, frame):
-        img = np.zeros((
-            self.context.file_height + self.IMG_STARTING_Y,
-            self.context.file_width,
-            3), np.uint8)
-
-        def write_top_text():
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.5
-            font_color = (255, 255, 255)
-            for i, msg in enumerate(self.logger.get_logs()):
-                starting_index = (self.LOG_START_X, self.LOG_LINE_HEIGHT * (i+1) + self.LOG_LINE_MARGIN * i)
-                cv2.putText(img, msg, starting_index,
-                            font, font_scale, font_color)
-
-            for i, msg in enumerate(self.get_mode_handler().get_state_message()):
-                starting_index = (0, self.LOG_LINE_HEIGHT * (i + 1) + self.LOG_LINE_MARGIN * i)
-                cv2.putText(img, msg, starting_index,
-                            font, font_scale, font_color)
-
-        write_top_text()
-        displayed = cv2.cvtColor(frame, cv2.IMREAD_COLOR)
-        img[self.IMG_STARTING_Y:, 0:] = displayed
-        return img
-
-    def handleClick(self, event, x, y, flags, param):
-        y = y-self.IMG_STARTING_Y
-        self.get_mode_handler().handle_click(event, x, y, flags, param)
-
-    def get_mode_handler(self):
-        return self.mode_handlers[self.mode_handler_i]
-
-    def cleanup(self):
-        self.vcm.release()
-        cv2.destroyAllWindows()
-
-class InternalMode(object):
-    def __init__(self, parent: VideoPlayerGUIManager, instructions: list):
-        self.par = parent
-        self.instructions = instructions
-    def handle_click(self, event, x, y, flags, param):
-        raise NotImplementedError()
-    def handle_keyboard(self, key_mapper: KeyMapper):
-        raise NotImplementedError()
-    def get_state_message(self):
-        raise NotImplementedError()
-    def modify_frame(self, frame, i):
-        return frame
-    def log(self, msg):
-        self.par.logger.log(msg)
-    def hint(self, msg):
-        self.log("[HINT] {0}".format(msg))
-    def error(self, msg):
-        self.log("[ERROR] {0}".format(msg))
-    def warn(self, msg):
-        self.log("[WARN] {0}".format(msg))
-    def cancel(self, op, msg):
-        self.log("[CANCELLED: {0}] {1}".format(op, msg))
 
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
@@ -298,7 +129,7 @@ class InternalBBoxMode(InternalMode):
         par = self.par
         bbm = par.bbm
         if key_mapper.consume("i"):  # Select id
-            id = PopUpWindow("Enter ID. If ID exists, will work on original").run()
+            id = TextPopup("Enter ID. If ID exists, will work on original").run()
             if id is None or id == "":
                 self.cancel("Select ID", "Still on {0}".format(self.selected_id))
             else:
@@ -313,7 +144,7 @@ class InternalBBoxMode(InternalMode):
             if not bbm.has_id(self.selected_id):
                 self.error("Could not update class. ID {0} does not exist".format(self.selected_id))
             else:
-                cls = PopUpWindow("Enter new class for the selected object").run()
+                cls = TextPopup("Enter new class for the selected object").run()
                 prev = bbm.get_cls(self.selected_id)
                 if cls == None:
                     self.cancel("Class change", "{0} still on class {1}".format(self.selected_id, prev))
