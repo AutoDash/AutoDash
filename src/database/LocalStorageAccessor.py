@@ -32,7 +32,7 @@ class LocalStorageAccessor(iDatabase):
             new_id = uuid.uuid4()
         return str(new_id)
 
-    async def publish_new_metadata(self, metadata: MetaDataItem) -> str:
+    def publish_new_metadata(self, metadata: MetaDataItem) -> str:
         if metadata.url in self.url_list:
             raise AlreadyExistsException()
 
@@ -43,7 +43,7 @@ class LocalStorageAccessor(iDatabase):
         self.url_list.append(metadata.url)
         return metadata.id
 
-    async def update_metadata(self, metadata: MetaDataItem):
+    def update_metadata(self, metadata: MetaDataItem):
         if metadata.id not in self.id_list or metadata.url not in self.url_list:
             raise NotExistingException()
 
@@ -56,7 +56,7 @@ class LocalStorageAccessor(iDatabase):
 
         return metadata_from_file(gen_filename(id), self.storage_loc)
 
-    async def delete_metadata(self, id: str):
+    def delete_metadata(self, id: str):
         if id not in self.id_list:
             raise NotExistingException()
 

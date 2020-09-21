@@ -4,8 +4,6 @@ from ..VideoStorageService import VideoStorageService
 from ..data.VideoItem import VideoItem
 from ..executor.iExecutor import iExecutor
 from ..data.MetaDataItem import MetaDataItem
-import asyncio
-import os
 
 class DownloadException(RuntimeError):
     '''Raise on download failure'''
@@ -16,11 +14,11 @@ class iDownloader(iExecutor):
         self.video_storage = None
 
     @abstractmethod
-    async def download(self, md_item: MetaDataItem) -> VideoItem:
+    def download(self, md_item: MetaDataItem) -> VideoItem:
         pass
 
     def run(self, md_item: MetaDataItem):
-        return asyncio.run(self.download(md_item))
+        return self.download(md_item)
 
     def set_video_storage(self, video_storage: VideoStorageService):
         self.video_storage = video_storage

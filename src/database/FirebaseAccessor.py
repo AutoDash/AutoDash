@@ -75,11 +75,11 @@ class FirebaseAccessor(iDatabase):
         urls = map(lambda metadata: metadata['url'], metadata_list)
         return list(urls)
 
-    async def fetch_all_metadata(self) -> List[dict]:
+    def fetch_all_metadata(self) -> List[dict]:
         ref = self.__metadata_reference()
         return [ *zip(self.__query_keys(ref), self.__query_list(ref)) ]
 
-    async def fetch_video_id_list(self) -> List[str]:
+    def fetch_video_id_list(self) -> List[str]:
         ref = self.__metadata_reference()
         return self.__query_keys(ref)
 
@@ -107,7 +107,7 @@ class FirebaseAccessor(iDatabase):
         return result
 
 
-    async def publish_new_metadata(self, metadata: MetaDataItem) -> str:
+    def publish_new_metadata(self, metadata: MetaDataItem) -> str:
         ref = self.__metadata_reference()
 
         # Check that the video isn't already in the list by seeing if its url is already in the list
@@ -120,7 +120,7 @@ class FirebaseAccessor(iDatabase):
         return key
 
 
-    async def update_metadata(self, metadata: MetaDataItem):
+    def update_metadata(self, metadata: MetaDataItem):
         ref = self.__metadata_reference()
 
         existing_ids = self.__query_keys(ref)
@@ -130,7 +130,7 @@ class FirebaseAccessor(iDatabase):
         ref.child(metadata.id).update(metadata.to_json())
 
 
-    async def fetch_metadata(self, id: str) -> MetaDataItem:
+    def fetch_metadata(self, id: str) -> MetaDataItem:
         ref = self.__metadata_reference()
 
         existing_ids = self.__query_keys(ref)
@@ -141,7 +141,7 @@ class FirebaseAccessor(iDatabase):
         return self.create_metadata(id, dict(item_dict))
 
 
-    async def delete_metadata(self, id: str):
+    def delete_metadata(self, id: str):
         ref = self.__metadata_reference()
 
         existing_ids = self.__query_keys(ref)

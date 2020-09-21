@@ -9,11 +9,11 @@ class RedditCrawler(iCrawler):
         super().__init__(*parents)
 
 
-    async def find_next_downloadable(self, posts) -> MetaDataItem:
+    def find_next_downloadable(self, posts) -> MetaDataItem:
         while len(posts):
             post = posts.pop(0)
             if post.media is not None and 'oembed' in post.media.keys():
-                if await self.check_new_url(post.url):
+                if self.check_new_url(post.url):
                     title = post.media['oembed']['title']
                     video_source = post.media['type']
                     reddit_tag = {
@@ -26,13 +26,13 @@ class RedditCrawler(iCrawler):
 
         raise CrawlerException("Reddit crawler could not find any new videos")
 
-    async def next_downloadable(self) -> MetaDataItem:
+    def next_downloadable(self) -> MetaDataItem:
         posts = get_posts()
 
         try:
-            return await self.find_next_downloadable(posts)
+            return self.find_next_downloadable(posts)
         except CrawlerException:
             reload_posts()
             posts = get_posts()
         # Try to find a new downloadable after updating posts, but if this fails then give up
-        return await self.find_next_downloadable(posts)
+        return self.find_next_downloadable(posts)

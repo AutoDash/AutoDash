@@ -16,7 +16,7 @@ class YoutubeDownloader(iDownloader):
             'format': 'mp4'
         }
 
-    async def download(self, md_item: MetaDataItem) -> VideoItem:
+    def download(self, md_item: MetaDataItem) -> VideoItem:
         ydl = youtube_dl.YoutubeDL(self.dl_opts)
 
         link = md_item.url

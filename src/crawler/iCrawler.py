@@ -1,8 +1,6 @@
 from abc import abstractmethod
 from typing import Any, Dict
 
-import asyncio
-
 from ..data.MetaDataItem import MetaDataItem
 from ..executor.iDatabaseExecutor import iDatabaseExecutor, UndefinedDatabaseException
 
@@ -16,10 +14,10 @@ class iCrawler(iDatabaseExecutor):
         super().__init__(*args, **kwargs)
 
     @abstractmethod
-    async def next_downloadable(self) -> MetaDataItem:
+    def next_downloadable(self) -> MetaDataItem:
         pass
 
-    async def check_new_url(self, url: str) -> bool:
+    def check_new_url(self, url: str) -> bool:
         if self.database is None:
             raise UndefinedDatabaseException()
 
@@ -27,4 +25,4 @@ class iCrawler(iDatabaseExecutor):
         return url not in urls
 
     def run(self, obj : Dict[str, Any]):
-        return asyncio.run(self.next_downloadable())
+        return self.next_downloadable()

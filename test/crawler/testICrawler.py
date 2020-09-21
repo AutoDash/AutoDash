@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 
-import asyncio
-
 from src.crawler.iCrawler import iCrawler, UndefinedDatabaseException
 from src.data.MetaDataItem import MetaDataItem
 from test.mock.MockDataAccessor import MockDataAccessor
@@ -12,7 +10,7 @@ class MockCrawler(iCrawler):
     def __init__(self):
         super().__init__()
 
-    async def next_downloadable(self):
+    def next_downloadable(self):
         return MetaDataItem(
                 title="title", 
                 url="fake url 1", 
@@ -28,10 +26,10 @@ class TestICrawler(unittest.TestCase):
         self.assertEqual(True, True)
 
     def test_no_database(self):
-        metadata = asyncio.run(self.crawler.next_downloadable())
+        metadata = self.crawler.next_downloadable()
 
         try:
-            asyncio.run(self.crawler.check_new_url(metadata.url))
+            self.crawler.check_new_url(metadata.url)
             self.assertTrue(False)
         except UndefinedDatabaseException:
             # Expected error
@@ -40,17 +38,17 @@ class TestICrawler(unittest.TestCase):
     def test_check_new_url(self):
         self.crawler.set_database(self.database)
 
-        metadata = asyncio.run(self.crawler.next_downloadable())
-        self.assertTrue(asyncio.run(self.crawler.check_new_url(metadata.url)))
+        metadata = self.crawler.next_downloadable()
+        self.assertTrue(self.crawler.check_new_url(metadata.url))
 
-        asyncio.run(self.database.publish_new_metadata(metadata))
-        self.assertFalse(asyncio.run(self.crawler.check_new_url(metadata.url)))
+        self.database.publish_new_metadata(metadata)
+        self.assertFalse(self.crawler.check_new_url(metadata.url))
 
     def test_run(self):
         self.crawler.set_database(self.database)
 
         metadata = self.crawler.run({})
-        asyncio.run(self.database.publish_new_metadata(metadata))
+        self.database.publish_new_metadata(metadata)
 
         id_list = self.database.fetch_video_id_list()
         self.assertTrue(len(id_list) == 1)
@@ -58,7 +56,7 @@ class TestICrawler(unittest.TestCase):
         metadata = self.database.fetch_metadata(id_list[0])
 
         # Get exact copy of the metadata item that was published
-        copy_metadata = asyncio.run(self.crawler.next_downloadable())
+        copy_metadata = self.crawler.next_downloadable()
 
         self.assertEqual(metadata.to_json(), copy_metadata.to_json())
 
