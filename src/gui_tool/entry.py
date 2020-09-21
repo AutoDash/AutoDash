@@ -7,6 +7,10 @@ from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from .GUIExceptions import ManualTaggingAbortedException
 
+
+from .gui.context import GUIContext
+from .gui.sp_gui import SPGUIManager
+
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
     while True:
@@ -24,6 +28,17 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 mdi.is_cancelled = True
                 raise CancelSignal("Marked as not a dashcam video")
 
+            return mdi
+
+        except ManualTaggingAbortedException as e:
+            print("Aborted. Will restart")
+
+def split_file(file_loc, mdi:MetaDataItem):
+    while True:
+        try:
+            context = GUIContext(file_loc)
+            gui = SPGUIManager(context)
+            gui.start()
             return mdi
 
         except ManualTaggingAbortedException as e:

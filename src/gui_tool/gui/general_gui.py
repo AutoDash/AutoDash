@@ -46,14 +46,11 @@ class VideoPlayerGUIManager(object):
     def start(self):
         self.set_GUI()
         try:
-            self.logger.log("Starting with: {0} bounding box ids".format(self.bbm.get_n_ids()))
             self.play_video()
         except ManualTaggingAbortedException:
             raise
         finally:
             self.cleanup()
-
-        self.context.set_bbox_fields_from_list(self.bbm.extract())
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
@@ -85,7 +82,7 @@ class VideoPlayerGUIManager(object):
 
             frame = self.vcm.next().copy()
             frame_index = self.vcm.get_frame_index()
-            frame = self.bbm.modify_frame(frame, frame_index)
+            frame = self.modify_frame(frame, frame_index)
             frame = self.get_mode_handler().modify_frame(frame, frame_index)
             cv2.imshow(self.WINDOW_NAME, self.build_frame(frame))
             shown_for_first_time = True
@@ -168,3 +165,6 @@ class VideoPlayerGUIManager(object):
     def cleanup(self):
         self.vcm.release()
         cv2.destroyAllWindows()
+
+    def modify_frame(self, frame, frame_index):
+        raise NotImplementedError()

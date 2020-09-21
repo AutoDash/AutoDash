@@ -62,6 +62,10 @@ class BBGUIManager(VideoPlayerGUIManager):
         super(BBGUIManager, self).start()
         self.context.set_bbox_fields_from_list(self.bbm.extract())
 
+    def modify_frame(self, frame, frame_index):
+        frame = self.bbm.modify_frame(frame, frame_index)
+        return frame
+
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
         super().__init__(parent, SELECTION_MODE_INSTRUCTIONS)
