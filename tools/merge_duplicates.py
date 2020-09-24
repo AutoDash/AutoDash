@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from database.FirebaseAccessor import FirebaseAccessor
-import asyncio
+from data.MetaDataItem import MetaDataItem
 from argparse import ArgumentParser
 
 class CLIParser(ArgumentParser):
@@ -19,7 +19,7 @@ def latest_merger(items):
 
 def main(args):
     fb = FirebaseAccessor()
-    metadata_list = asyncio.run(fb.fetch_all_metadata())
+    metadata_list = fb.fetch_all_metadata()
     duplicates = {}
     for (key, item) in metadata_list:
         if item['url'] in duplicates:

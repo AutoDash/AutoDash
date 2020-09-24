@@ -3,8 +3,6 @@ import unittest
 
 import os
 
-import asyncio
-
 from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem, gen_filename
 from src.database.LocalStorageAccessor import LocalStorageAccessor
@@ -26,24 +24,24 @@ class TestLocalStorageAccessor(unittest.TestCase):
     def test_metadata_file_creation_and_deletion(self):
         metadata = MetaDataItem(title="title", url="fake url 1", download_src="youtube")
         try:
-            asyncio.run(self.storage.publish_new_metadata(metadata))
+            self.storage.publish_new_metadata(metadata)
             self.assertTrue(metadata.id != "") # metadata id successfully updated by the publish call
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
         finally:
-            asyncio.run(self.storage.delete_metadata(metadata.id))
+            self.storage.delete_metadata(metadata.id)
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
     def test_metadata_file_fetching(self):
         metadata = MetaDataItem(title="title", url="fake url 1", download_src="youtube")
         try:
-            asyncio.run(self.storage.publish_new_metadata(metadata))
+            self.storage.publish_new_metadata(metadata)
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
             metadata2 = self.storage.fetch_metadata(metadata.id)
             self.assertEqual(str(metadata), str(metadata2))
 
         finally:
-            asyncio.run(self.storage.delete_metadata(metadata.id))
+            self.storage.delete_metadata(metadata.id)
         # Ensure deletion worked so that data is not polluted
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
@@ -51,8 +49,8 @@ class TestLocalStorageAccessor(unittest.TestCase):
         metadata1 = MetaDataItem(title="title", url="fake url 1", download_src="youtube")
         metadata2 = MetaDataItem(title="title", url="fake url 2", download_src="youtube")
         try:
-            asyncio.run(self.storage.publish_new_metadata(metadata1))
-            asyncio.run(self.storage.publish_new_metadata(metadata2))
+            self.storage.publish_new_metadata(metadata1)
+            self.storage.publish_new_metadata(metadata2)
 
             actual_id_list = self.storage.fetch_video_id_list()
             self.assertEqual(actual_id_list, [metadata1.id, metadata2.id])
@@ -62,8 +60,8 @@ class TestLocalStorageAccessor(unittest.TestCase):
 
         # Clean up after test
         finally:
-            asyncio.run(self.storage.delete_metadata(metadata1.id))
-            asyncio.run(self.storage.delete_metadata(metadata2.id))
+            self.storage.delete_metadata(metadata1.id)
+            self.storage.delete_metadata(metadata2.id)
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata1.id))))
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata2.id))))
 
@@ -71,8 +69,8 @@ class TestLocalStorageAccessor(unittest.TestCase):
         metadata1 = MetaDataItem(title="title", url="fake url 1", download_src="youtube")
         metadata2 = MetaDataItem(title="title", url="fake url 2", download_src="youtube")
         try:
-            asyncio.run(self.storage.publish_new_metadata(metadata1))
-            asyncio.run(self.storage.publish_new_metadata(metadata2))
+            self.storage.publish_new_metadata(metadata1)
+            self.storage.publish_new_metadata(metadata2)
 
             # Create a second storage system to run the initialization code again with existing files
             storage2 = LocalStorageAccessor(self.storage_loc)
@@ -85,19 +83,19 @@ class TestLocalStorageAccessor(unittest.TestCase):
 
         # Clean up after test
         finally:
-            asyncio.run(self.storage.delete_metadata(metadata1.id))
-            asyncio.run(self.storage.delete_metadata(metadata2.id))
+            self.storage.delete_metadata(metadata1.id)
+            self.storage.delete_metadata(metadata2.id)
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata1.id))))
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata2.id))))
 
     def test_metadata_update(self):
         metadata = MetaDataItem(title="title", url="fake url 1", download_src="youtube")
         try:
-            asyncio.run(self.storage.publish_new_metadata(metadata))
+            self.storage.publish_new_metadata(metadata)
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
             metadata.title = "new title"
-            asyncio.run(self.storage.update_metadata(metadata))
+            self.storage.update_metadata(metadata)
             # Ensure file is still there
             self.assertTrue(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
@@ -106,7 +104,7 @@ class TestLocalStorageAccessor(unittest.TestCase):
             self.assertEqual(metadata.title, "new title")
 
         finally:
-            asyncio.run(self.storage.delete_metadata(metadata.id))
+            self.storage.delete_metadata(metadata.id)
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata.id))))
 
     def test_filter_condition_query(self):
@@ -114,9 +112,9 @@ class TestLocalStorageAccessor(unittest.TestCase):
         metadata2 = MetaDataItem(title="title", url="fake url 2", download_src="youtube", collision_type="human", location="Canada")
         metadata3 = MetaDataItem(title="title", url="fake url 3", download_src="youtube", collision_type="human", location="America")
         try:
-            asyncio.run(self.storage.publish_new_metadata(metadata1))
-            asyncio.run(self.storage.publish_new_metadata(metadata2))
-            asyncio.run(self.storage.publish_new_metadata(metadata3))
+            self.storage.publish_new_metadata(metadata1)
+            self.storage.publish_new_metadata(metadata2)
+            self.storage.publish_new_metadata(metadata3)
 
             condition = FilterCondition("title == 'title' and location == 'Canada' and collision_type != 'car'")
             print(condition.tokenize("title == 'title' and location == 'Canada' and collision_type != 'car'"))
@@ -125,9 +123,9 @@ class TestLocalStorageAccessor(unittest.TestCase):
 
         # Clean up after test
         finally:
-            asyncio.run(self.storage.delete_metadata(metadata1.id))
-            asyncio.run(self.storage.delete_metadata(metadata2.id))
-            asyncio.run(self.storage.delete_metadata(metadata3.id))
+            self.storage.delete_metadata(metadata1.id)
+            self.storage.delete_metadata(metadata2.id)
+            self.storage.delete_metadata(metadata3.id)
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata1.id))))
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata2.id))))
         self.assertFalse(os.path.exists(os.path.join(self.storage_loc, gen_filename(metadata3.id))))
