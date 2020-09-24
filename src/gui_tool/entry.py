@@ -1,6 +1,8 @@
 """
 Press h in GUI tool to see commands
 """
+from tkinter import Tk
+
 from .gui.bb_gui import BBGUIManager
 from .gui.bb_context import BBContext
 from ..data.MetaDataItem import MetaDataItem
@@ -13,6 +15,11 @@ from .gui.sp_gui import SPGUIManager
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
+
+    # Initial Tk to avoid macOS error
+    t = Tk()
+    t.destroy()
+
     while True:
         try:
             context = BBContext(file_loc, mdi.bb_fields)

@@ -1,4 +1,3 @@
-import asyncio
 from typing import Union
 
 from ..signals import StopSignal
@@ -17,13 +16,13 @@ class DataUpdater(iDatabaseExecutor):
     def run(self, item: Union[MetaDataItem, VideoItem]) -> Union[MetaDataItem, VideoItem]:
         metadata = self.get_metadata(item)
 
-        if metadata.id is None or len(metadata.id) == 0 or metadata.id not in asyncio.run(self.database.fetch_video_id_list()):
+        if metadata.id is None or len(metadata.id) == 0 or metadata.id not in self.database.fetch_video_id_list():
             if metadata.url in self.database.fetch_video_url_list():
                 # The video already exists in the database, with a different id, so don't re-add it to the database
                 raise StopSignal()
             # metadata item is not in the database, therefore create it in the database
-            asyncio.run(self.database.publish_new_metadata(metadata))
+            self.database.publish_new_metadata(metadata)
         else:
-            asyncio.run(self.database.update_metadata(metadata))
+            self.database.update_metadata(metadata)
         # Return saved metadata item
         return item

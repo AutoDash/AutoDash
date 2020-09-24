@@ -7,7 +7,7 @@ import os, re, shutil
 
 class ImgurDownloader(iDownloader):
 
-    async def download(self, md_item: MetaDataItem) -> VideoItem:
+    def download(self, md_item: MetaDataItem) -> VideoItem:
         link = md_item.url
         pathname = self.video_storage.get_storage_dir()
         filename = self.video_storage.get_file_name(md_item)

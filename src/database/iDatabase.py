@@ -50,13 +50,13 @@ class iDatabase(iReadOnlyDatabase):
 
     # Sets the id of the metadata to a unique identifier
     @abstractmethod
-    async def publish_new_metadata(self, metadata: MetaDataItem) -> str:
+    def publish_new_metadata(self, metadata: MetaDataItem) -> str:
         pass
 
     @abstractmethod
-    async def update_metadata(self, metadata: MetaDataItem):
+    def update_metadata(self, metadata: MetaDataItem):
         pass
 
     @abstractmethod
-    async def delete_metadata(self, id: str):
+    def delete_metadata(self, id: str):
         pass

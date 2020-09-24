@@ -36,7 +36,7 @@ class YoutubeCrawler(iCrawler):
         self.skip_n = self.get_n
         self.get_n *= 2
 
-    async def next_downloadable(self) -> MetaDataItem:
+    def next_downloadable(self) -> MetaDataItem:
         while True:  # Loop until return
             zero_cases = 0
             while len(self.search_results) == 0:
@@ -48,7 +48,7 @@ class YoutubeCrawler(iCrawler):
             res = self.search_results[0]
             self.search_results = self.search_results[1:]
 
-            if not self.check_url or await self.check_new_url(res['url']):
+            if not self.check_url or self.check_new_url(res['url']):
                 url = "https://www.youtube.com/watch?v={0}".format(res["url"])
                 title = res.get("title", None)
                 tags = { 'id': res["id"] }

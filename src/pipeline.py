@@ -11,7 +11,6 @@ from .signals import CancelSignal, StopSignal
 from .database.DataUpdater import DataUpdater
 import tensorflow as tf
 import copy
-import asyncio
 
 database_arg_mapper = {'firebase': DatabaseConfigOption.firebase,
                        'local': DatabaseConfigOption.local}
