@@ -7,11 +7,6 @@ class VideoItem:
     def __init__(self, metadata, filepath=None):
         self.filepath = filepath
         self.metadata = metadata
-        self.npy = None
-        # TODO: use cv2 to read mp4
-        if filepath:
-            self.npy = skvideo.io.vread(self.filepath)
-
 
     def encode(self):
         if self.metadata is None:
@@ -24,5 +19,5 @@ class VideoItem:
 
     def save_and_close(self, **kwargs):
         file_path = kwargs.get('file_path', self.file_path)
-        
+
 

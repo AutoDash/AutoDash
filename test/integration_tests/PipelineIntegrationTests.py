@@ -11,11 +11,6 @@ from src.pipeline import run as Administrator
 
 from test.mock.MockDataAccessor import MockDataAccessor
 
-class TestExecutorGenericVideoModification(iExecutor):
-    def run(self, item: VideoItem):
-        item.npy[..., 0] = 0
-        return item
-
 dest_dir = './youtube_videos'
 assert(not os.path.exists(dest_dir))
 
