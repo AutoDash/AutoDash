@@ -1,4 +1,5 @@
-from src.gui_tool.utils import RotatingLog, KeyMapper
+from src.gui_tool.utils.rotating_log import RotatingLog
+from src.gui_tool.utils.key_mapper import KeyMapper
 import numpy as np
 from .VideoTaggingContext import VideoTaggingContext
 from .BoundingBoxManager import BoundingBoxManager
