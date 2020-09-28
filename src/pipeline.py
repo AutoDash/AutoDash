@@ -9,6 +9,8 @@ from .data.FilterCondition import FilterCondition
 from .utils import get_project_root
 from .signals import CancelSignal, StopSignal
 from .database.DataUpdater import DataUpdater
+from collections.abc import Iterable
+
 import tensorflow as tf
 import copy
 
@@ -53,7 +55,6 @@ def main():
 def run(pipeline, **args):
 
     # Set up services
-    parser = PipelineCLIParser()
     source_executors, output_executor = pipeline.generate_graph()
     database = get_database(database_arg_mapper.get(args['storage'], None))
     dataUpdater = DataUpdater()
@@ -73,19 +74,31 @@ def run(pipeline, **args):
     for i in range(iterations):
         executor = source_executors[i % len(source_executors)]
         item = filter_cond
-        try:
-            while executor is not None:
-                    item = executor.run(item)
-                    executor = executor.get_next()
-        except StopSignal:
-            pass
-        except CancelSignal:
-            metadata = iExecutor.get_metadata(item)
-            metadata.is_cancelled = True
-            dataUpdater.run(metadata)
-        except RuntimeError as e:
-            print(e)
+        run_recur(executor, item, dataUpdater)
 
+
+def run_recur(source_executor, item, dataUpdater):
+    if not source_executor:
+        return
+
+    try:
+        items = source_executor.run(item)
+    except StopSignal:
+        return
+    except CancelSignal:
+        metadata = iExecutor.get_metadata(item)
+        metadata.is_cancelled = True
+        dataUpdater.run(metadata)
+        return
+    except RuntimeError as e:
+        print(e)
+        return
+
+    if not isinstance(items, Iterable):
+        items = [items]
+
+    for next_item in items:
+        run_recur(source_executor.get_next(), next_item, dataUpdater)
 
 if __name__ == "__main__":
     main()
