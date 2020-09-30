@@ -63,6 +63,18 @@ class SPMode(InternalMode):
             sm.erase_split(i)
         elif key_mapper.consume("t"):
             sm.toggle_section(i)
+        elif key_mapper.consume("q"):
+            p_loc = sm.find_previous_split(i)
+            if p_loc is not None:
+                self.par.vcm.start_from(p_loc)
+            else:
+                self.error("Can't jump: No previous split exists")
+        elif key_mapper.consume("e"):
+            n_loc = sm.find_next_split(i)
+            if n_loc is not None:
+                self.par.vcm.start_from(n_loc)
+            else:
+                self.error("Can't jump: No previous split exists")
 
     def get_state_message(self):
         return [
