@@ -81,7 +81,7 @@ class SPMode(InternalMode):
             "Split Mode",
             "{0} Splits".format(self.sm.get_n_splits()),
             "{0}/{1} Deleted".format(self.sm.get_n_deleted(), self.sm.get_n_sections()),
-            # "{0:.1f} % Deleted".format(), TODO later
+            "{0:.1f}% Deleted".format(self.sm.get_prop_deleted() * 100.0),
         ]
 
     def modify_frame(self, frame, i):
@@ -120,6 +120,8 @@ class SplitManager(object):
         self.section_statuses = [SectionStatus.ACTIVE]
 
     def split(self, loc):
+        if loc == 0 or loc == self.frame_count-1:
+            return self.par.error("Cannot split at endpoints")
         info = self.__find(loc)
         if info.kind == SMLocInfo.SPLIT:
             return self.par.error("Split already exists at {0}".format(loc))
@@ -163,7 +165,7 @@ class SplitManager(object):
             self.section_statuses[info.ii] = SectionStatus.DELETED
         else:
             self.section_statuses[info.ii] = SectionStatus.ACTIVE
-        self.par.log("Current section state was toggled".format(loc))
+        self.par.log("Current section state was toggled to {0}".format(self.section_statuses[info.ii]))
 
 
     def __find(self, loc):
@@ -298,8 +300,14 @@ class SplitManager(object):
             active_ranges.append((start+1, end))
         return active_ranges
 
+    def get_prop_deleted(self):
+        deleted_frames = len(self.splits)
+        splits = [-1] + self.splits + [self.frame_count]
+        for i in range(len(self.section_statuses)):
+            if self.section_statuses[i] == SectionStatus.DELETED:
+                deleted_frames += splits[i+1] - splits[i] - 1
 
-
+        return deleted_frames * 1.0 / self.frame_count
 
 
 
