@@ -8,9 +8,8 @@ SP_MODE_INSTRUCTIONS = [
     ["x", "Split at the current frame exclusively", "Split is exclusive (current frame is gone)"],
     ["z", "Undo a split"],
     ["t", "Toggle the current section for deletion", "If deleted, this section will be ignored for the rest of the pipeline"],
-    # ["q", "Go to previous split"], TODO later
-    # ["e", "Go to next split"], TODO later
-    ["r", "Undo all"],
+    ["q", "Jump to previous split"],
+    ["e", "Jump to next split"],
 ]
 
 class SPGUIManager(VideoPlayerGUIManager):
