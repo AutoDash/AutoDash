@@ -22,7 +22,7 @@ def tag_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = BBContext(file_loc, mdi.bb_fields)
+            context = BBContext(file_loc, bbox_fields=mdi.bb_fields)
             gui = BBGUIManager(context)
             gui.start()
 
