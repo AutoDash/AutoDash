@@ -96,14 +96,18 @@ class SMLocInfo(object):
         self.kind = kind
         self.ii = ii
 
+class DisplayParams(object):
+    def __init__(self, text, line_num, x_loc, formatter):
+        self.text = text
+        self.line_num = line_num
+        self.x_loc = x_loc
+        self.formatter = formatter
+
 class SplitManager(object):
-    # Don't change anything except color
-    TEXT_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
-        "fontScale": 1,
-        "color": (255, 255, 255),
-        "thickness": 2
-    }
+    # Color in BGR
+    SPLIT_DISPLAY =   {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (153, 51, 51)}
+    DELETED_DISPLAY = {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (10, 10, 204)}
+    ACTIVE_DISPLAY =  {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (51, 204, 51)}
 
     def __init__(self, frame_count):
         self.frame_count = frame_count
@@ -168,59 +172,75 @@ class SplitManager(object):
         return SMLocInfo(loc, kind, ii)
 
     def modify_frame(self, frame, loc, width, height):
-        def get_center(text):
+        def get_location(text, center_pct):
             textsize = cv2.getTextSize(text,
-                    self.TEXT_DISPLAY["fontFace"],
-                    self.TEXT_DISPLAY["fontScale"],
-                    self.TEXT_DISPLAY["thickness"])[0]
-            return (width - textsize[0]) // 2
-        def get_end(text):
-            textsize = cv2.getTextSize(text,
-                    self.TEXT_DISPLAY["fontFace"],
-                    self.TEXT_DISPLAY["fontScale"],
-                    self.TEXT_DISPLAY["thickness"])[0]
-            return int(width - textsize[0]) - 5
-        def get_start(text):
-            return 5
+                    self.SPLIT_DISPLAY["fontFace"],
+                    self.SPLIT_DISPLAY["fontScale"],
+                    self.SPLIT_DISPLAY["thickness"])[0]
+            target_loc = (width - 10) * center_pct + 5
+            return max(
+                min(
+                    int(target_loc - (textsize[0] // 2)),
+                    width - 5 - textsize[0]
+                ),
+                5
+            )
+        def f_by_status(status):
+            return self.DELETED_DISPLAY if status == SectionStatus.DELETED else self.ACTIVE_DISPLAY
 
         info = self.__find(loc)
         ii = info.ii
         kind = info.kind
 
-        prev_text = []
-        mid_text = []
-        next_text = []
+        to_display = []
         if kind == SMLocInfo.SECTION:
             # Prev text
             if ii != 0:
-                prev_text = ["< " + str(loc - self.splits[ii-1]), "At " + str(self.splits[ii-1])]
+                to_display.append(DisplayParams("< " + str(loc - self.splits[ii-1]),
+                                                0, 0.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams("At " + str(self.splits[ii-1]),
+                                                1, 0.0, self.SPLIT_DISPLAY))
+
 
             # Current text
-            mid_text = [self.section_statuses[ii], "Section {0}".format(ii+1)]
+            f = f_by_status(self.section_statuses[ii])
+            to_display.append(DisplayParams(self.section_statuses[ii],
+                                            0, 0.5, f))
+            to_display.append(DisplayParams("Section {0}".format(ii+1),
+                                            1, 0.5, f))
 
             # Next text
             if ii != len(self.splits):
-                next_text = [str(self.splits[ii] - loc) + " >", "At " + str(self.splits[ii])]
+                to_display.append(DisplayParams(str(self.splits[ii] - loc) + " >",
+                                                0, 1.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams("At " + str(self.splits[ii]),
+                                                1, 1.0, self.SPLIT_DISPLAY))
 
         elif kind == SMLocInfo.SPLIT:
             # Prev text
             if ii != 0:
-                prev_text = ["< " + str(loc - self.splits[ii-1]), "At " + str(self.splits[ii-1]), self.section_statuses[ii]]
+                to_display.append(DisplayParams("< " + str(loc - self.splits[ii-1]),
+                                                0, 0.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams( "At " + str(self.splits[ii-1]),
+                                                1, 0.0, self.SPLIT_DISPLAY))
+            to_display.append(DisplayParams(self.section_statuses[ii],
+                                            1, 0.25, f_by_status(self.section_statuses[ii])))
 
             # Current text
-            mid_text = ["Split {0}".format(ii+1)]
+            to_display.append(DisplayParams("Split {0}".format(ii+1),
+                                            1, 0.5, self.SPLIT_DISPLAY))
 
             # Next text
             if ii != len(self.splits) - 1:
-                next_text = [str(self.splits[ii+1] - loc) + " >", "At " + str(self.splits[ii+1]), self.section_statuses[ii+1]]
+                to_display.append(DisplayParams(str(self.splits[ii+1] - loc) + " >",
+                                                0, 1.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams("At " + str(self.splits[ii+1]),
+                                                1, 1.0, self.SPLIT_DISPLAY))
+            to_display.append(DisplayParams(self.section_statuses[ii+1],
+                                            1, 0.75, f_by_status(self.section_statuses[ii+1])))
 
-        for i, text in enumerate(prev_text):
-            cv2.putText(frame, text, (get_start(text), (i+1) * 30), **self.TEXT_DISPLAY)
-        for i, text in enumerate(mid_text):
-            cv2.putText(frame, text, (get_center(text), (i+1) * 30), **self.TEXT_DISPLAY)
-        for i, text in enumerate(next_text):
-            cv2.putText(frame, text, (get_end(text), (i+1) * 30), **self.TEXT_DISPLAY)
-
+        for p in to_display:
+            cv2.putText(frame, p.text, (get_location(p.text, p.x_loc), (p.line_num+1) * 30), **p.formatter)
         return frame
 
 
