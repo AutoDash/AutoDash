@@ -3,6 +3,7 @@ from .context import GUIContext
 from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.text_popup import TextPopup
+from .tinker_subuis.select_popup import SelectPopup
 import cv2
 from gui_tool.gui.bb.BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
@@ -37,6 +38,10 @@ SELECTION_MODE_INSTRUCTIONS = [
         "NOTE: by default, all videos will be dashcam",
         "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable tags"],
+]
+
+BB_CLASS_DEFAULT_OPTIONS = [
+    "Car", "Truck", "Motorcycle", "Van", "Pedestrian"
 ]
 
 class BBGUIManager(VideoPlayerGUIManager):
@@ -148,7 +153,9 @@ class InternalBBoxMode(InternalMode):
             if not bbm.has_id(self.selected_id):
                 self.error("Could not update class. ID {0} does not exist".format(self.selected_id))
             else:
-                cls = TextPopup("Enter new class for the selected object").run()
+                cls = SelectPopup("Enter new class for the selected object",
+                      "bb_classes", 10,
+                      BB_CLASS_DEFAULT_OPTIONS).run()
                 prev = bbm.get_cls(self.selected_id)
                 if cls == None:
                     self.cancel("Class change", "{0} still on class {1}".format(self.selected_id, prev))
