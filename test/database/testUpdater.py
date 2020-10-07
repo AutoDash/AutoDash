@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-from signals import StopSignal
+from src.signals import StopSignal
 from src.data.MetaDataItem import MetaDataItem
 from src.database.DataUpdater import DataUpdater
 from test.mock.MockDataAccessor import MockDataAccessor

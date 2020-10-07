@@ -21,6 +21,6 @@ class Filterer(iExecutor):
         res = self.filter_cond.filter([metadata])
 
         if len(res) == 0:
-            raise StopSignal
+            raise StopSignal()
 
         return item
