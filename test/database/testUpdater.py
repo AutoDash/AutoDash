@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 
-import sys
-
 from signals import StopSignal
 from src.data.MetaDataItem import MetaDataItem
 from src.database.DataUpdater import DataUpdater
