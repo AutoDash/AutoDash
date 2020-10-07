@@ -17,7 +17,7 @@ class DataUpdater(iDatabaseExecutor):
         metadata = self.get_metadata(item)
 
         if metadata.id is None or len(metadata.id) == 0 or metadata.id not in self.database.fetch_video_id_list():
-            if metadata.url in self.database.fetch_video_url_list():
+            if not metadata.is_split_url and metadata.url in self.database.fetch_video_url_list():
                 # The video already exists in the database, with a different id, so don't re-add it to the database
                 raise StopSignal()
             # metadata item is not in the database, therefore create it in the database
