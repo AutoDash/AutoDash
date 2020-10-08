@@ -1,5 +1,5 @@
 import cv2
-from gui_tool.utils.IndexedRect import IndexedRect
+from ...utils.IndexedRect import IndexedRect
 
 class BoundingBoxManager(object):
     BOX_DISPLAY = {
