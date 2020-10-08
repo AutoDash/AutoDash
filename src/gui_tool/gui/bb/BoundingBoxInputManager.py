@@ -1,5 +1,5 @@
 
-from gui_tool.utils.IndexedRect import IndexedRect
+from ...utils.IndexedRect import IndexedRect
 
 class IndexedRectBuilder(object):
     def __init__(self):

@@ -4,7 +4,7 @@ from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.text_popup import TextPopup
 import cv2
-from gui_tool.gui.bb.BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
+from .bb.BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
 from .general_gui import VideoPlayerGUIManager
 from .gui_mode import InternalMode
