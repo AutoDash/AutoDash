@@ -38,7 +38,10 @@ class SelectPopup:
 
     def __get_update_inp_field_func(self, value):
         this = self
-        return lambda: this.__update_inp_field(value)
+        def ret():
+            this.__update_inp_field(value)
+            this.submit()
+        return ret
 
     def __update_inp_field(self, value):
         self.inp_field.delete(0, END)
