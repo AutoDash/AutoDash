@@ -15,6 +15,7 @@ class MetaDataItem:
         self.location = kwargs.get("location", None)
         self.tags = kwargs.get("tags", {})
         self.is_cancelled = kwargs.get("is_cancelled", False)
+        self.is_split_url = kwargs.get("is_split_url", False)
 
         self.bb_fields = kwargs.get("bb_fields", None)
 

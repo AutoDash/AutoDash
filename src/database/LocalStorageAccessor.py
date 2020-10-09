@@ -33,14 +33,17 @@ class LocalStorageAccessor(iDatabase):
         return str(new_id)
 
     def publish_new_metadata(self, metadata: MetaDataItem) -> str:
-        if metadata.url in self.url_list:
+        if not metadata.is_split_url and metadata.url in self.url_list:
             raise AlreadyExistsException()
 
         metadata.id = self.__gen_new_id()
         metadata.to_file(self.storage_loc)
 
         self.id_list.append(metadata.id)
-        self.url_list.append(metadata.url)
+
+        if metadata.url not in self.url_list:
+            self.url_list.append(metadata.url)
+
         return metadata.id
 
     def update_metadata(self, metadata: MetaDataItem):

@@ -111,9 +111,10 @@ class FirebaseAccessor(iDatabase):
         ref = self.__metadata_reference()
 
         # Check that the video isn't already in the list by seeing if its url is already in the list
-        existing_list = self.fetch_video_url_list()
-        if metadata.url in existing_list:
-            raise AlreadyExistsException("Error, video url already in list")
+        if not metadata.is_split_url:
+            existing_list = self.fetch_video_url_list()
+            if metadata.url in existing_list:
+                raise AlreadyExistsException("Error, video url already in list")
 
         key = ref.push(metadata.to_json()).key
         metadata.id = key
