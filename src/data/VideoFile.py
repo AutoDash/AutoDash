@@ -2,14 +2,14 @@ from abc import ABC, abstractmethod
 import cv2
 import numpy as np
 import os
-class VideoStartOrEndOutOfBoundsException(Exception):
+class VideoStartOrEndOutOfBoundsException(RuntimeError):
     '''Invalid start or end location in VideoFile'''
 
-class VideoNotFoundException(Exception):
-    '''Raise when user aborts the tagging'''
+class VideoNotFoundException(RuntimeError):
+    '''Raise when local video file could not be found'''
 
-class VideoCouldNotBeOpenedException(Exception):
-    '''Raise when user aborts the tagging'''
+class VideoCouldNotBeOpenedException(RuntimeError):
+    '''Raise when the local video file could not be properly read or opened'''
 
 """
 Behaviour notes:
