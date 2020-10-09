@@ -41,7 +41,7 @@ SELECTION_MODE_INSTRUCTIONS = [
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
-    "Car", "Truck", "Motorcycle", "Van", "Pedestrian"
+    "car", "truck", "motorcycle", "van", "pedestrian"
 ]
 
 class BBGUIManager(VideoPlayerGUIManager):
