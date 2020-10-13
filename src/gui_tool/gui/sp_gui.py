@@ -8,9 +8,8 @@ SP_MODE_INSTRUCTIONS = [
     ["x", "Split at the current frame exclusively", "Split is exclusive (current frame is gone)"],
     ["z", "Undo a split"],
     ["t", "Toggle the current section for deletion", "If deleted, this section will be ignored for the rest of the pipeline"],
-    # ["q", "Go to previous split"], TODO later
-    # ["e", "Go to next split"], TODO later
-    ["r", "Undo all"],
+    ["q", "Jump to previous split"],
+    ["e", "Jump to next split"],
 ]
 
 class SPGUIManager(VideoPlayerGUIManager):
@@ -45,7 +44,7 @@ class SPMode(InternalMode):
         self.splits = []
         self.section_statuses = []
 
-        self.sm = SplitManager(context.vcm.get_frames_count())
+        self.sm = SplitManager(self, context.vcm.get_frames_count())
 
     def handle_click(self, event, x, y, flags, param):
         pass
@@ -55,33 +54,33 @@ class SPMode(InternalMode):
         sm = self.sm
         i = vcm.get_frame_index()
 
-        if key_mapper.consume("r"):
-            sm.reset()
-        elif key_mapper.consume("x"):
-            err = sm.split(i)
-            if err is not None:
-                self.error(err)
-            else:
-                self.log("New split made at {0}".format(i))
+        # if key_mapper.consume("r"):
+        #     sm.reset()
+        if key_mapper.consume("x"):
+            sm.split(i)
         elif key_mapper.consume("z"):
-            err = sm.erase_split(i)
-            if err is not None:
-                self.error(err)
-            else:
-                self.log("Split at {0} was removed".format(i))
+            sm.erase_split(i)
         elif key_mapper.consume("t"):
-            err = sm.toggle_section(i)
-            if err is not None:
-                self.error(err)
+            sm.toggle_section(i)
+        elif key_mapper.consume("q"):
+            p_loc = sm.find_previous_split(i)
+            if p_loc is not None:
+                self.par.vcm.start_from(p_loc)
             else:
-                self.log("Current section state was toggled".format(i))
+                self.error("Can't jump: No previous split exists")
+        elif key_mapper.consume("e"):
+            n_loc = sm.find_next_split(i)
+            if n_loc is not None:
+                self.par.vcm.start_from(n_loc)
+            else:
+                self.error("Can't jump: No previous split exists")
 
     def get_state_message(self):
         return [
             "Split Mode",
             "{0} Splits".format(self.sm.get_n_splits()),
             "{0}/{1} Deleted".format(self.sm.get_n_deleted(), self.sm.get_n_sections()),
-            # "{0:.1f} % Deleted".format(), TODO later
+            "{0:.1f}% Deleted".format(self.sm.get_prop_deleted() * 100.0),
         ]
 
     def modify_frame(self, frame, i):
@@ -96,16 +95,21 @@ class SMLocInfo(object):
         self.kind = kind
         self.ii = ii
 
-class SplitManager(object):
-    # Don't change anything except color
-    TEXT_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
-        "fontScale": 1,
-        "color": (255, 255, 255),
-        "thickness": 2
-    }
+class DisplayParams(object):
+    def __init__(self, text, line_num, x_loc, formatter):
+        self.text = text
+        self.line_num = line_num
+        self.x_loc = x_loc
+        self.formatter = formatter
 
-    def __init__(self, frame_count):
+class SplitManager(object):
+    # Color in BGR
+    SPLIT_DISPLAY =   {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (153, 51, 51)}
+    DELETED_DISPLAY = {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (10, 10, 204)}
+    ACTIVE_DISPLAY =  {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (51, 204, 51)}
+
+    def __init__(self, parent, frame_count):
+        self.par = parent
         self.frame_count = frame_count
         self.splits = []
         self.section_statuses = [SectionStatus.ACTIVE]
@@ -115,34 +119,52 @@ class SplitManager(object):
         self.section_statuses = [SectionStatus.ACTIVE]
 
     def split(self, loc):
+        if loc == 0 or loc == self.frame_count-1:
+            return self.par.error("Cannot split at endpoints")
         info = self.__find(loc)
         if info.kind == SMLocInfo.SPLIT:
-            return "Split already exists at {0}".format(loc)
+            return self.par.error("Split already exists at {0}".format(loc))
+
+        if self.section_statuses[info.ii] == SectionStatus.DELETED:
+            self.par.warn("Splitting on a deleted section. Both sides will be deleted")
+        p_loc, n_loc = self.find_previous_split(loc), self.find_next_split(loc)
+        if p_loc is not None:
+            if loc - p_loc == 1:
+                return self.par.error("Cannot split right next to another split")
+            if loc - p_loc <= 5:
+                self.par.warn("Splitting very close to an existing previous split ({0} away)".format(loc - p_loc))
+        if n_loc is not None:
+            if n_loc - loc == 1:
+                return self.par.error("Cannot split right next to another split")
+            if n_loc - loc <= 5:
+                self.par.warn("Splitting very close to an existing following split ({0} away)".format(n_loc - loc))
+
         self.splits.insert(info.ii, loc)
         self.section_statuses.insert(info.ii, self.section_statuses[info.ii])
+        self.par.log("New split made at {0}".format(loc))
 
     def erase_split(self, loc):
         info = self.__find(loc)
         if info.kind != SMLocInfo.SPLIT:
-            return "Frame {0} is not the location of a split".format(loc)
-
+            return self.par.error("Frame {0} is not the location of a split".format(loc))
         ii = info.ii
         if self.section_statuses[ii] != self.section_statuses[ii+1]:
-            return "Both sides of the split must be in the same state ({0} != {1})".format(
+            return self.par.error("Both sides of the split must be in the same state ({0} != {1})".format(
                 self.section_statuses[ii], self.section_statuses[ii+1]
-            )
-
+            ))
         del self.splits[ii]
         del self.section_statuses[ii]
+        self.par.log("Split at {0} was removed".format(loc))
 
     def toggle_section(self, loc):
         info = self.__find(loc)
         if info.kind != SMLocInfo.SECTION:
-            return "Frame {0} is a split".format(loc)
+            return self.par.error("Frame {0} is a split".format(loc))
         if self.section_statuses[info.ii] == SectionStatus.ACTIVE:
             self.section_statuses[info.ii] = SectionStatus.DELETED
         else:
             self.section_statuses[info.ii] = SectionStatus.ACTIVE
+        self.par.log("Current section state was toggled to {0}".format(self.section_statuses[info.ii]))
 
 
     def __find(self, loc):
@@ -167,60 +189,88 @@ class SplitManager(object):
 
         return SMLocInfo(loc, kind, ii)
 
+    def find_previous_split(self, loc):
+        for split in reversed(self.splits):
+            if split < loc:
+                return split
+        return None
+
+    def find_next_split(self, loc):
+        for split in self.splits:
+            if split > loc:
+                return split
+        return None
+
     def modify_frame(self, frame, loc, width, height):
-        def get_center(text):
+        def get_location(text, center_pct):
             textsize = cv2.getTextSize(text,
-                    self.TEXT_DISPLAY["fontFace"],
-                    self.TEXT_DISPLAY["fontScale"],
-                    self.TEXT_DISPLAY["thickness"])[0]
-            return (width - textsize[0]) // 2
-        def get_end(text):
-            textsize = cv2.getTextSize(text,
-                    self.TEXT_DISPLAY["fontFace"],
-                    self.TEXT_DISPLAY["fontScale"],
-                    self.TEXT_DISPLAY["thickness"])[0]
-            return int(width - textsize[0]) - 5
-        def get_start(text):
-            return 5
+                    self.SPLIT_DISPLAY["fontFace"],
+                    self.SPLIT_DISPLAY["fontScale"],
+                    self.SPLIT_DISPLAY["thickness"])[0]
+            target_loc = (width - 10) * center_pct + 5
+            return max(
+                min(
+                    int(target_loc - (textsize[0] // 2)),
+                    width - 5 - textsize[0]
+                ),
+                5
+            )
+        def f_by_status(status):
+            return self.DELETED_DISPLAY if status == SectionStatus.DELETED else self.ACTIVE_DISPLAY
 
         info = self.__find(loc)
         ii = info.ii
         kind = info.kind
 
-        prev_text = []
-        mid_text = []
-        next_text = []
+        to_display = []
         if kind == SMLocInfo.SECTION:
             # Prev text
             if ii != 0:
-                prev_text = ["< " + str(loc - self.splits[ii-1]), "At " + str(self.splits[ii-1])]
+                to_display.append(DisplayParams("< " + str(loc - self.splits[ii-1]),
+                                                0, 0.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams("At " + str(self.splits[ii-1]),
+                                                1, 0.0, self.SPLIT_DISPLAY))
+
 
             # Current text
-            mid_text = [self.section_statuses[ii], "Section {0}".format(ii+1)]
+            f = f_by_status(self.section_statuses[ii])
+            to_display.append(DisplayParams(self.section_statuses[ii],
+                                            0, 0.5, f))
+            to_display.append(DisplayParams("Section {0}".format(ii+1),
+                                            1, 0.5, f))
 
             # Next text
             if ii != len(self.splits):
-                next_text = [str(self.splits[ii] - loc) + " >", "At " + str(self.splits[ii])]
+                to_display.append(DisplayParams(str(self.splits[ii] - loc) + " >",
+                                                0, 1.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams("At " + str(self.splits[ii]),
+                                                1, 1.0, self.SPLIT_DISPLAY))
 
         elif kind == SMLocInfo.SPLIT:
             # Prev text
             if ii != 0:
-                prev_text = ["< " + str(loc - self.splits[ii-1]), "At " + str(self.splits[ii-1]), self.section_statuses[ii]]
+                to_display.append(DisplayParams("< " + str(loc - self.splits[ii-1]),
+                                                0, 0.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams( "At " + str(self.splits[ii-1]),
+                                                1, 0.0, self.SPLIT_DISPLAY))
+            to_display.append(DisplayParams(self.section_statuses[ii],
+                                            1, 0.25, f_by_status(self.section_statuses[ii])))
 
             # Current text
-            mid_text = ["Split {0}".format(ii+1)]
+            to_display.append(DisplayParams("Split {0}".format(ii+1),
+                                            1, 0.5, self.SPLIT_DISPLAY))
 
             # Next text
             if ii != len(self.splits) - 1:
-                next_text = [str(self.splits[ii+1] - loc) + " >", "At " + str(self.splits[ii+1]), self.section_statuses[ii+1]]
+                to_display.append(DisplayParams(str(self.splits[ii+1] - loc) + " >",
+                                                0, 1.0, self.SPLIT_DISPLAY))
+                to_display.append(DisplayParams("At " + str(self.splits[ii+1]),
+                                                1, 1.0, self.SPLIT_DISPLAY))
+            to_display.append(DisplayParams(self.section_statuses[ii+1],
+                                            1, 0.75, f_by_status(self.section_statuses[ii+1])))
 
-        for i, text in enumerate(prev_text):
-            cv2.putText(frame, text, (get_start(text), (i+1) * 30), **self.TEXT_DISPLAY)
-        for i, text in enumerate(mid_text):
-            cv2.putText(frame, text, (get_center(text), (i+1) * 30), **self.TEXT_DISPLAY)
-        for i, text in enumerate(next_text):
-            cv2.putText(frame, text, (get_end(text), (i+1) * 30), **self.TEXT_DISPLAY)
-
+        for p in to_display:
+            cv2.putText(frame, p.text, (get_location(p.text, p.x_loc), (p.line_num+1) * 30), **p.formatter)
         return frame
 
 
@@ -243,14 +293,20 @@ class SplitManager(object):
             end = splits[i+1]
 
             # Start and end frames will be removed
-            if not (start+1 <= end-1):
+            if not (start+1 < end):
                 continue
 
-            active_ranges.append((start+1, end-1))
+            active_ranges.append((start+1, end))
         return active_ranges
 
+    def get_prop_deleted(self):
+        deleted_frames = len(self.splits)
+        splits = [-1] + self.splits + [self.frame_count]
+        for i in range(len(self.section_statuses)):
+            if self.section_statuses[i] == SectionStatus.DELETED:
+                deleted_frames += splits[i+1] - splits[i] - 1
 
-
+        return deleted_frames * 1.0 / self.frame_count
 
 
 
