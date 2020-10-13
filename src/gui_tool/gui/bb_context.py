@@ -11,8 +11,8 @@ class BBContext(GUIContext):
         "y2s",
         "has_collision",
     ]
-    def __init__(self, file_loc: str, bbox_fields):
-        super(BBContext, self).__init__(file_loc)
+    def __init__(self, file_loc: str, bbox_fields, start_index=None, end_index=None):
+        super(BBContext, self).__init__(file_loc, start_index, end_index)
         self.bbox_fields = None
         self.set_bbox_fields(bbox_fields)
 

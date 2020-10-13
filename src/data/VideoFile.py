@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
 import cv2
 import numpy as np
-
-class VideoStartOrEndOutOfBoundsException(Exception):
+import os
+class VideoStartOrEndOutOfBoundsException(RuntimeError):
     '''Invalid start or end location in VideoFile'''
+
+class VideoNotFoundException(RuntimeError):
+    '''Raise when local video file could not be found'''
+
+class VideoCouldNotBeOpenedException(RuntimeError):
+    '''Raise when the local video file could not be properly read or opened'''
 
 """
 Behaviour notes:
@@ -20,6 +26,10 @@ while vf.is_open():
 class VideoFile(object):
     def __init__(self, file_loc, start: int = None, end: int = None):
         self.file_loc = file_loc
+
+        if not (os.path.isfile(file_loc)):
+            raise VideoNotFoundException("Requested video file does not exist")
+
         self.source = cv2.VideoCapture(file_loc)
         self.true_length = int(self.source.get(cv2.CAP_PROP_FRAME_COUNT))
         start = start if start is not None else 0
@@ -60,17 +70,19 @@ class VideoFile(object):
 
         skip_n = int(skip_n)
         self.capture = cv2.VideoCapture(self.file_loc)
-        self.n_frames_played = skip_n
+
+        if not (self.is_open()):
+            raise VideoCouldNotBeOpenedException("Video format could not be read by opencv")
 
         if skip_n > 0:
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, skip_n)
-            assert(self.capture.get(cv2.CAP_PROP_POS_FRAMES) == skip_n)
+        ret, self.current_frame = self.capture.read()
 
     def set_index(self, location: int = None):
         self.__set_capture(self.__alter_index(location))
 
     def get_index(self) -> int:
-        return self.__revert_index(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
+        return self.__revert_index(int(self.capture.get(cv2.CAP_PROP_POS_FRAMES)) - 1)
 
     def clear(self):
         self.capture.release()
@@ -80,7 +92,9 @@ class VideoFile(object):
             ret, frame = self.capture.read()
             if ret:
                 self.current_frame = frame
-                self.n_frames_played += 1
+        return self.current_frame
+
+    def current(self):
         return self.current_frame
 
     def get_frame_count(self) -> int:
@@ -103,3 +117,12 @@ class VideoFile(object):
         while vf.is_open() and vf.get_index() < end:
             ret.append(vf.next())
         return np.array(ret)
+
+    def get_width(self):
+        return self.frame_width
+
+    def get_height(self):
+        return self.frame_height
+
+    def release(self):
+        self.capture.release()
