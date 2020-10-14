@@ -84,7 +84,9 @@ class MetaDataItem:
             return None
 
     def clone(self):
-        return MetaDataItem(**self.to_json())
+        m = MetaDataItem(**self.to_json())
+        m.id = None
+        return m
 
 
 

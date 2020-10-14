@@ -55,7 +55,6 @@ def split_file(file_loc, mdi:MetaDataItem):
                 m = mdi.clone()
                 m.start_i = start
                 m.end_i = end
-                m.id = None
                 ret.append(m)
             return ret
 
