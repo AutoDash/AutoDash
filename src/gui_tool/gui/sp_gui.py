@@ -30,6 +30,9 @@ class SPGUIManager(VideoPlayerGUIManager):
 
     def start(self):
         super(SPGUIManager, self).start()
+        active_ranges = self.mode_handlers[0].sm.get_all_active_ranges()
+        return active_ranges
+
 
     def modify_frame(self, frame, frame_index):
         return frame

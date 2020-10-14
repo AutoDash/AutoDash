@@ -22,7 +22,11 @@ def tag_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = BBContext(file_loc, bbox_fields=mdi.bb_fields)
+            context = BBContext(
+                file_loc,
+                bbox_fields=mdi.bb_fields,
+                start_index=mdi.start_i,
+                end_index=mdi.end_i)
             gui = BBGUIManager(context)
             gui.start()
 
@@ -45,8 +49,15 @@ def split_file(file_loc, mdi:MetaDataItem):
         try:
             context = GUIContext(file_loc)
             gui = SPGUIManager(context)
-            gui.start()
-            return mdi
+            rs = gui.start()
+            ret = []
+            for start, end in rs:
+                m = mdi.clone()
+                m.start_i = start
+                m.end_i = end
+                m.id = None
+                ret.append(m)
+            return ret
 
         except ManualTaggingAbortedException as e:
             print("Aborted. Will restart")
