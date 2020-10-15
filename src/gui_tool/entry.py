@@ -50,11 +50,26 @@ def split_file(file_loc, mdi:MetaDataItem):
             context = GUIContext(file_loc)
             gui = SPGUIManager(context)
             rs = gui.start()
-            ret = []
-            for start, end in rs:
-                m = mdi.clone()
+            ret = [mdi]
+
+            split_vid = False
+            if len(rs) > 1:
+                split_vid = True
+
+            for i, vid_range in enumerate(rs):
+                start, end = vid_range
+
+                if i == 0:
+                    m = mdi
+                else:
+                    m = mdi.clone()
+
                 m.start_i = start
                 m.end_i = end
+
+                if split_vid:
+                    m.is_split_url = True
+
                 ret.append(m)
             return ret
 
