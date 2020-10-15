@@ -50,7 +50,7 @@ def split_file(file_loc, mdi:MetaDataItem):
             context = GUIContext(file_loc)
             gui = SPGUIManager(context)
             rs = gui.start()
-            ret = [mdi]
+            ret = []
 
             split_vid = False
             if len(rs) > 1:
@@ -71,6 +71,9 @@ def split_file(file_loc, mdi:MetaDataItem):
                     m.is_split_url = True
 
                 ret.append(m)
+
+            if len(ret) == 0:
+                ret = mdi
             return ret
 
         except ManualTaggingAbortedException as e:
