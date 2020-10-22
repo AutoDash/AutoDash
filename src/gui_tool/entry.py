@@ -73,6 +73,7 @@ def split_file(file_loc, mdi:MetaDataItem):
                 ret.append(m)
 
             if len(ret) == 0:
+                mdi.is_cancelled = True
                 ret = mdi
             return ret
 
