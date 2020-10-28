@@ -88,8 +88,7 @@ def run_recur(source_executor, item, dataUpdater):
     except CancelSignal:
         metadata = iExecutor.get_metadata(item)
         metadata.is_cancelled = True
-        dataUpdater.run(metadata)
-        return
+        items = item
     except RuntimeError as e:
         print(e)
         return
@@ -98,7 +97,10 @@ def run_recur(source_executor, item, dataUpdater):
         items = [items]
 
     for next_item in items:
-        run_recur(source_executor.get_next(), next_item, dataUpdater)
+        if next_item.is_cancelled:
+            dataUpdater.run(iExecutor.get_metadata(next_item))
+        else:
+            run_recur(source_executor.get_next(), next_item, dataUpdater)
 
 if __name__ == "__main__":
     main()
