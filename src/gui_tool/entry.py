@@ -36,7 +36,6 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 mdi.add_tag(key, val)
 
             if not context.is_dashcam:
-                mdi.is_cancelled = True
                 raise CancelSignal("Marked as not a dashcam video")
 
             return mdi
@@ -52,8 +51,9 @@ def split_file(file_loc, mdi:MetaDataItem):
             rs = gui.start()
 
             if len(rs) == 0:
-                mdi.is_cancelled = True
-                return mdi
+                raise CancelSignal("No sections of the video are of interest")
+
+            split_vid = len(rs) > 1
 
             ret = []
             for i, vid_range in enumerate(rs):
@@ -65,7 +65,7 @@ def split_file(file_loc, mdi:MetaDataItem):
                 start, end = vid_range
                 m.start_i = start
                 m.end_i = end
-                m.is_split_url = True
+                m.is_split_url = split_vid
 
                 ret.append(m)
             return ret
