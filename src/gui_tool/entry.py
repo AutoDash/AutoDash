@@ -22,7 +22,11 @@ def tag_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = BBContext(file_loc, bbox_fields=mdi.bb_fields)
+            context = BBContext(
+                file_loc,
+                bbox_fields=mdi.bb_fields,
+                start_index=mdi.start_i,
+                end_index=mdi.end_i)
             gui = BBGUIManager(context)
             gui.start()
 
@@ -32,7 +36,6 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 mdi.add_tag(key, val)
 
             if not context.is_dashcam:
-                mdi.is_cancelled = True
                 raise CancelSignal("Marked as not a dashcam video")
 
             return mdi
@@ -45,8 +48,27 @@ def split_file(file_loc, mdi:MetaDataItem):
         try:
             context = GUIContext(file_loc)
             gui = SPGUIManager(context)
-            gui.start()
-            return mdi
+            rs = gui.start()
+
+            if len(rs) == 0:
+                raise CancelSignal("No sections of the video are of interest")
+
+            split_vid = len(rs) > 1
+
+            ret = []
+            for i, vid_range in enumerate(rs):
+                if i == 0:
+                    m = mdi
+                else:
+                    m = mdi.clone()
+
+                start, end = vid_range
+                m.start_i = start
+                m.end_i = end
+                m.is_split_url = split_vid
+
+                ret.append(m)
+            return ret
 
         except ManualTaggingAbortedException as e:
             print("Aborted. Will restart")

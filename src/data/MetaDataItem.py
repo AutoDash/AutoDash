@@ -19,6 +19,10 @@ class MetaDataItem:
 
         self.bb_fields = kwargs.get("bb_fields", None)
 
+
+        self.start_i = kwargs.get("start_i", None)
+        self.end_i = kwargs.get("end_i", None)
+
     def __repr__(self) -> str:
         return self.to_json_str()
 
@@ -34,7 +38,10 @@ class MetaDataItem:
             'location' : str,
             'tags': dict,
             'is_cancelled': bool,
+            'is_split_url': bool,
             'bb_fields': dict,
+            'start_i': int,
+            'end_i': int,
         }
 
     def encode(self) -> str:
@@ -49,8 +56,11 @@ class MetaDataItem:
             'description': self.description,
             'location': self.location,
             'is_cancelled': self.is_cancelled,
+            'is_split_url': self.is_split_url,
             'tags': self.tags,
             'bb_fields': self.bb_fields,
+            'start_i': self.start_i,
+            'end_i': self.end_i,
         }
 
     def to_json_str(self) -> str:
@@ -74,6 +84,12 @@ class MetaDataItem:
             return self.tags[name]
         else:
             return None
+
+    def clone(self):
+        m = MetaDataItem(**self.to_json())
+        m.id = None
+        return m
+
 
 
 # For accessing metadata items stored in local storage
