@@ -80,10 +80,10 @@ def run(pipeline, **args):
 def run_recur(source_executor, item, dataUpdater):
     if not source_executor:
         return
-
     try:
         items = source_executor.run(item)
-    except StopSignal:
+    except StopSignal as e:
+        print(e)
         return
     except CancelSignal:
         metadata = iExecutor.get_metadata(item)
