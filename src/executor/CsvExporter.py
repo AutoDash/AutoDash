@@ -14,23 +14,14 @@ class CsvExporter(iExecutor):
         print("Start exporting file")
         metadata = iExecutor.get_metadata(item)
         bbs = metadata.bb_fields
-        if (bbs is None) or ("frames" not in bbs):
+        if bbs is None:
             raise StopSignal("No bounding box fields for this item")
 
         filename = str(metadata.id) + ".csv"
         with open(STORAGE_DIR / filename, 'w') as f:
             writer = csv.writer(f)
-            for i in range(len(bbs['frames'])):
-                writer.writerow([
-                    bbs['frames'][i],
-                    bbs['ids'][i],
-                    bbs['clss'][i],
-                    bbs['x1s'][i],
-                    bbs['y1s'][i],
-                    bbs['x2s'][i],
-                    bbs['y2s'][i],
-                    bbs['has_collision'][i],
-                ])
+            for i in range(len(bbs)):
+                writer.writerow(bbs.get_row(i))
         print(f"Done exporting file {filename}")
         return item
 
