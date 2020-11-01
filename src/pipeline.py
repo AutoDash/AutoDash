@@ -59,7 +59,7 @@ def run(pipeline, **args):
     database = get_database(database_arg_mapper.get(args['storage'], None))
     dataUpdater = DataUpdater()
     dataUpdater.set_database(database)
-    print(database)
+    print(f"database: {database}")
 
     for executor in source_executors:
         if executor.requires_database():
@@ -79,11 +79,18 @@ def run(pipeline, **args):
 
 def run_recur(source_executor, item, dataUpdater):
     if not source_executor:
+        print(f"finished execution chain\n\n")
         return
+    print(f"Executing {source_executor}")
     try:
         items = source_executor.run(item)
+        if items is None:
+            return
     except StopSignal as e:
-        print(e)
+        print(f"Stopping Pipeline for metadataitem {item}\n\n\n reason: {e}")
+        metadata = iExecutor.get_metadata(item)
+        metadata.tags['state'] = ''
+        dataUpdater.run(metadata)
         return
     except CancelSignal:
         metadata = iExecutor.get_metadata(item)

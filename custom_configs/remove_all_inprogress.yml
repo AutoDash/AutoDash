@@ -1,0 +1,8 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: AutoLabeler
+    config:
+      key: "state"
+      val: ""
+  - executor: FirebaseUpdater

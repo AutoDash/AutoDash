@@ -14,7 +14,7 @@ class CsvExporter(iExecutor):
         print("Start exporting file")
         metadata = iExecutor.get_metadata(item)
         bbs = metadata.bb_fields
-        if bbs is None:
+        if bbs is None or len(bbs) == 0:
             raise StopSignal("No bounding box fields for this item")
 
         filename = str(metadata.id) + ".csv"

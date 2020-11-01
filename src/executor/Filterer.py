@@ -21,6 +21,7 @@ class Filterer(iExecutor):
         res = self.filter_cond.filter([metadata])
 
         if len(res) == 0:
-            raise StopSignal()
+            print(f"Condition {self.filter_cond} wasn't met")
+            return None
 
         return item
