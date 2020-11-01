@@ -25,9 +25,5 @@ class TestFilterer(unittest.TestCase):
         al = AutoLabeler()
         v = al.run(v)
 
-        try:
-            f.run(v)
-            self.assertTrue(False)
-        except StopSignal:
-            #expected path
-            pass
+        ret = f.run(v)
+        self.assertIsNone(ret, msg="Filterer should return None if failed")

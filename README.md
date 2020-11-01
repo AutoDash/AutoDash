@@ -18,4 +18,4 @@ You can run tests using the [run_tests.sh](./tools/run_tests.sh) file
 
 # Pipeline Configurations
 
-If you run the pipeline with the arg `--config smallcorgi_exporter.yml` then it will produce a folder with csv files that contain all completed metadatas
+If you run the pipeline with the arg `--config custom_configs/smallcorgi_exporter.yml` then it will produce a folder with csv files that contain all completed metadatas

@@ -16,6 +16,7 @@ class TestExecutor(iExecutor):
     def run(self, obj):
         print(f"run {self.event_num}")
         events.put(self.event_num)
+        return 1
 
 
 class MultipleReturnExecutor(iExecutor):
@@ -99,7 +100,7 @@ class TestAdministrator(unittest.TestCase):
 
         pc.load_graph(ptr)
 
-        administrator(pc, n_workers=2, max_iterations=3, storage='local')
+        administrator(pc, max_iterations=3, storage='local')
         for i in range(num_items*3):
             events.get(timeout=2)
 

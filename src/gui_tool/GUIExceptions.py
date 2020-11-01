@@ -1,6 +1,7 @@
+from ..signals import StopSignal
 
-class ManualTaggingAbortedException(Exception):
+class ManualTaggingAbortedException(StopSignal):
     '''Raise when user aborts the tagging'''
 
-class ManualTaggingExitedException(Exception):
+class ManualTaggingExitedException(StopSignal):
     '''Raise when user aborts the tagging'''
