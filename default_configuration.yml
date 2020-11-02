@@ -23,6 +23,7 @@ processingStages:
   #     batch_size: 10
   #     confidence_threshold: 0.85
   # - executor: FaceBlurrer
+  - executor: Splitter
   - executor: Labeler
   - executor: AutoLabeler
   - executor: Printer
