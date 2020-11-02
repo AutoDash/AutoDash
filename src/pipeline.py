@@ -20,7 +20,7 @@ database_arg_mapper = {'firebase': DatabaseConfigOption.firebase,
 
 # Needed for PyInstaller to work :(
 from src.executor import FirebaseSource, FaceBlurrer, Filterer, Labeler, LocalStorageSource, LocalStorageUpdater, ObjectDetector, Printer, RedditCrawler, UniversalDownloader, YoutubeCrawler, AutoLabeler
-from src.executor import FirebaseUpdater
+from src.executor import FirebaseUpdater, CsvExporter, Splitter
 
 class PipelineCLIParser(ArgumentParser):
     def __init__(self, *args, **kwargs):
