@@ -26,3 +26,10 @@ class DataUpdater(iDatabaseExecutor):
             self.database.update_metadata(metadata)
         # Return saved metadata item
         return item
+
+    def safe_run(self, item: Union[MetaDataItem, VideoItem]) -> bool:
+        try:
+            self.run(item)
+        except StopSignal:
+            return False
+        return True
