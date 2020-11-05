@@ -44,6 +44,11 @@ def tag_file(file_loc, mdi:MetaDataItem):
             print("Aborted. Will restart")
 
 def split_file(file_loc, mdi:MetaDataItem):
+
+    # Initial Tk to avoid macOS error
+    t = Tk()
+    t.destroy()
+
     while True:
         try:
             context = GUIContext(file_loc)

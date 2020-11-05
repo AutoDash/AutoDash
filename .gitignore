@@ -9,3 +9,7 @@ storage/
 metadata_storage/
 data_files/
 .cache
+build/
+dist/
+tools/build/
+tools/dist/
