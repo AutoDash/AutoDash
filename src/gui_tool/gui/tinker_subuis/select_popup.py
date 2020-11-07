@@ -25,7 +25,7 @@ class SelectPopup:
 
         self.confirm_button = Button(self.frame, text="Confirm", command=self.submit)
         self.confirm_button.grid(row=i//2+2, column=1)
-        self.cancel_button = Button(self.frame, text="Cancel", command=lambda event: self.root.destroy())
+        self.cancel_button = Button(self.frame, text="Cancel", command=lambda: self.root.destroy())
         self.cancel_button.grid(row=i//2+2, column=2)
 
         self.frame.pack()

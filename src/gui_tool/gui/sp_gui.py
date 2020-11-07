@@ -3,6 +3,7 @@ from ..utils.key_mapper import KeyMapper
 from .general_gui import VideoPlayerGUIManager
 from .gui_mode import InternalMode
 import cv2
+from .tinker_subuis.multiselect_popup import MultiSelectPopup
 
 SP_MODE_INSTRUCTIONS = [
     ["x", "Split at the current frame exclusively", "Split is exclusive (current frame is gone)"],
@@ -77,6 +78,16 @@ class SPMode(InternalMode):
                 self.par.vcm.start_from(n_loc)
             else:
                 self.error("Can't jump: No previous split exists")
+        elif key_mapper.consume("v"):
+            window = MultiSelectPopup("Select custom enum tags", "video_enum_tags", self.par.context.enum_tags)
+            enum_tags = window.run()
+            if enum_tags is not None:
+                self.log("Updated from {0}".format(self.par.context.enum_tags))
+                self.log("Now: {0}".format(enum_tags))
+                self.par.context.enum_tags = enum_tags
+                self.log("Remember to commit any new tags!")
+            else:
+                self.log("Enum tag update cancelled")
 
     def get_state_message(self):
         return [
