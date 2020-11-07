@@ -20,4 +20,11 @@ class VideoItem:
     def save_and_close(self, **kwargs):
         file_path = kwargs.get('file_path', self.file_path)
 
+    def to_json(self):
+        return {
+            "filepath": self.filepath,
+            "metadata": self.metadata,
+        }
 
+    def __repr__(self) -> str:
+        return str(self.to_json())

@@ -20,9 +20,9 @@ def get_firebase_access():
         return ReadOnlyFirebaseAccessor()
 
 def get_database(database_config: DatabaseConfigOption):
-    if database_config is DatabaseConfigOption.firebase:
-        database_access = get_firebase_access()
-    else:
+    if database_config is DatabaseConfigOption.local:
         database_access = LocalStorageAccessor()
+    else:
+        database_access = get_firebase_access()
 
     return database_access
