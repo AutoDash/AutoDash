@@ -1,0 +1,23 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: Filterer
+    config:
+      filter_str: "tags['state'] != 'processed'"
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
+  - executor: AutoLabeler
+    config:
+      key: "state"
+      val: "in-progress"
+  - executor: FirebaseUpdater
+  - executor: UniversalDownloader
+  - executor: Printer
+  - executor: Splitter
+  - executor: Labeler
+  - executor: AutoLabeler
+  - executor: FirebaseUpdater
+  - executor: Printer
+    config:
+      msg: "labelling and video uploaded"

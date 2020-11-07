@@ -1,6 +1,7 @@
 from ..downloader.iDownloader import iDownloader, DownloadException
 from ..data.VideoItem import VideoItem
 from ..data.MetaDataItem import MetaDataItem
+from ..signals.StopSignal import StopSignal
 from imgur_downloader import ImgurDownloader as imgur
 import os, re, shutil
 
@@ -13,10 +14,14 @@ class ImgurDownloader(iDownloader):
         filename = self.video_storage.get_file_name(md_item)
 
         print(f"downloading file {filename}")
-        downloader = imgur(link,
-                           dir_download=pathname,
-                           file_name=filename)
-        files, idx = downloader.save_images()
+        try:
+            downloader = imgur(link,
+                               dir_download=pathname,
+                               file_name=filename)
+            files, idx = downloader.save_images()
+        except Exception as e:
+            print(f"Error in downloading: {e}, stopping")
+            raise DownloadException("Could not download from{link}")
         print(f"downloaded {files}")
 
         # album downloaded, extract video from album

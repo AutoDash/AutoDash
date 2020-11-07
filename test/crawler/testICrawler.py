@@ -58,6 +58,7 @@ class TestICrawler(unittest.TestCase):
         # Get exact copy of the metadata item that was published
         copy_metadata = self.crawler.next_downloadable()
 
+        copy_metadata.id = metadata.id #need to do this because otherwise cant compare
         self.assertEqual(metadata.to_json(), copy_metadata.to_json())
 
 

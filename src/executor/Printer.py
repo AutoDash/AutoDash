@@ -8,8 +8,7 @@ class Printer(iExecutor):
 
     def run(self, item):
         if item is not None:
-            metadata = iExecutor.get_metadata(item)
-            print(f"printer loaded, item {metadata}, message: {self.msg}")
+            print(f"printer loaded, item {item}, message: {self.msg}")
         else:
             print(f"printer loaded, message: {self.msg}")
         return item

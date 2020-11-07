@@ -27,7 +27,7 @@ class MetaDataItem:
         self.end_i = kwargs.get("end_i", None)
 
     def __repr__(self) -> str:
-        return self.to_json_str()
+        return f"Metadata {self.id}:\n\n" + self.to_json_str()
 
     # Returns lists of attributes and their types. Types should ideally be default constructable.
     @staticmethod
@@ -40,6 +40,7 @@ class MetaDataItem:
             'description' : str,
             'location' : str,
             'tags': dict,
+            'id': str,
             'is_cancelled': bool,
             'is_split_url': bool,
             'bb_fields': dict,
@@ -58,6 +59,7 @@ class MetaDataItem:
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
+            'id': self.id,
             'is_cancelled': self.is_cancelled,
             'is_split_url': self.is_split_url,
             'tags': self.tags,
