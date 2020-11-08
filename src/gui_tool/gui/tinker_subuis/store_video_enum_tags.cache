@@ -1,1 +1,1 @@
-["NoCollision", "CollisionWithStationaryObject", "CollisionWithAnimal", "MultiCollision", "StationaryCamera", "ManHeldCamera", "LowQualityVideo", "LowVisibility", "PoorLighting"]
+["NoCollision", "CollisionWithStationaryObject", "CollisionWithAnimal", "CollisionWithRecordingVehicle", "MultiCollision", "StationaryCamera", "ManHeldCamera", "LowQualityVideo", "LowVisibility", "PoorLighting"]
