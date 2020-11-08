@@ -14,6 +14,7 @@ class MetaDataItem:
         self.description = kwargs.get("description", None)
         self.location = kwargs.get("location", None)
         self.tags = kwargs.get("tags", {})
+        self.enum_tags = kwargs.get("enum_tags", [])
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
 
@@ -36,11 +37,12 @@ class MetaDataItem:
             'title': str,
             'url' : str,
             'download_src': str,
-            'collision_type' : str,
-            'description' : str,
-            'location' : str,
+            'collision_type': str,
+            'description': str,
+            'location': str,
             'tags': dict,
             'id': str,
+            'enum_tags': list,
             'is_cancelled': bool,
             'is_split_url': bool,
             'bb_fields': dict,
@@ -63,6 +65,7 @@ class MetaDataItem:
             'is_cancelled': self.is_cancelled,
             'is_split_url': self.is_split_url,
             'tags': self.tags,
+            'enum_tags': self.enum_tags,
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,

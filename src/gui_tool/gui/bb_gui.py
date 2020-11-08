@@ -2,6 +2,7 @@ from src.gui_tool.utils.key_mapper import KeyMapper
 from .bb_context import BBContext
 from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
+from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from .tinker_subuis.text_popup import TextPopup
 from .tinker_subuis.select_popup import SelectPopup
 import cv2
@@ -37,7 +38,8 @@ SELECTION_MODE_INSTRUCTIONS = [
         "Toggle whether it is a dashcam video",
         "NOTE: by default, all videos will be dashcam",
         "Pressing n the first time will mark the video as not dashcam"],
-    ["t", "Opens window for user customizable tags"],
+    ["t", "Opens window for user customizable key-value tags"],
+    ["v", "Opens window for user customizable enum tags"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
@@ -92,12 +94,23 @@ class InternaSelectionMode(InternalMode):
             tags = window.get_user_tags()
             par.context.set_additional_tags(tags)
             self.log("Additional tags set")
+        elif key_mapper.consume("v"):
+            window = MultiSelectPopup("Select custom enum tags", "video_enum_tags", self.par.context.enum_tags)
+            enum_tags = window.run()
+            if enum_tags is not None:
+                self.log("Updated from {0}".format(self.par.context.enum_tags))
+                self.log("Now: {0}".format(enum_tags))
+                self.par.context.enum_tags = enum_tags
+                self.log("Remember to commit any new tags!")
+            else:
+                self.log("Enum tag update cancelled")
     def get_state_message(self):
         return [
             "Selection Mode",
             "{0} Selected".format(self.par.bbm.get_n_selected()),
             "{0} Total".format(self.par.bbm.get_n_ids()),
-            "Is dashcam" if self.par.context.is_dashcam else "Not dashcam"
+            "Is dashcam" if self.par.context.is_dashcam else "Not dashcam",
+            "{0} enum tags set".format(len(self.par.context.enum_tags))
         ]
 
 class InternalBBoxMode(InternalMode):

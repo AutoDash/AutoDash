@@ -27,10 +27,12 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 bbox_fields=mdi.bb_fields,
                 start_index=mdi.start_i,
                 end_index=mdi.end_i)
+            context.enum_tags = mdi.enum_tags
             gui = BBGUIManager(context)
             gui.start()
 
             mdi.bb_fields = context.get_bbox_fields()
+            mdi.enum_tags = context.enum_tags
 
             for key, val in context.additional_tags:
                 mdi.add_tag(key, val)
@@ -52,8 +54,11 @@ def split_file(file_loc, mdi:MetaDataItem):
     while True:
         try:
             context = GUIContext(file_loc)
+            context.enum_tags = mdi.enum_tags
             gui = SPGUIManager(context)
             rs = gui.start()
+
+            mdi.enum_tags = context.enum_tags
 
             if len(rs) == 0:
                 raise CancelSignal("No sections of the video are of interest")
