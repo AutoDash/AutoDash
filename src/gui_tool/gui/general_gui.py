@@ -54,6 +54,7 @@ class VideoPlayerGUIManager(object):
 
     def set_GUI(self):
         cv2.namedWindow(self.WINDOW_NAME)
+        cv2.resizeWindow(self.WINDOW_NAME, self.vcm.get_width(), self.vcm.get_height() + self.IMG_STARTING_Y)
         cv2.setMouseCallback(self.WINDOW_NAME,
              lambda event, x, y, flags, param: self.handleClick(event, x, y, flags, param))
 

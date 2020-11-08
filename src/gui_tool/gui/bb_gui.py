@@ -1,5 +1,5 @@
 from src.gui_tool.utils.key_mapper import KeyMapper
-from .context import GUIContext
+from .bb_context import BBContext
 from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.text_popup import TextPopup
@@ -53,7 +53,7 @@ class BBGUIManager(VideoPlayerGUIManager):
     LOG_START_X = 250
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
 
-    def __init__(self, context: GUIContext):
+    def __init__(self, context: BBContext):
         super(BBGUIManager, self).__init__(context,
            [
                InternaSelectionMode(self),
