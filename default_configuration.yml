@@ -3,6 +3,10 @@ dataSources:
   - executor: RedditCrawler
 processingStages:
   - executor: Filterer
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
+  - executor: Filterer
     config:
       filter_str: "tags['state'] != 'in-progress'"
   - executor: AutoLabeler
@@ -10,10 +14,6 @@ processingStages:
       key: "state"
       val: "in-progress"
   - executor: FirebaseUpdater
-  - executor: Filterer
-  - executor: Filterer
-    config:
-      filter_str: 'is_cancelled != 1'
   - executor: UniversalDownloader
   - executor: Printer
   # - executor: ObjectDetector
