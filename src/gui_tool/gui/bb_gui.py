@@ -110,7 +110,7 @@ class InternaSelectionMode(InternalMode):
             "{0} Selected".format(self.par.bbm.get_n_selected()),
             "{0} Total".format(self.par.bbm.get_n_ids()),
             "Is dashcam" if self.par.context.is_dashcam else "Not dashcam",
-            "{0} enum tags set".format(len(self.par.context.enum_tags))
+            "{0} enum tags set".format(len(self.par.context.enum_tags) if self.par.context.enum_tags else 0)
         ]
 
 class InternalBBoxMode(InternalMode):
