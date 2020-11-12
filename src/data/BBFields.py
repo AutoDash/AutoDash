@@ -11,7 +11,6 @@ class BBFields:
         "x2s",
         "y2s",
         "has_collision",
-        "accident_locations"
     ]
 
     def __init__(self, **kwargs):
@@ -45,14 +44,11 @@ class BBFields:
                 setattr(self, param, [])
             return
 
-        if "accident_locations" not in d:
-            d["accident_locations"] = []
-
         for param in BBFields.PARAMETERS:
             if param in d and type(d[param]) == list:
                 setattr(self, param, d[param])
                 if len(getattr(self, BBFields.PARAMETERS[0])) \
-                    != len(getattr(self, param)) and param != "accident_locations":
+                    != len(getattr(self, param)):
                     raise InvalidData(f"Length of all arrays must be equal")
             else:
-                raise InvalidData("Invalid Bounding-Box, param: {0} missing".format(param))
+                raise InvalidData(f"Invalid Bounding-Box, param: {param} missing")

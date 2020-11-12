@@ -74,6 +74,12 @@ class BBGUIManager(VideoPlayerGUIManager):
         frame = self.bbm.modify_frame(frame, frame_index)
         return frame
 
+    def can_commit(self):
+        if len(self.bbm.get_accident_locations()) == 0 and self.bbm.get_n_selected() > 0:
+            self.logger.log("[ERROR]: If there is an accident, must specify accident location")
+            return False
+        return True
+
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
         super().__init__(parent, SELECTION_MODE_INSTRUCTIONS)

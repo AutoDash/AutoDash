@@ -100,13 +100,16 @@ class VideoPlayerGUIManager(object):
                 if res == "Confirm":
                     raise ManualTaggingAbortedException("Tagging operation aborted")
             elif self.key_mapper.consume(("enter", "enter")):  # Enter
-                res = ButtonPopup(
-                    "Confirm commit",
-                    "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?",
-                    ["Confirm", "Cancel"]
-                ).run()
-                if res == "Confirm":
-                    break
+                if not self.can_commit():
+                    self.logger.log("[ERROR] Commit operation failed")
+                else:
+                    res = ButtonPopup(
+                        "Confirm commit",
+                        "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?",
+                        ["Confirm", "Cancel"]
+                    ).run()
+                    if res == "Confirm":
+                        break
             elif self.key_mapper.consume("h"):
                 window = HelpPopup(
                     "GUI controls reference",
@@ -168,4 +171,7 @@ class VideoPlayerGUIManager(object):
         cv2.destroyAllWindows()
 
     def modify_frame(self, frame, frame_index):
+        raise NotImplementedError()
+
+    def can_commit(self):
         raise NotImplementedError()

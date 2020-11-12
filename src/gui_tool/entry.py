@@ -12,6 +12,7 @@ from .GUIExceptions import ManualTaggingAbortedException
 
 from .gui.context import GUIContext
 from .gui.sp_gui import SPGUIManager
+from ..data.BBFields import BBFields
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi:MetaDataItem):
@@ -24,14 +25,16 @@ def tag_file(file_loc, mdi:MetaDataItem):
         try:
             context = BBContext(
                 file_loc,
-                bbox_fields=mdi.bb_fields,
+                bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
                 start_index=mdi.start_i,
-                end_index=mdi.end_i)
+                end_index=mdi.end_i
+            )
             context.enum_tags = mdi.enum_tags
             gui = BBGUIManager(context)
             gui.start()
 
-            mdi.bb_fields = context.get_bbox_fields()
+            mdi.bb_fields.set_fields_from_list(context.get_bbox_fields()[:-1])
+            mdi.accident_locations = context.get_bbox_fields()[-1]
             mdi.enum_tags = context.enum_tags
 
             for key, val in context.additional_tags:
