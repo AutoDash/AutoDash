@@ -29,4 +29,5 @@ processingStages:
   - executor: Printer
     config:
       msg: "labelling complete"
+  - executor: LocalStorageUpdater
   - executor: FirebaseUpdater

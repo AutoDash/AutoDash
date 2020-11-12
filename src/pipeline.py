@@ -29,7 +29,7 @@ class PipelineCLIParser(ArgumentParser):
                 help="Number of times to run pipeline loop", dest='max_iterations')
         self.add_argument('--mode', choices={'crawler', 'ucrawler', 'user'}, default='user',
                 help="Run mode. Either 'crawler', 'ucrawler', or 'user'")
-        self.add_argument('--storage', choices=database_arg_mapper, default='local',
+        self.add_argument('--storage', choices=database_arg_mapper, default='firebase',
                 help="Data storage used. Either 'firebase' or 'local")
         self.add_argument('--filter', type=str, help='A relational condition over metadata that we pull, overrides any conditions set by executors')
         self.add_argument('--config', type=str, default='default_configuration.yml', dest='config')
