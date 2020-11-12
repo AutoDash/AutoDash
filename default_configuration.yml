@@ -1,5 +1,5 @@
 dataSources:
-  - executor: FirebaseSource
+  - executor: YoutubeCrawler
   - executor: RedditCrawler
 processingStages:
   - executor: Filterer
