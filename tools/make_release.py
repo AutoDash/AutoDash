@@ -1,6 +1,6 @@
 from os import path
 import PyInstaller.__main__
-from shutil import copyfile
+from shutil import copyfile, copytree
 from pathlib import Path
 from zipfile import ZipFile, ZIP_BZIP2
 import platform
@@ -18,6 +18,8 @@ if __name__ == '__main__':
 
     # Copy default_configuration.yml
     copyfile(f'{TOOL_DIR}/../default_configuration.yml', f'{TOOL_DIR}/dist/default_configuration.yml')
+    # Copy custom configurations
+    copytree(f'{TOOL_DIR}/../custom_configs', f'{TOOL_DIR}/dist/custom_configs')
     
     # Zip all the files into package
     system = platform.system()
