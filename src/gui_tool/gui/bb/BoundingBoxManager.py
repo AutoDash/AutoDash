@@ -12,6 +12,11 @@ class BoundingBoxManager(object):
         "lineType": 1,
         "thickness": 1
     }
+    ACCIDENT_LOCATION_BOX_DISPLAY = {
+        "color": (0, 255, 255),
+        "lineType": 1,
+        "thickness": 2
+    }
     BOX_I_DISPLAY = {
         "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
         "fontScale": 0.5,
@@ -21,9 +26,10 @@ class BoundingBoxManager(object):
         self.bboxes = {}
         self.id_to_cls = {}
         self.selected = set()
+        self.accident_locations = []
         self.total_frames = total_frames
 
-    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s, selected):
+    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s, selected, accident_locations):
         self.bboxes = {}
         self.id_to_cls = {}
         for frame, id, cls, x1, y1, x2, y2, selected in zip(frames, ids, clss, x1s, y1s, x2s, y2s, selected):
@@ -34,6 +40,7 @@ class BoundingBoxManager(object):
 
             if selected:
                 self.selected.add(id)
+        self.accident_locations = sorted(accident_locations)
 
 
     def extract(self):
@@ -60,16 +67,17 @@ class BoundingBoxManager(object):
                 y2s.append(self.bboxes[id][frame][1][1])
                 selected.append(1 if id in self.selected else 0)
 
-        return frames, ids, clss, x1s, y1s, x2s, y2s, selected
-
-
+        return frames, ids, clss, x1s, y1s, x2s, y2s, selected, self.accident_locations
 
     def modify_frame(self, frame, i):
         for id, frame_data in self.bboxes.items():
             if i in frame_data:
                 p1, p2 = frame_data[i]
                 if id in self.selected:
-                    cv2.rectangle(frame, p1, p2, **self.SELECTED_BOX_DISPLAY)
+                    if i in self.accident_locations:
+                        cv2.rectangle(frame, p1, p2, **self.ACCIDENT_LOCATION_BOX_DISPLAY)
+                    else:
+                        cv2.rectangle(frame, p1, p2, **self.SELECTED_BOX_DISPLAY)
                 else:
                     cv2.rectangle(frame, p1, p2, **self.BOX_DISPLAY)
                 cv2.putText(frame, str(id), (p1[0] + 2, p1[1] + 15), **self.BOX_I_DISPLAY)
@@ -163,5 +171,17 @@ class BoundingBoxManager(object):
             return None
         p = self.bboxes[id][i]
         return IndexedRect(i, p[0][0], p[0][1], p[1][0], p[1][1])
-
+    def add_accident_location(self, loc):
+        if loc not in self.accident_locations:
+            self.accident_locations.append(loc)
+            self.accident_locations = sorted(self.accident_locations)
+    def remove_accident_location(self, loc):
+        for i, val in enumerate(self.accident_locations):
+            if val == loc:
+                del self.accident_locations[i]
+                break
+    def has_accident_location(self, loc):
+        return loc in self.accident_locations
+    def get_accident_locations(self):
+        return self.accident_locations.copy()
 
