@@ -18,12 +18,6 @@ class iReadOnlyDatabase(ABC):
     @staticmethod
     def create_metadata(id: str, var_dict: dict) -> MetaDataItem:
         var_dict['id'] = id
-        defined_vars = var_dict.keys()
-
-        for var in MetaDataItem.attributes():
-            if var not in defined_vars:
-                var_dict[var] = None
-
         return MetaDataItem(**var_dict)
 
     @abstractmethod
