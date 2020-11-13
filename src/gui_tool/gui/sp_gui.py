@@ -242,9 +242,19 @@ class SplitManager(object):
             for start, end, status in zip(ext_split_x[:-1], ext_split_x[1:], self.section_statuses):
                 color = f_by_status(status)["color"]
                 cv2.rectangle(frame, (start, 10), (end, 20), color, thickness=-1)
-            for split in split_x:
+            on_split = False
+            for split, rs in zip(split_x, self.splits):
                 cv2.rectangle(frame, (split-1, 8), (split+1, 22), self.SPLIT_DISPLAY["color"], thickness=-1)
+                if split == current_x: # Having current ontop of split when it is not a split is misleading
+                    if rs>loc:
+                        current_x -= 1
+                    elif rs < loc:
+                        current_x += 1
+                    else:
+                        on_split = True
             cv2.rectangle(frame, (current_x-1, 5), (current_x+1, 25), self.CURRENT_LOC_COLOR, thickness=-1)
+            if on_split:
+                cv2.rectangle(frame, (current_x, 5), (current_x, 25), self.SPLIT_DISPLAY["color"], thickness=-1)
 
         build_minimap()
 
