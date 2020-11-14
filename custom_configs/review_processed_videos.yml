@@ -9,3 +9,4 @@ processingStages:
       filter_str: 'is_cancelled != 1'
   - executor: UniversalDownloader
   - executor: Labeler
+  - executor: FirebaseUpdater
