@@ -3,6 +3,7 @@ from ..data.MetaDataItem import MetaDataItem
 from ..data.VideoItem import VideoItem
 import youtube_dl
 import os
+import glob
 
 class YoutubeDownloader(iDownloader):
 
@@ -19,6 +20,12 @@ class YoutubeDownloader(iDownloader):
     def download(self, md_item: MetaDataItem) -> VideoItem:
         ydl = youtube_dl.YoutubeDL(self.dl_opts)
 
+        new_name = self.video_storage.get_file_name(md_item)
+        existing_files = glob.glob(os.path.join(self.video_storage.get_storage_dir(), new_name + ".*"))
+        if existing_files:
+            print("Video already downloaded. Skipping download")
+            return VideoItem(metadata=md_item, filepath=existing_files[0])
+        
         link = md_item.url
         try:
             ydl.download([link])
@@ -29,7 +36,6 @@ class YoutubeDownloader(iDownloader):
             raise DownloadException("Failed to download youtube link " + link)
 
         base_filename, ext = os.path.splitext(self.file_name)
-        new_name = self.video_storage.get_file_name(md_item)
         self.video_storage.move_video(self.file_name, new_name + ext)
 
         return VideoItem(metadata=md_item, filepath=os.path.join(self.video_storage.get_storage_dir(), new_name + ext))
