@@ -121,6 +121,7 @@ class SplitManager(object):
     SPLIT_DISPLAY =   {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (153, 51, 51)}
     DELETED_DISPLAY = {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (10, 10, 204)}
     ACTIVE_DISPLAY =  {"fontFace": cv2.FONT_HERSHEY_SIMPLEX, "fontScale": 1, "thickness": 2, "color": (51, 204, 51)}
+    CURRENT_LOC_COLOR = (51, 153, 255)
 
     def __init__(self, parent, frame_count):
         self.par = parent
@@ -229,8 +230,33 @@ class SplitManager(object):
                 ),
                 5
             )
+
         def f_by_status(status):
             return self.DELETED_DISPLAY if status == SectionStatus.DELETED else self.ACTIVE_DISPLAY
+
+        def build_minimap():
+            ratio = (width-20.0)/(self.frame_count-1)
+            split_x = [int(s*ratio) + 10 for s in self.splits]
+            ext_split_x = [int(s*ratio) + 10 for s in [0] + self.splits + [self.frame_count-1]]
+            current_x = int(loc*ratio) + 10
+            for start, end, status in zip(ext_split_x[:-1], ext_split_x[1:], self.section_statuses):
+                color = f_by_status(status)["color"]
+                cv2.rectangle(frame, (start, 10), (end, 20), color, thickness=-1)
+            on_split = False
+            for split, rs in zip(split_x, self.splits):
+                cv2.rectangle(frame, (split-1, 8), (split+1, 22), self.SPLIT_DISPLAY["color"], thickness=-1)
+                if split == current_x: # Having current ontop of split when it is not a split is misleading
+                    if rs>loc:
+                        current_x -= 1
+                    elif rs < loc:
+                        current_x += 1
+                    else:
+                        on_split = True
+            cv2.rectangle(frame, (current_x-1, 5), (current_x+1, 25), self.CURRENT_LOC_COLOR, thickness=-1)
+            if on_split:
+                cv2.rectangle(frame, (current_x, 5), (current_x, 25), self.SPLIT_DISPLAY["color"], thickness=-1)
+
+        build_minimap()
 
         info = self.__find(loc)
         ii = info.ii
@@ -248,10 +274,8 @@ class SplitManager(object):
 
             # Current text
             f = f_by_status(self.section_statuses[ii])
-            to_display.append(DisplayParams(self.section_statuses[ii],
-                                            0, 0.5, f))
             to_display.append(DisplayParams("Section {0}".format(ii+1),
-                                            1, 0.5, f))
+                                            0, 0.5, f))
 
             # Next text
             if ii != len(self.splits):
@@ -267,12 +291,10 @@ class SplitManager(object):
                                                 0, 0.0, self.SPLIT_DISPLAY))
                 to_display.append(DisplayParams( "At " + str(self.splits[ii-1]),
                                                 1, 0.0, self.SPLIT_DISPLAY))
-            to_display.append(DisplayParams(self.section_statuses[ii],
-                                            1, 0.25, f_by_status(self.section_statuses[ii])))
 
             # Current text
             to_display.append(DisplayParams("Split {0}".format(ii+1),
-                                            1, 0.5, self.SPLIT_DISPLAY))
+                                            0, 0.5, self.SPLIT_DISPLAY))
 
             # Next text
             if ii != len(self.splits) - 1:
@@ -280,11 +302,9 @@ class SplitManager(object):
                                                 0, 1.0, self.SPLIT_DISPLAY))
                 to_display.append(DisplayParams("At " + str(self.splits[ii+1]),
                                                 1, 1.0, self.SPLIT_DISPLAY))
-            to_display.append(DisplayParams(self.section_statuses[ii+1],
-                                            1, 0.75, f_by_status(self.section_statuses[ii+1])))
 
         for p in to_display:
-            cv2.putText(frame, p.text, (get_location(p.text, p.x_loc), (p.line_num+1) * 30), **p.formatter)
+            cv2.putText(frame, p.text, (get_location(p.text, p.x_loc), (p.line_num+1) * 30 + 25), **p.formatter)
         return frame
 
 
