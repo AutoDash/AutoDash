@@ -10,3 +10,4 @@ processingStages:
   - executor: UniversalDownloader
   - executor: Labeler
   - executor: FirebaseUpdater
+  - executor: Printer
