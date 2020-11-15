@@ -61,6 +61,7 @@ def split_file(file_loc, mdi:MetaDataItem):
             rs = gui.start()
 
             if len(rs) == 0:
+                mdi.enum_tags = gui.mode_handlers[0].sm.get_first_enum_tags()
                 raise CancelSignal("No sections of the video are of interest")
 
             split_vid = len(rs) > 1

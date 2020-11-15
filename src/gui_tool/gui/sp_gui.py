@@ -437,7 +437,9 @@ class SplitManager(object):
                 ret.add(tag)
         return len(ret)
 
-
+    # Hotfix
+    def get_first_enum_tags(self):
+        return self.secs[0].enum_tags
 
 
 
