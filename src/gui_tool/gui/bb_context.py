@@ -6,6 +6,7 @@ class BBContext(GUIContext):
         super(BBContext, self).__init__(file_loc, start_index, end_index)
         self.bbox_fields = bbox_fields
         self.additional_tags = {}
+        self.enum_tags = []
 
     def set_bbox_fields_from_list(self, fields: List):
         self.bbox_fields = fields

@@ -5,13 +5,12 @@ from tkinter import Tk
 
 from .gui.bb_gui import BBGUIManager
 from .gui.bb_context import BBContext
+from .gui.sp_context import SPContext
 from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from .GUIExceptions import ManualTaggingAbortedException
 
-
-from .gui.context import GUIContext
-from .gui.sp_gui import SPGUIManager
+from .gui.sp_gui import SPGUIManager, Section
 from ..data.BBFields import BBFields
 
 # Lets the user tag the file. Modifies MetaDataItem in place
@@ -56,28 +55,27 @@ def split_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = GUIContext(file_loc)
-            context.enum_tags = mdi.enum_tags
+            context = SPContext(file_loc)
+            context.initial_enum_tags = mdi.enum_tags
             gui = SPGUIManager(context)
             rs = gui.start()
 
-            mdi.enum_tags = context.enum_tags
-
             if len(rs) == 0:
+                mdi.enum_tags = gui.mode_handlers[0].sm.get_all_used_tags()
                 raise CancelSignal("No sections of the video are of interest")
 
             split_vid = len(rs) > 1
 
             ret = []
-            for i, vid_range in enumerate(rs):
+            for i, sec in enumerate(rs):
                 if i == 0:
                     m = mdi
                 else:
                     m = mdi.clone()
 
-                start, end = vid_range
-                m.start_i = start
-                m.end_i = end
+                m.start_i = sec.start
+                m.end_i = sec.end
+                m.enum_tags = sec.enum_tags
                 m.is_split_url = split_vid
 
                 ret.append(m)
