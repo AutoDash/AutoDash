@@ -40,7 +40,7 @@ SELECTION_MODE_INSTRUCTIONS = [
         "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
-    ["l", "Mark current frame as a accident location"],
+    ["l", "Mark accident location"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [

@@ -10,7 +10,6 @@ class GUIContext(object):
         self.file_width = self.vcm.get_width()
 
         self.is_dashcam = True
-        self.enum_tags = []
 
     def mark_is_dashcam(self, is_dashcam: bool):
         self.marked = True
