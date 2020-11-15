@@ -49,6 +49,8 @@ class MultiSelectPopup:
         self.inp_field.delete(0, END)
         self.inp_field.insert(END, "")
 
+        if text == "":
+            return
         if text in self.cm.retrieve():
             return
 
