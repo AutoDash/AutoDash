@@ -18,7 +18,7 @@ class YoutubeDownloader(iDownloader):
 
     def download(self, md_item: MetaDataItem) -> VideoItem:
         ydl = youtube_dl.YoutubeDL(self.dl_opts)
-
+        
         link = md_item.url
         try:
             ydl.download([link])
@@ -32,7 +32,7 @@ class YoutubeDownloader(iDownloader):
         new_name = self.video_storage.get_file_name(md_item)
         self.video_storage.move_video(self.file_name, new_name + ext)
 
-        return VideoItem(metadata=md_item, filepath=os.path.join(self.video_storage.get_storage_dir(), new_name + ext))
+        return VideoItem(metadata=md_item, filepath=(self.video_storage.get_file(md_item) + ext))
 
     def on_download_callback(self, download):
         print("In callback: ", download)

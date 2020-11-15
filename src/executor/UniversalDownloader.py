@@ -27,7 +27,7 @@ class UniversalDownloader(iExecutor):
 
     def run(self, metadata_item: MetaDataItem) -> VideoItem:
         if self.video_storage.video_exists(metadata_item):
-            return self.video_storage.load_video(metadata_item)
+            return VideoItem(metadata=metadata_item, filepath=self.video_storage.get_existing_file_with_ext(metadata_item))
 
         for regex, downloader in self.registered_downloaders:
             if re.search(regex, metadata_item.url): return downloader.run(metadata_item)
