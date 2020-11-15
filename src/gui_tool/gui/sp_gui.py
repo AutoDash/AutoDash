@@ -38,6 +38,9 @@ class SPGUIManager(VideoPlayerGUIManager):
     def modify_frame(self, frame, frame_index):
         return frame
 
+    def can_commit(self):
+        return True
+
 class SectionStatus(object):
     ACTIVE = "ACTIVE"
     DELETED = "DELETED"

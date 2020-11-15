@@ -40,6 +40,7 @@ SELECTION_MODE_INSTRUCTIONS = [
         "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
+    ["l", "Mark current frame as a accident location"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
@@ -73,6 +74,12 @@ class BBGUIManager(VideoPlayerGUIManager):
         frame = self.bbm.modify_frame(frame, frame_index)
         return frame
 
+    def can_commit(self):
+        if len(self.bbm.get_accident_locations()) == 0 and self.bbm.get_n_selected() > 0:
+            self.logger.log("[ERROR]: If there is an accident, must specify accident location")
+            return False
+        return True
+
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
         super().__init__(parent, SELECTION_MODE_INSTRUCTIONS)
@@ -84,6 +91,8 @@ class InternaSelectionMode(InternalMode):
                     modified_id,
                     "part of collision" if self.par.bbm.get_is_selected(modified_id) else "not part of collision"
                 ))
+                if len(self.par.bbm.get_accident_locations()) == 0:
+                    self.warn("No accident location specified")
     def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
         if key_mapper.consume("n"):
@@ -104,13 +113,30 @@ class InternaSelectionMode(InternalMode):
                 self.log("Remember to commit any new tags!")
             else:
                 self.log("Enum tag update cancelled")
+        elif key_mapper.consume("l"):
+            ind = self.par.vcm.get_frame_index()
+            if self.par.bbm.has_accident_location(ind):
+                self.par.bbm.remove_accident_location(ind)
+                self.log("Accident location removed:{0}".format(ind))
+            else:
+                self.par.bbm.add_accident_location(ind)
+                self.log("Accident location added:{0}".format(ind))
+            self.log("Is now {0}".format(self.par.bbm.get_accident_locations()))
+
+
     def get_state_message(self):
+        ac_msg = ""
+        if self.par.bbm.get_n_selected() > 0 or len(self.par.bbm.get_accident_locations()) > 0:
+            ac_msg = "AC: {0}".format(self.par.bbm.get_accident_locations())
+        if len(self.par.bbm.get_accident_locations()) == 0 and self.par.bbm.get_n_selected() > 0:
+            ac_msg = "WARN: NO AC"
         return [
             "Selection Mode",
             "{0} Selected".format(self.par.bbm.get_n_selected()),
             "{0} Total".format(self.par.bbm.get_n_ids()),
             "Is dashcam" if self.par.context.is_dashcam else "Not dashcam",
-            "{0} enum tags set".format(len(self.par.context.enum_tags) if self.par.context.enum_tags else 0)
+            "{0} enum tags set".format(len(self.par.context.enum_tags) if self.par.context.enum_tags else 0),
+            ac_msg,
         ]
 
 class InternalBBoxMode(InternalMode):

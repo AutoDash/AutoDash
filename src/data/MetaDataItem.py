@@ -22,6 +22,7 @@ class MetaDataItem:
             self.bb_fields = BBFields(**kwargs.get("bb_fields"))
         else:
             self.bb_fields = BBFields()
+        self.accident_locations = kwargs.get("accident_locations", [])
 
 
         self.start_i = kwargs.get("start_i", None)
@@ -48,6 +49,7 @@ class MetaDataItem:
             'bb_fields': dict,
             'start_i': int,
             'end_i': int,
+            'accident_locations': list,
         }
 
     def encode(self) -> str:
@@ -69,6 +71,7 @@ class MetaDataItem:
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,
+            'accident_locations': self.accident_locations
         }
 
     def to_json_str(self) -> str:
