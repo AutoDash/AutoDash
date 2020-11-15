@@ -438,8 +438,13 @@ class SplitManager(object):
         return len(ret)
 
     # Hotfix
-    def get_first_enum_tags(self):
-        return self.secs[0].enum_tags
+    def get_all_used_tags(self):
+        ret = []
+        for sec in self.secs:
+            for tag in sec.enum_tags:
+                if tag not in ret:
+                    ret.append(tag)
+        return ret
 
 
 
