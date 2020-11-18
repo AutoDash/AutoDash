@@ -107,7 +107,12 @@ def run_recur(source_executor, item, dataUpdater):
         items = [items]
 
     for next_item in items:
-        run_recur(source_executor.get_next(), next_item, dataUpdater)
+        metadata = iExecutor.get_metadata(next_item)
+        if metadata.is_cancelled == True:
+            metadata.add_tag('state', 'processed')
+            dataUpdater.safe_run(metadata)
+        else:
+            run_recur(source_executor.get_next(), next_item, dataUpdater)
 
 if __name__ == "__main__":
     main()
