@@ -3,8 +3,16 @@ dataSources:
 processingStages:
   - executor: Filterer
     config:
-      filter_str: "tags['state'] != 'in-progress'"
+      filter_str: tags['state'] != 'in-progress'
   - executor: Filterer
     config:
-      filter_str: 'is_cancelled != 1'
+      filter_str: is_cancelled != 1
+  - executor: Filterer
+    config:
+      filter_str: accident_locations
+  - executor: UniversalDownloader
   - executor: CsvExporter
+    config:
+      target_fps: 20
+      clip_length: 5s
+      length_threshold: 3s
