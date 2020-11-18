@@ -2,7 +2,7 @@
 from src.data.MetaDataItem import MetaDataItem
 from src.data.VideoItem import VideoItem
 import os, pickle
-
+import glob
 
 class VideoStorageService:
     def __init__(self, storage_dir=None):
@@ -40,7 +40,7 @@ class VideoStorageService:
         os.rename(cur_loc, new_path)
 
     def video_exists(self, item: MetaDataItem) -> bool:
-        return os.path.exists(self.get_file(item))
+        return glob.glob(self.get_file(item)+ ".*")
 
     def load_video(self, item: MetaDataItem) -> VideoItem:
         return self.load_file(self.get_file(item))
@@ -68,3 +68,9 @@ class VideoStorageService:
 
     def get_file(self, item) -> str:
         return os.path.join(self.storage_dir, self.get_file_name(item))
+        
+    def get_existing_file_with_ext(self, item) -> str:
+        existing_files = glob.glob(self.get_file(item)+ ".*")
+        if existing_files:
+            return existing_files[0]
+        return None
