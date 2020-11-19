@@ -6,7 +6,6 @@ from multiprocessing import Queue
 from queue import Empty as EmptyException
 from src.PipelineConfiguration import PipelineConfiguration
 from src.data.MetaDataItem import MetaDataItem
-from collections import defaultdict
 
 events = Queue()
 
@@ -27,7 +26,7 @@ class MultipleReturnExecutor(iExecutor):
         super().__init__(parents)
 
     def run(self, obj):
-        return [x for x in range(self.iters)]
+        return [MetaDataItem(title=None, url=None, download_src=None) for _ in range(self.iters)]
 
 
 class ExceptionExecutor(iExecutor):
