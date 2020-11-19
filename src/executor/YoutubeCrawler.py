@@ -29,7 +29,9 @@ class YoutubeCrawler(iCrawler):
             query = "ytsearch{0}:{1}".format(self.get_n, search_term)
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 results = ydl.extract_info(query, process=False, download=False)
-            total_results += results['entries'][self.skip_n:]
+            for i, result in enumerate(results['entries']):
+                if i >= self.skip_n:
+                    total_results.append(result)
 
         self.search_results = total_results
         self.log("Crawled {0}".format(self.get_n*len(self.search_terms)))
