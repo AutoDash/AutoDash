@@ -10,7 +10,7 @@ from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from .GUIExceptions import ManualTaggingAbortedException
 
-from .gui.sp_gui import SPGUIManager, Section
+from .gui.sp_gui import SPGUIManager, Section, SectionStatus
 from ..data.BBFields import BBFields
 
 # Lets the user tag the file. Modifies MetaDataItem in place
@@ -60,10 +60,6 @@ def split_file(file_loc, mdi:MetaDataItem):
             gui = SPGUIManager(context)
             rs = gui.start()
 
-            if len(rs) == 0:
-                mdi.enum_tags = gui.mode_handlers[0].sm.get_all_used_tags()
-                raise CancelSignal("No sections of the video are of interest")
-
             split_vid = len(rs) > 1
 
             ret = []
@@ -77,6 +73,7 @@ def split_file(file_loc, mdi:MetaDataItem):
                 m.end_i = sec.end
                 m.enum_tags = sec.enum_tags
                 m.is_split_url = split_vid
+                m.is_cancelled = not (sec.status == SectionStatus.ACTIVE)
 
                 ret.append(m)
             return ret

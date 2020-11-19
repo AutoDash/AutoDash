@@ -5,6 +5,7 @@ from src.executor.iExecutor import iExecutor
 from multiprocessing import Queue
 from queue import Empty as EmptyException
 from src.PipelineConfiguration import PipelineConfiguration
+from src.data.MetaDataItem import MetaDataItem
 
 events = Queue()
 
@@ -16,7 +17,7 @@ class TestExecutor(iExecutor):
     def run(self, obj):
         print(f"run {self.event_num}")
         events.put(self.event_num)
-        return 1
+        return MetaDataItem(title=None, url=None, download_src=None)
 
 
 class MultipleReturnExecutor(iExecutor):
@@ -25,7 +26,7 @@ class MultipleReturnExecutor(iExecutor):
         super().__init__(parents)
 
     def run(self, obj):
-        return [x for x in range(self.iters)]
+        return [MetaDataItem(title=None, url=None, download_src=None) for _ in range(self.iters)]
 
 
 class ExceptionExecutor(iExecutor):

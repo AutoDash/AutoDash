@@ -37,7 +37,7 @@ class SPGUIManager(VideoPlayerGUIManager):
 
     def start(self) -> List[Section]:
         super(SPGUIManager, self).start()
-        active_sections = self.mode_handlers[0].sm.get_all_active_sections()
+        active_sections = self.mode_handlers[0].sm.get_all_sections()
         return active_sections
 
 
@@ -373,13 +373,8 @@ class SplitManager(object):
     def get_n_deleted(self):
         return sum([x.status == SectionStatus.DELETED for x in self.secs])
 
-    def get_all_active_sections(self) -> List[Section]:
-        active_sections = []
-        for sec in self.secs:
-            if sec.status == SectionStatus.DELETED:
-                continue
-            active_sections.append(sec)
-        return active_sections
+    def get_all_sections(self) -> List[Section]:
+        return self.secs
 
     def get_prop_deleted(self):
         deleted_frames = len(self.secs)-1 # Endpoints are gone
