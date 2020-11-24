@@ -13,3 +13,4 @@ build/
 dist/
 tools/build/
 tools/dist/
+*.mp4
