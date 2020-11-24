@@ -55,7 +55,11 @@ def split_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = SPContext(file_loc)
+            context = SPContext(
+                file_loc,
+                start_index=mdi.start_i,
+                end_index=mdi.end_i
+            )
             context.initial_enum_tags = mdi.enum_tags
             gui = SPGUIManager(context)
             rs = gui.start()
