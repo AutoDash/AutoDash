@@ -38,8 +38,11 @@ class SPGUIManager(VideoPlayerGUIManager):
     def start(self) -> List[Section]:
         super(SPGUIManager, self).start()
         active_sections = self.mode_handlers[0].sm.get_all_sections()
+        if self.context.start_index is not None and self.context.start_index > 0:
+            for sec in active_sections:
+                sec.start += self.context.start_index
+                sec.end += self.context.start_index
         return active_sections
-
 
     def modify_frame(self, frame, frame_index):
         return frame
@@ -285,6 +288,8 @@ class SplitManager(object):
             return self.DELETED_DISPLAY if status == SectionStatus.DELETED else self.ACTIVE_DISPLAY
 
         def build_minimap():
+            if self.frame_count == 1:
+                return
             ratio = (width-20.0)/(self.frame_count-1)
             def t(val):
                 return max(10, min(width-10, int(val*ratio) + 10))

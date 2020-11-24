@@ -4,6 +4,8 @@ from ..VideoCaptureManager import VideoCaptureManager
 class GUIContext(object):
     def __init__(self, file_loc: str, start_index=None, end_index=None):
         self.file_loc = file_loc
+        self.start_index = start_index
+        self.end_index = end_index
         self.vcm = VideoCaptureManager(file_loc, start_index, end_index)
         self.vcm.start_from(0)
         self.file_height = self.vcm.get_height()
