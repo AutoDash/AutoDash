@@ -42,8 +42,7 @@ class BoundingBoxManager(object):
                 self.selected.add(id)
         self.accident_locations = sorted(accident_locations)
 
-
-    def extract(self):
+    def extract_in_range(self, start_i, end_i):
         def format_frame(i):
             return "{0:0>5}".format(i+1)
 
@@ -58,7 +57,9 @@ class BoundingBoxManager(object):
 
         for id in self.bboxes.keys():
             for frame in self.bboxes[id]:
-                frames.append(format_frame(frame))
+                if not (start_i <= frame < end_i):
+                    continue
+                frames.append(format_frame(frame-start_i))
                 ids.append(id)
                 clss.append(self.get_cls(id))
                 x1s.append(self.bboxes[id][frame][0][0])
@@ -67,7 +68,9 @@ class BoundingBoxManager(object):
                 y2s.append(self.bboxes[id][frame][1][1])
                 selected.append(1 if id in self.selected else 0)
 
-        return frames, ids, clss, x1s, y1s, x2s, y2s, selected, self.accident_locations
+        acs = [a-start_i for a in self.accident_locations if start_i <= a < end_i]
+
+        return frames, ids, clss, x1s, y1s, x2s, y2s, selected, acs
 
     def modify_frame(self, frame, i):
         for id, frame_data in self.bboxes.items():

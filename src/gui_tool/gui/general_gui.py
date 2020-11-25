@@ -108,7 +108,7 @@ class VideoPlayerGUIManager(object):
                 else:
                     res = ButtonPopup(
                         "Confirm commit",
-                        "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?",
+                        self.get_commit_message(),
                         ["Confirm", "Cancel"]
                     ).run()
                     if res == "Confirm":
@@ -178,3 +178,6 @@ class VideoPlayerGUIManager(object):
 
     def can_commit(self):
         raise NotImplementedError()
+
+    def get_commit_message(self):
+        return "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?"

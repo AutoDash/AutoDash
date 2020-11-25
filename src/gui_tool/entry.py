@@ -61,14 +61,12 @@ def split_file(file_loc, mdi:MetaDataItem):
                 enum_tags = mdi.enum_tags
             )
             gui = SPGUIManager(context)
-            rs = gui.start()
+            rs, bbfs = gui.start()
 
             split_vid = len(rs) > 1 or mdi.is_split_url
-            if len(rs) > 1:
-                mdi.bb_fields = BBFields()
 
             ret = []
-            for i, sec in enumerate(rs):
+            for i, (sec, bbf) in enumerate(zip(rs, bbfs)):
                 if i == 0:
                     m = mdi
                 else:
@@ -79,6 +77,9 @@ def split_file(file_loc, mdi:MetaDataItem):
                 m.enum_tags = sec.enum_tags
                 m.is_split_url = split_vid
                 m.is_cancelled = not (sec.status == SectionStatus.ACTIVE)
+
+                m.bb_fields.set_fields_from_list(bbf[:-1])
+                m.accident_locations = bbf[-1]
 
                 ret.append(m)
             return ret

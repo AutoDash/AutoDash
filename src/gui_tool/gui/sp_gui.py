@@ -6,6 +6,7 @@ from .gui_mode import InternalMode
 import cv2
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from typing import List
+from .bb.BoundingBoxManager import BoundingBoxManager
 
 SP_MODE_INSTRUCTIONS = [
     ["x", "Split at the current frame exclusively", "Split is exclusive (current frame is gone)"],
@@ -15,6 +16,7 @@ SP_MODE_INSTRUCTIONS = [
     ["e", "Jump to next split"],
     ["v", "Set enum tags for the CURRENT section"],
     ["r*2", "reset enum tags the CURRENT section"],
+    ["o*2", "Remove all bounding boxes in this video", "Applies to whole video, not just the current section"],
 ]
 
 DEBUG_MODE = False
@@ -35,20 +37,55 @@ class SPGUIManager(VideoPlayerGUIManager):
            ]
         )
 
-    def start(self) -> List[Section]:
-        super(SPGUIManager, self).start()
-        active_sections = self.mode_handlers[0].sm.get_all_sections()
+    def get_return_fields(self) -> (List[Section], List[List]):
+        sections = self.mode_handlers[0].sm.get_all_sections()
+        bbfs = []
+        for sec in sections:
+            bbfs.append(self.bbm.extract_in_range(
+                sec.start,
+                sec.end
+            ))
         if self.context.start_index is not None and self.context.start_index > 0:
-            for sec in active_sections:
+            for sec in sections:
                 sec.start += self.context.start_index
                 sec.end += self.context.start_index
-        return active_sections
+        return sections, bbfs
+
+    def start(self) -> (List[Section], List[List]):
+        super(SPGUIManager, self).start()
+        return self.get_return_fields()
+
+    def verify_bounding_box_consistency(self):
+        sections, bbfs = self.get_return_fields()
+        success = True
+        for i, b in enumerate(bbfs):
+            selected = b[-2]
+            accident_locs = b[-1]
+            if len(accident_locs) == 0 and len(selected) > 0:
+                self.logger.log("[WARN]: Section {0} has accident location despite no marked participants".format(i+1))
+                success = False
+            if len(accident_locs) > 0 and len(selected) == 0:
+                self.logger.log("[WARN]: Section {0} contains marked accident participants, but no accident location".format(i+1))
+                success = False
+        return success
 
     def modify_frame(self, frame, frame_index):
+        frame = self.bbm.modify_frame(frame, frame_index)
         return frame
 
     def can_commit(self):
         return True
+
+    def get_commit_message(self):
+        if not self.verify_bounding_box_consistency():
+            return "\n".join([
+                "WARNING:",
+                "There are warnings related to accident locations.",
+                "You cannot fix them in this GUI tool without clearing all bonding boxes.",
+                "Hitting continue will ignore this problem",
+                "Do you wish to continue?"
+            ])
+        return super(SPGUIManager, self).get_commit_message()
 
 class SectionStatus(object):
     ACTIVE = "ACTIVE"
@@ -109,6 +146,9 @@ class SPMode(InternalMode):
             else:
                 self.sm.set_enum_tags_at(i, [])
                 self.log("Removing all enum tags (previously {0})".format(curr_tags))
+        elif key_mapper.consume(("o", "o")):
+            self.log("All bounding boxes removed")
+            self.par.bbm = BoundingBoxManager(self.par.bbm.total_frames)
 
     def get_state_message(self):
         return [

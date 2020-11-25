@@ -65,7 +65,10 @@ class BBGUIManager(VideoPlayerGUIManager):
 
     def start(self):
         super(BBGUIManager, self).start()
-        self.context.set_bbox_fields_from_list(self.bbm.extract())
+        self.context.set_bbox_fields_from_list(self.bbm.extract_in_range(
+            0,
+            self.vcm.get_frames_count()
+        ))
 
     def modify_frame(self, frame, frame_index):
         frame = self.bbm.modify_frame(frame, frame_index)
@@ -74,6 +77,9 @@ class BBGUIManager(VideoPlayerGUIManager):
     def can_commit(self):
         if len(self.bbm.get_accident_locations()) == 0 and self.bbm.get_n_selected() > 0:
             self.logger.log("[ERROR]: If there is an accident, must specify accident location")
+            return False
+        if len(self.bbm.get_accident_locations()) > 0 and self.bbm.get_n_selected() == 0:
+            self.logger.log("[ERROR]: If an accident location is specified, you must select the participants")
             return False
         return True
 
