@@ -55,7 +55,6 @@ def split_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            mdi.bb_fields = BBFields()
             context = SPContext(file_loc,
                 bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
                 start_index=mdi.start_i,
@@ -66,6 +65,8 @@ def split_file(file_loc, mdi:MetaDataItem):
             rs = gui.start()
 
             split_vid = len(rs) > 1 or mdi.is_split_url
+            if len(rs) > 1:
+                mdi.bb_fields = BBFields()
 
             ret = []
             for i, sec in enumerate(rs):
