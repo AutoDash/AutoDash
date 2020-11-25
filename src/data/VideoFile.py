@@ -88,10 +88,11 @@ class VideoFile(object):
         self.capture.release()
 
     def next(self) -> np.ndarray:
-        if self.is_open():
+        if self.is_open() and self.get_index()+1 < self.frame_count:
             ret, frame = self.capture.read()
             if ret:
                 self.current_frame = frame
+
         return self.current_frame
 
     def current(self):
