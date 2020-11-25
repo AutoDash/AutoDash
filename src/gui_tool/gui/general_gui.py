@@ -1,11 +1,12 @@
 from src.gui_tool.utils.rotating_log import RotatingLog
 from src.gui_tool.utils.key_mapper import KeyMapper
+from .bb.BoundingBoxManager import BoundingBoxManager
 import numpy as np
 from .tinker_subuis.help_popup import HelpPopup
 from .tinker_subuis.button_popup import ButtonPopup
 import cv2
 from ..GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
-from .context import GUIContext
+from .bb_context import BBContext
 
 class VideoPlayerGUIManager(object):
     PROGRESS_BAR_NAME = "progress"
@@ -31,7 +32,7 @@ class VideoPlayerGUIManager(object):
         ["Esc * 2", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
     ]
 
-    def __init__(self, context: GUIContext, mode_handlers: list):
+    def __init__(self, context: BBContext, mode_handlers: list):
         self.context = context
         self.vcm = self.context.vcm
         self.frame_rate = 25
@@ -42,6 +43,8 @@ class VideoPlayerGUIManager(object):
         self.mode_handler_i = 0
 
         self.key_mapper = KeyMapper()
+        self.bbm = BoundingBoxManager(self.vcm.get_frames_count())
+        self.bbm.set_to(*context.get_bbox_fields_as_list())
 
     def start(self):
         self.set_GUI()

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from .sp_context import SPContext
+from .bb_context import BBContext
 from ..utils.key_mapper import KeyMapper
 from .general_gui import VideoPlayerGUIManager
 from .gui_mode import InternalMode
@@ -28,7 +28,7 @@ class SPGUIManager(VideoPlayerGUIManager):
     LOG_START_X = 250
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
 
-    def __init__(self, context: SPContext):
+    def __init__(self, context: BBContext):
         super(SPGUIManager, self).__init__(context,
            [
                SPMode(self, context)
@@ -55,12 +55,12 @@ class SectionStatus(object):
     DELETED = "DELETED"
 
 class SPMode(InternalMode):
-    def __init__(self, parent: SPGUIManager, context: SPContext):
+    def __init__(self, parent: SPGUIManager, context: BBContext):
         super().__init__(parent, SP_MODE_INSTRUCTIONS)
         self.splits = []
         self.section_statuses = []
 
-        self.sm = SplitManager(self, context.vcm.get_frames_count(), context.initial_enum_tags.copy())
+        self.sm = SplitManager(self, context.vcm.get_frames_count(), context.enum_tags.copy())
 
     def handle_click(self, event, x, y, flags, param):
         pass

@@ -1,6 +1,5 @@
 from src.gui_tool.utils.key_mapper import KeyMapper
 from .bb_context import BBContext
-from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from .tinker_subuis.text_popup import TextPopup
@@ -63,8 +62,6 @@ class BBGUIManager(VideoPlayerGUIManager):
                InternalBBoxMode(self)
            ]
         )
-        self.bbm = BoundingBoxManager(self.vcm.get_frames_count())
-        self.bbm.set_to(*context.get_bbox_fields_as_list())
 
     def start(self):
         super(BBGUIManager, self).start()

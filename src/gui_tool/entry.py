@@ -5,7 +5,6 @@ from tkinter import Tk
 
 from .gui.bb_gui import BBGUIManager
 from .gui.bb_context import BBContext
-from .gui.sp_context import SPContext
 from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from .GUIExceptions import ManualTaggingAbortedException
@@ -26,9 +25,9 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 file_loc,
                 bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
                 start_index=mdi.start_i,
-                end_index=mdi.end_i
+                end_index=mdi.end_i,
+                enum_tags = mdi.enum_tags
             )
-            context.enum_tags = mdi.enum_tags
             gui = BBGUIManager(context)
             gui.start()
 
@@ -55,12 +54,12 @@ def split_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = SPContext(file_loc,
+            context = BBContext(file_loc,
                 bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
                 start_index=mdi.start_i,
-                end_index=mdi.end_i
+                end_index=mdi.end_i,
+                enum_tags = mdi.enum_tags
             )
-            context.initial_enum_tags = mdi.enum_tags
             gui = SPGUIManager(context)
             rs = gui.start()
 
