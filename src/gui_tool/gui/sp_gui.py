@@ -7,6 +7,7 @@ import cv2
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from typing import List
 from .bb.BoundingBoxManager import BoundingBoxManager
+from .tinker_subuis.button_popup import ButtonPopup
 
 SP_MODE_INSTRUCTIONS = [
     ["x", "Split at the current frame exclusively", "Split is exclusive (current frame is gone)"],
@@ -147,8 +148,14 @@ class SPMode(InternalMode):
                 self.sm.set_enum_tags_at(i, [])
                 self.log("Removing all enum tags (previously {0})".format(curr_tags))
         elif key_mapper.consume(("o", "o")):
-            self.log("All bounding boxes removed")
-            self.par.bbm = BoundingBoxManager(self.par.bbm.total_frames)
+            res = ButtonPopup(
+                "Confirm clearing ALL bounding boxes",
+                "Are you sure you want to clear ALL bounding boxes, across ALL sections of this video?",
+                ["Confirm", "Cancel"]
+            ).run()
+            if res == "Confirm":
+                self.par.bbm = BoundingBoxManager(self.par.bbm.total_frames)
+                self.log("All bounding boxes removed")
 
     def get_state_message(self):
         return [
