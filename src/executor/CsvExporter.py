@@ -13,6 +13,8 @@ STORAGE_DIR_POSITIVES = Path(os.path.join(get_project_root(), "data_files_positi
 STORAGE_DIR_POSITIVES.mkdir(parents=True, exist_ok=True)
 STORAGE_DIR_NEGATIVES = Path(os.path.join(get_project_root(), "data_files_negatives"))
 STORAGE_DIR_NEGATIVES.mkdir(parents=True, exist_ok=True)
+STORAGE_DIR_VIDEOS = Path(os.path.join(get_project_root(), "feature_videos"))
+STORAGE_DIR_VIDEOS.mkdir(parents=True, exist_ok=True)
 
 class CsvExporter(iExecutor):
     def __init__(self, *parents, target_fps=20, clip_length='5s', length_threshold='3s'):
@@ -64,7 +66,9 @@ class CsvExporter(iExecutor):
             ('y2s', np.uint),
             ('has_collision', np.uint),
         ]
-        data = np.array([*zip(bbs['frames'], bbs['ids'], bbs['clss'], 
+        normalized_frames = np.array(bbs['frames'], dtype=np.int)
+        normalized_frames -= np.min(normalized_frames)
+        data = np.array([*zip(normalized_frames, bbs['ids'], bbs['clss'], 
             bbs['x1s'], bbs['x2s'], bbs['y1s'], bbs['y2s'], bbs['has_collision'])], dtype=dtype)
         begin = int(collision_frame - np.floor(self.clip_len_s * fps))
         if begin + self.len_thresh_s * fps < 0:
@@ -82,6 +86,12 @@ class CsvExporter(iExecutor):
             fmt='%d,%d,%s,%d,%d,%d,%d,%d',
             header='frames,ids,clss,x1s,x2s,y1s,y2s,has_collision',
             comments='')
+        stream = ffmpeg.input(item.filepath)
+        stream = stream.trim(start_frame=begin, end_frame=collision_frame)
+        stream = ffmpeg.filter(stream, 'fps', fps=self.target_fps, round='up')
+        stream = stream.output(str(STORAGE_DIR_VIDEOS / (str(metadata.id) + '.mp4')))
+        stream = ffmpeg.overwrite_output(stream)
+        stream.run()
         print(f"Done exporting file {filename}")
         return item
 
