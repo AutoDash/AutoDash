@@ -65,10 +65,10 @@ class BBGUIManager(VideoPlayerGUIManager):
 
     def start(self):
         super(BBGUIManager, self).start()
-        self.context.set_bbox_fields_from_list(self.bbm.extract_in_range(
+        self.context.bbox_fields.crop_range(
             0,
             self.vcm.get_frames_count()
-        ))
+        )
 
     def modify_frame(self, frame, frame_index):
         frame = self.bbm.modify_frame(frame, frame_index)
@@ -90,10 +90,12 @@ class InternaSelectionMode(InternalMode):
         if event == cv2.EVENT_LBUTTONDOWN:
             modified_id = self.par.bbm.handleClickSelection(self.par.vcm.get_frame_index(), x, y)
             if modified_id is not None:
+                id_has_collision = self.par.bbm.get_is_selected(modified_id)
                 self.log("Set object {0} as {1}".format(
                     modified_id,
-                    "part of collision" if self.par.bbm.get_is_selected(modified_id) else "not part of collision"
+                    "part of collision" if id_has_collision else "not part of collision"
                 ))
+                self.par.bbm.objects[modified_id].has_collision = id_has_collision
                 if len(self.par.bbm.get_accident_locations()) == 0:
                     self.warn("No accident location specified")
     def handle_keyboard(self, key_mapper: KeyMapper):

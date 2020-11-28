@@ -12,8 +12,9 @@ from .GUIExceptions import ManualTaggingAbortedException
 from .gui.sp_gui import SPGUIManager, Section, SectionStatus
 from ..data.BBFields import BBFields
 
+
 # Lets the user tag the file. Modifies MetaDataItem in place
-def tag_file(file_loc, mdi:MetaDataItem):
+def tag_file(file_loc, mdi: MetaDataItem):
 
     # Initial Tk to avoid macOS error
     t = Tk()
@@ -23,16 +24,15 @@ def tag_file(file_loc, mdi:MetaDataItem):
         try:
             context = BBContext(
                 file_loc,
-                bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
+                bbox_fields=mdi.bb_fields.clone(),
                 start_index=mdi.start_i,
                 end_index=mdi.end_i,
-                enum_tags = mdi.enum_tags
+                enum_tags=mdi.enum_tags,
             )
             gui = BBGUIManager(context)
             gui.start()
 
-            mdi.bb_fields.set_fields_from_list(context.get_bbox_fields()[:-1])
-            mdi.accident_locations = context.get_bbox_fields()[-1]
+            mdi.bb_fields = context.get_bbox_fields()
             mdi.enum_tags = context.enum_tags
 
             for key, val in context.additional_tags:
@@ -43,10 +43,11 @@ def tag_file(file_loc, mdi:MetaDataItem):
 
             return mdi
 
-        except ManualTaggingAbortedException as e:
+        except ManualTaggingAbortedException:
             print("Aborted. Will restart")
 
-def split_file(file_loc, mdi:MetaDataItem):
+
+def split_file(file_loc, mdi: MetaDataItem):
 
     # Initial Tk to avoid macOS error
     t = Tk()
@@ -54,14 +55,16 @@ def split_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = BBContext(file_loc,
-                bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
+            context = BBContext(
+                file_loc,
+                bbox_fields=mdi.bb_fields.clone(),
                 start_index=mdi.start_i,
                 end_index=mdi.end_i,
-                enum_tags = mdi.enum_tags
+                enum_tags=mdi.enum_tags,
             )
             gui = SPGUIManager(context)
             rs, bbfs = gui.start()
+            print(f"split done, rs: {rs}")
 
             split_vid = len(rs) > 1 or mdi.is_split_url
 
@@ -78,8 +81,7 @@ def split_file(file_loc, mdi:MetaDataItem):
                 m.is_split_url = split_vid
                 m.is_cancelled = not (sec.status == SectionStatus.ACTIVE)
 
-                m.bb_fields.set_fields_from_list(bbf[:-1])
-                m.accident_locations = bbf[-1]
+                m.bb_fields = bbf
 
                 ret.append(m)
             return ret

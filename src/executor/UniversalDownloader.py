@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 import os
+import cv2
 
 from ..VideoStorageService import VideoStorageService
 from ..downloader.iDownloader import iDownloader
@@ -26,13 +27,18 @@ class UniversalDownloader(iExecutor):
         return self
 
     def run(self, metadata_item: MetaDataItem) -> VideoItem:
+        vid_item = None
         if self.video_storage.video_exists(metadata_item):
-            return VideoItem(metadata=metadata_item, filepath=self.video_storage.get_existing_file_with_ext(metadata_item))
-
-        for regex, downloader in self.registered_downloaders:
-            if re.search(regex, metadata_item.url): return downloader.run(metadata_item)
+            vid_item = VideoItem(metadata=metadata_item, filepath=self.video_storage.get_existing_file_with_ext(metadata_item))
         else:
-            raise RuntimeError(f"No registered downloader can handle link: {metadata_item.url}")
+            for regex, downloader in self.registered_downloaders:
+                if re.search(regex, metadata_item.url):
+                    vid_item = downloader.run(metadata_item)
+                    break
+            else:
+                raise RuntimeError(f"No registered downloader can handle link: {metadata_item.url}")
+        
+        return vid_item
 
     def set_pathname(self, pathname):
         self.video_storage.update_storage_dir(pathname)
