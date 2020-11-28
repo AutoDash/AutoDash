@@ -1,0 +1,16 @@
+dataSources:
+  - executor: LocalStorageSource
+processingStages:
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
+  - executor: ExecFilterer
+    config:
+      filter_str: 'data.bb_fields.objects'
+  - executor: UniversalDownloader
+  - executor: Printer
+  - executor: Splitter
+  - executor: Printer
+  - executor: Labeler
+  - executor: Printer
+  - executor: LocalStorageUpdater

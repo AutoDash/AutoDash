@@ -1,8 +1,10 @@
 from typing import Union
 from .BBFields import BBFields
-import json, hashlib
+import json
+import hashlib
 
 import os
+
 
 class MetaDataItem:
     def __init__(self, **kwargs):
@@ -18,25 +20,41 @@ class MetaDataItem:
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
 
-        if "bb_fields" in kwargs and kwargs["bb_fields"] is not None:
-            self.bb_fields = BBFields(**kwargs.get("bb_fields"))
-        else:
-            self.bb_fields = BBFields()
-        self.accident_locations = kwargs.get("accident_locations", [])
-
+        accident_locations = kwargs.get("accident_locations", [])
+        bb_fields_json = kwargs.get("bb_fields", {})
+        if accident_locations:
+            bb_fields_json["accident_locations"] = accident_locations
+        self.bb_fields = BBFields.from_json(bb_fields_json)
 
         self.start_i = kwargs.get("start_i", None)
         self.end_i = kwargs.get("end_i", None)
 
     def __repr__(self) -> str:
-        return f"Metadata {self.id}:\n\n" + self.to_json_str()
+        return f"Metadata {self.id}:\n\n" + f"""
+{{
+    'title': {self.title},
+    'url': {self.url},
+    'download_src': {self.download_src},
+    'collision_type': {self.collision_type},
+    'description': {self.description},
+    'location': {self.location},
+    'id': {self.id},
+    'is_cancelled': {self.is_cancelled},
+    'is_split_url': {self.is_split_url},
+    'tags': {self.tags},
+    'enum_tags': {self.enum_tags},
+    'bb_fields': {self.bb_fields},
+    'start_i': {self.start_i},
+    'end_i': {self.end_i},
+}}
+"""
 
     # Returns lists of attributes and their types. Types should ideally be default constructable.
     @staticmethod
     def attributes() -> dict:
         return {
             'title': str,
-            'url' : str,
+            'url': str,
             'download_src': str,
             'collision_type': str,
             'description': str,
@@ -71,7 +89,6 @@ class MetaDataItem:
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,
-            'accident_locations': self.accident_locations
         }
 
     def to_json_str(self) -> str:
@@ -85,7 +102,8 @@ class MetaDataItem:
             json.dump(self.to_json(), outfile, sort_keys=True, indent=2)
 
     def add_tag(self, name: str, val: Union[dict, str]):
-        if name in self.tags.keys() and isinstance(self.tags[name], dict) and isinstance(val, dict):
+        if name in self.tags.keys() and isinstance(
+                self.tags[name], dict) and isinstance(val, dict):
             self.tags[name].update(val)
         else:
             self.tags[name] = val
@@ -102,7 +120,6 @@ class MetaDataItem:
         return m
 
 
-
 # For accessing metadata items stored in local storage
 def metadata_from_file(filename: str, directory: str) -> MetaDataItem:
     loc = os.path.join(directory, filename)
@@ -111,13 +128,16 @@ def metadata_from_file(filename: str, directory: str) -> MetaDataItem:
         data['id'] = get_id_from_filename(filename)
         return MetaDataItem(**data)
 
+
 def delete_metadata_file(id: str, directory: str):
     loc = os.path.join(directory, gen_filename(id))
     if os.path.exists(loc):
         os.remove(loc)
 
+
 def gen_filename(id: str):
     return id + '_metadata.json'
+
 
 def get_id_from_filename(filename: str):
     return filename.split('_')[0]

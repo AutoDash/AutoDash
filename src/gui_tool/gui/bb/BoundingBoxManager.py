@@ -1,12 +1,10 @@
 import cv2
 from ...utils.IndexedRect import IndexedRect
+from ....data.BBFields import BBox, BBObject
+
 
 class BoundingBoxManager(object):
-    BOX_DISPLAY = {
-        "color": (255, 255, 255),
-        "lineType": 1,
-        "thickness": 1
-    }
+    BOX_DISPLAY = {"color": (255, 255, 255), "lineType": 1, "thickness": 1}
     SELECTED_BOX_DISPLAY = {
         "color": (255, 255, 0),
         "lineType": 1,
@@ -22,6 +20,7 @@ class BoundingBoxManager(object):
         "fontScale": 0.5,
         "color": (255, 255, 255)
     }
+
     def __init__(self, total_frames):
         self.bboxes = {}
         self.id_to_cls = {}
@@ -29,67 +28,34 @@ class BoundingBoxManager(object):
         self.accident_locations = []
         self.total_frames = total_frames
 
-    def set_to(self, frames, ids, clss, x1s, y1s, x2s, y2s, selected, accident_locations):
-        self.bboxes = {}
-        self.id_to_cls = {}
-        for frame, id, cls, x1, y1, x2, y2, selected in zip(frames, ids, clss, x1s, y1s, x2s, y2s, selected):
-            self.add_or_update_id(id, cls)
-
-            frame = int(frame) - 1
-            self.bboxes[id][frame] = [(x1, y1), (x2, y2)]
-
-            if selected:
-                self.selected.add(id)
-        self.accident_locations = sorted(accident_locations)
-
-    def extract_in_range(self, start_i, end_i):
-        def format_frame(i):
-            return "{0:0>5}".format(i+1)
-
-        frames = []
-        ids = []
-        clss = []
-        x1s = []
-        y1s = []
-        x2s = []
-        y2s = []
-        selected = []
-
-        for id in self.bboxes.keys():
-            for frame in self.bboxes[id]:
-                if not (start_i <= frame < end_i):
-                    continue
-                frames.append(format_frame(frame-start_i))
-                ids.append(id)
-                clss.append(self.get_cls(id))
-                x1s.append(self.bboxes[id][frame][0][0])
-                y1s.append(self.bboxes[id][frame][0][1])
-                x2s.append(self.bboxes[id][frame][1][0])
-                y2s.append(self.bboxes[id][frame][1][1])
-                selected.append(1 if id in self.selected else 0)
-
-        acs = [a-start_i for a in self.accident_locations if start_i <= a < end_i]
-
-        return frames, ids, clss, x1s, y1s, x2s, y2s, selected, acs
+    def set_to(self, context, selected):
+        self.selected.update(selected)
+        self.bbox_fields = context.bbox_fields
+        self.objects = context.bbox_fields.objects
+        self.accident_locations = self.bbox_fields.accident_locations
+        self.accident_locations.sort()
 
     def modify_frame(self, frame, i):
-        for id, frame_data in self.bboxes.items():
-            if i in frame_data:
-                p1, p2 = frame_data[i]
+        for id, obj in self.objects.items():
+            if i in obj.bboxes:
+                p1, p2 = obj.bboxes[i].get_points()
                 if id in self.selected:
                     if i in self.accident_locations:
-                        cv2.rectangle(frame, p1, p2, **self.ACCIDENT_LOCATION_BOX_DISPLAY)
+                        cv2.rectangle(frame, p1, p2,
+                                      **self.ACCIDENT_LOCATION_BOX_DISPLAY)
                     else:
-                        cv2.rectangle(frame, p1, p2, **self.SELECTED_BOX_DISPLAY)
+                        cv2.rectangle(frame, p1, p2,
+                                      **self.SELECTED_BOX_DISPLAY)
                 else:
                     cv2.rectangle(frame, p1, p2, **self.BOX_DISPLAY)
-                cv2.putText(frame, str(id), (p1[0] + 2, p1[1] + 15), **self.BOX_I_DISPLAY)
+                cv2.putText(frame, str(id), (p1[0] + 2, p1[1] + 15),
+                            **self.BOX_I_DISPLAY)
         return frame
 
     def handleClickSelection(self, i, x, y):
-        for id, frame_data in self.bboxes.items():
-            if i in frame_data:
-                p1, p2 = frame_data[i]
+        for id, obj in self.objects.items():
+            if i in obj.bboxes:
+                p1, p2 = obj.bboxes[i].get_points()
                 if p1[0] < x < p2[0] and p1[1] < y < p2[1]:
                     if id in self.selected:
                         self.selected.remove(id)
@@ -109,82 +75,95 @@ class BoundingBoxManager(object):
 
         slopes = [(pts2[i] - pts1[i]) / r for i in range(4)]
 
-        for o in range(ir2.i-ir1.i+1):
-            frame = ir1.i+o
-            new_pt = [pts1[i] + int(slopes[i]*o) for i in range(4)]
-            self.bboxes[id][frame] = (new_pt[0], new_pt[1]), (new_pt[2], new_pt[3])
+        for o in range(ir2.i - ir1.i + 1):
+            frame = ir1.i + o
+            new_pt = [pts1[i] + int(slopes[i] * o) for i in range(4)]
+            self.objects[id].bboxes[frame] = BBox(
+                frame,
+                new_pt[0],
+                new_pt[1],
+                new_pt[2],
+                new_pt[3],
+            )
 
     def clear_in_range(self, id, i1, i2):
         if i2 < i1:
             i1, i2 = i2, i1
-        for i in range(i1, i2+1):
-            if i in self.bboxes[id]:
-                del self.bboxes[id][i]
+        for i in range(i1, i2 + 1):
+            if i in self.objects[id].bboxes:
+                del self.objects[id].bboxes[i]
 
     def add_or_update_id(self, id, cls):
-        self.id_to_cls[id] = cls
-        if id not in self.bboxes:
-            self.bboxes[id] = {}
+        if id not in self.objects:
+            self.objects[id] = BBObject(id)
+        self.objects[id].obj_class = cls
+
     def get_is_selected(self, id):
         return id in self.selected
+
     def get_n_selected(self):
         return len(self.selected)
+
     def get_n_ids(self):
-        return len(self.id_to_cls)
+        return len(self.objects)
+
     def has_id(self, id):
-        return id in self.bboxes
+        return id in self.objects
+
     def get_cls(self, id):
-        if id in self.id_to_cls:
-            return self.id_to_cls[id]
+        if self.has_id(id):
+            return self.objects[id].obj_class
         return None
+
     def get_unused_ids(self):
         unused_ids = set()
-        for id, d in self.bboxes.items():
-            if len(d) == 0:
-                unused_ids.add(id)
-        for id in self.id_to_cls.keys():
-            if id not in self.bboxes:
+        for id, d in self.objects.items():
+            if d.bboxes or not d.obj_class:
                 unused_ids.add(id)
         return unused_ids
 
     def remove_unused_ids(self):
         unused_ids = self.get_unused_ids()
         for i in unused_ids:
-            if i in self.bboxes:
-                del self.bboxes[i]
-            if i in self.id_to_cls:
-                del self.id_to_cls[i]
+            if i in self.objects:
+                del self.objects[i]
         return unused_ids
+
     def get_last_bounding_box_i(self, id, starting_i):
-        if id not in self.bboxes:
+        if id not in self.objects:
             return None
-        for i in range(starting_i, 0-1, -1):
-            if i in self.bboxes[id]:
+        for i in range(starting_i, -1, -1):
+            if i in self.objects[id].bboxes:
                 return i
         return None
+
     def get_next_bounding_box_i(self, id, starting_i):
-        if id not in self.bboxes:
+        if id not in self.objects:
             return None
         for i in range(starting_i, self.total_frames):
-            if i in self.bboxes[id]:
+            if i in self.objects[id].bboxes:
                 return i
         return None
+
     def get_ir(self, id, i):
-        if id not in self.bboxes or i not in self.bboxes[id]:
+        if id not in self.objects or i not in self.objects[id].bboxes:
             return None
-        p = self.bboxes[id][i]
-        return IndexedRect(i, p[0][0], p[0][1], p[1][0], p[1][1])
+        bbox = self.objects[id].bboxes[i]
+        return IndexedRect(bbox.frame, *bbox.get_flat_points())
+
     def add_accident_location(self, loc):
         if loc not in self.accident_locations:
             self.accident_locations.append(loc)
-            self.accident_locations = sorted(self.accident_locations)
+            self.accident_locations.sort()
+
     def remove_accident_location(self, loc):
         for i, val in enumerate(self.accident_locations):
             if val == loc:
                 del self.accident_locations[i]
                 break
+
     def has_accident_location(self, loc):
         return loc in self.accident_locations
+
     def get_accident_locations(self):
         return self.accident_locations.copy()
-
