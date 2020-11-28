@@ -61,15 +61,15 @@ class CsvExporter(iExecutor):
             ('ids', np.uint),
             ('clss', np.object),
             ('x1s', np.uint),
-            ('x2s', np.uint),
             ('y1s', np.uint),
+            ('x2s', np.uint),
             ('y2s', np.uint),
             ('has_collision', np.uint),
         ]
         normalized_frames = np.array(bbs['frames'], dtype=np.int)
         normalized_frames -= np.min(normalized_frames)
         data = np.array([*zip(normalized_frames, bbs['ids'], bbs['clss'], 
-            bbs['x1s'], bbs['x2s'], bbs['y1s'], bbs['y2s'], bbs['has_collision'])], dtype=dtype)
+            bbs['x1s'], bbs['y1s'], bbs['x2s'], bbs['y2s'], bbs['has_collision'])], dtype=dtype)
         begin = int(collision_frame - np.floor(self.clip_len_s * fps))
         if begin + self.len_thresh_s * fps < 0:
             # We are under the minimum threshold
@@ -84,7 +84,6 @@ class CsvExporter(iExecutor):
         filename = str(metadata.id) + ".csv"
         np.savetxt(directory / filename, data, delimiter=',',
             fmt='%d,%d,%s,%d,%d,%d,%d,%d',
-            header='frames,ids,clss,x1s,x2s,y1s,y2s,has_collision',
             comments='')
         stream = ffmpeg.input(item.filepath)
         stream = stream.trim(start_frame=begin, end_frame=collision_frame)
