@@ -47,7 +47,10 @@ class CsvExporter(iExecutor):
 
         # First, we trim the last seconds before the first collision
         if not metadata.accident_locations or len(metadata.accident_locations) == 0:
+            # TODO: This should be a negative
             raise StopSignal(f"No accident locations labelled for {item.id}")
+        if not metadata.start_i:
+            raise StopSignal(f"Metadata is not clipped")
         collision_frame = np.min(metadata.accident_locations)
         info = ffmpeg.probe(item.filepath)
         streams = [ stream for stream in info.get('streams', []) if stream.get('codec_type') == 'video']
@@ -67,18 +70,21 @@ class CsvExporter(iExecutor):
             ('has_collision', np.uint),
         ]
         normalized_frames = np.array(bbs['frames'], dtype=np.int)
-        normalized_frames -= np.min(normalized_frames)
-        data = np.array([*zip(normalized_frames, bbs['ids'], bbs['clss'], 
-            bbs['x1s'], bbs['y1s'], bbs['x2s'], bbs['y2s'], bbs['has_collision'])], dtype=dtype)
         begin = int(collision_frame - np.floor(self.clip_len_s * fps))
         if begin + self.len_thresh_s * fps < 0:
             # We are under the minimum threshold
             raise StopSignal(f"Video {item.id} is shorter than {self.len_thresh_s}s")
         begin = max(begin, 0)
-        data = data[begin:collision_frame]
-        mask = np.arange(int(self.target_fps * min(self.clip_len_s, len(data) / fps)))
-        mask = np.floor(mask * fps / self.target_fps).astype(np.int)
-        data = data[mask]
+        normalized_frames -= begin
+        data = np.array([*zip(normalized_frames, bbs['ids'], bbs['clss'], 
+            bbs['x1s'], bbs['y1s'], bbs['x2s'], bbs['y2s'], bbs['has_collision'])])
+        data = data[np.logical_and(normalized_frames >= 0, normalized_frames <= collision_frame - begin)]
+        data.sort(axis=0)
+        data = np.split(data[:,1:], np.unique(data[:, 0], return_index=True)[1][1:])
+        mask = np.floor(np.arange((collision_frame - begin) * self.target_fps / fps)).astype(int)
+        
+        # This line is broken
+        data = data[mask].astype(dtype).flatten()
 
         directory = STORAGE_DIR_POSITIVES if np.any(data['has_collision']) else STORAGE_DIR_NEGATIVES
         filename = str(metadata.id) + ".csv"
@@ -86,7 +92,7 @@ class CsvExporter(iExecutor):
             fmt='%d,%d,%s,%d,%d,%d,%d,%d',
             comments='')
         stream = ffmpeg.input(item.filepath)
-        stream = stream.trim(start_frame=begin, end_frame=collision_frame)
+        stream = stream.trim(start_frame=begin + metadata.start_i, end_frame=collision_frame + metadata.start_i)
         stream = ffmpeg.filter(stream, 'fps', fps=self.target_fps, round='up')
         stream = stream.output(str(STORAGE_DIR_VIDEOS / (str(metadata.id) + '.mp4')))
         stream = ffmpeg.overwrite_output(stream)
