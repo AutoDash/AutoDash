@@ -1,11 +1,13 @@
 from __future__ import annotations
-from .sp_context import SPContext
+from .bb_context import BBContext
 from ..utils.key_mapper import KeyMapper
 from .general_gui import VideoPlayerGUIManager
 from .gui_mode import InternalMode
 import cv2
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from typing import List
+from .bb.BoundingBoxManager import BoundingBoxManager
+from .tinker_subuis.button_popup import ButtonPopup
 
 SP_MODE_INSTRUCTIONS = [
     ["x", "Split at the current frame exclusively", "Split is exclusive (current frame is gone)"],
@@ -15,6 +17,7 @@ SP_MODE_INSTRUCTIONS = [
     ["e", "Jump to next split"],
     ["v", "Set enum tags for the CURRENT section"],
     ["r*2", "reset enum tags the CURRENT section"],
+    ["o*2", "Remove all bounding boxes in this video", "Applies to whole video, not just the current section"],
 ]
 
 DEBUG_MODE = False
@@ -28,39 +31,74 @@ class SPGUIManager(VideoPlayerGUIManager):
     LOG_START_X = 250
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
 
-    def __init__(self, context: SPContext):
+    def __init__(self, context: BBContext):
         super(SPGUIManager, self).__init__(context,
            [
                SPMode(self, context)
            ]
         )
 
-    def start(self) -> List[Section]:
-        super(SPGUIManager, self).start()
-        active_sections = self.mode_handlers[0].sm.get_all_sections()
+    def get_return_fields(self) -> (List[Section], List[List]):
+        sections = self.mode_handlers[0].sm.get_all_sections()
+        bbfs = []
+        for sec in sections:
+            bbfs.append(self.bbm.extract_in_range(
+                sec.start,
+                sec.end
+            ))
         if self.context.start_index is not None and self.context.start_index > 0:
-            for sec in active_sections:
+            for sec in sections:
                 sec.start += self.context.start_index
                 sec.end += self.context.start_index
-        return active_sections
+        return sections, bbfs
+
+    def start(self) -> (List[Section], List[List]):
+        super(SPGUIManager, self).start()
+        return self.get_return_fields()
+
+    def verify_bounding_box_consistency(self):
+        sections, bbfs = self.get_return_fields()
+        success = True
+        for i, b in enumerate(bbfs):
+            selected = b[-2]
+            accident_locs = b[-1]
+            if len(accident_locs) == 0 and len(selected) > 0:
+                self.logger.log("[WARN]: Section {0} has accident location despite no marked participants".format(i+1))
+                success = False
+            if len(accident_locs) > 0 and len(selected) == 0:
+                self.logger.log("[WARN]: Section {0} contains marked accident participants, but no accident location".format(i+1))
+                success = False
+        return success
 
     def modify_frame(self, frame, frame_index):
+        frame = self.bbm.modify_frame(frame, frame_index)
         return frame
 
     def can_commit(self):
         return True
+
+    def get_commit_message(self):
+        if not self.verify_bounding_box_consistency():
+            return "\n".join([
+                "WARNING:",
+                "There are warnings related to accident locations.",
+                "You cannot fix them in this GUI tool without clearing all bonding boxes.",
+                "Hitting continue will ignore this problem",
+                "Do you wish to continue?"
+            ])
+        return super(SPGUIManager, self).get_commit_message()
 
 class SectionStatus(object):
     ACTIVE = "ACTIVE"
     DELETED = "DELETED"
 
 class SPMode(InternalMode):
-    def __init__(self, parent: SPGUIManager, context: SPContext):
+    def __init__(self, parent: SPGUIManager, context: BBContext):
         super().__init__(parent, SP_MODE_INSTRUCTIONS)
         self.splits = []
         self.section_statuses = []
 
-        self.sm = SplitManager(self, context.vcm.get_frames_count(), context.initial_enum_tags.copy())
+        self.sm = SplitManager(self, context.vcm.get_frames_count(), context.enum_tags.copy())
 
     def handle_click(self, event, x, y, flags, param):
         pass
@@ -109,6 +147,15 @@ class SPMode(InternalMode):
             else:
                 self.sm.set_enum_tags_at(i, [])
                 self.log("Removing all enum tags (previously {0})".format(curr_tags))
+        elif key_mapper.consume(("o", "o")):
+            res = ButtonPopup(
+                "Confirm clearing ALL bounding boxes",
+                "Are you sure you want to clear ALL bounding boxes, across ALL sections of this video?",
+                ["Confirm", "Cancel"]
+            ).run()
+            if res == "Confirm":
+                self.par.bbm = BoundingBoxManager(self.par.bbm.total_frames)
+                self.log("All bounding boxes removed")
 
     def get_state_message(self):
         return [

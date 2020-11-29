@@ -5,7 +5,6 @@ from tkinter import Tk
 
 from .gui.bb_gui import BBGUIManager
 from .gui.bb_context import BBContext
-from .gui.sp_context import SPContext
 from ..data.MetaDataItem import MetaDataItem
 from ..signals import CancelSignal
 from .GUIExceptions import ManualTaggingAbortedException
@@ -26,9 +25,9 @@ def tag_file(file_loc, mdi:MetaDataItem):
                 file_loc,
                 bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
                 start_index=mdi.start_i,
-                end_index=mdi.end_i
+                end_index=mdi.end_i,
+                enum_tags = mdi.enum_tags
             )
-            context.enum_tags = mdi.enum_tags
             gui = BBGUIManager(context)
             gui.start()
 
@@ -55,21 +54,19 @@ def split_file(file_loc, mdi:MetaDataItem):
 
     while True:
         try:
-            context = SPContext(file_loc,
+            context = BBContext(file_loc,
                 bbox_fields=mdi.bb_fields.get_fields_as_list() + [mdi.accident_locations],
                 start_index=mdi.start_i,
-                end_index=mdi.end_i
+                end_index=mdi.end_i,
+                enum_tags = mdi.enum_tags
             )
-            context.initial_enum_tags = mdi.enum_tags
             gui = SPGUIManager(context)
-            rs = gui.start()
+            rs, bbfs = gui.start()
 
             split_vid = len(rs) > 1 or mdi.is_split_url
-            if len(rs) > 1:
-                mdi.bb_fields = BBFields()
 
             ret = []
-            for i, sec in enumerate(rs):
+            for i, (sec, bbf) in enumerate(zip(rs, bbfs)):
                 if i == 0:
                     m = mdi
                 else:
@@ -80,6 +77,9 @@ def split_file(file_loc, mdi:MetaDataItem):
                 m.enum_tags = sec.enum_tags
                 m.is_split_url = split_vid
                 m.is_cancelled = not (sec.status == SectionStatus.ACTIVE)
+
+                m.bb_fields.set_fields_from_list(bbf[:-1])
+                m.accident_locations = bbf[-1]
 
                 ret.append(m)
             return ret
