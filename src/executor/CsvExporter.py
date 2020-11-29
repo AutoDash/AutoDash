@@ -55,6 +55,10 @@ class CsvExporter(iExecutor):
         if not metadata.start_i:
             raise StopSignal(f"Metadata is not clipped")
         collision_frame = np.min(metadata.accident_locations)
+
+        if (collision_frame > max(map(int, bbs[FRAME]))):
+            raise StopSignal(f"Incorrectly labelled collision frame ({collision_frame}) for video with {max(map(int, bbs[FRAME]))} frames")
+
         info = ffmpeg.probe(item.filepath)
         streams = [ stream for stream in info.get('streams', []) if stream.get('codec_type') == 'video']
         if len(streams) > 1:
@@ -82,10 +86,12 @@ class CsvExporter(iExecutor):
             raise StopSignal(f"Video {item.id} is shorter than {self.len_thresh_s}s")
         begin = max(begin, 0)
 
-        normalized_frames = np.array(bbs[FRAME]).astype(np.int) - begin
+        normalized_frames = np.array(bbs[FRAME]).astype(np.int) 
 
         data = np.array([*zip(normalized_frames, bbs[ID], bbs[CLASS], 
             bbs[X1], bbs[Y1], bbs[X2], bbs[Y2], bbs[HAS_COLLISION])], dtype=str)
+
+        normalized_frames -= begin
         
         data = data[np.logical_and(normalized_frames >= 0, normalized_frames <= collision_frame - begin), ...]
 
@@ -103,17 +109,22 @@ class CsvExporter(iExecutor):
 
         # select frames to sample
         mask = np.round(np.arange(n_output_frames) * sample_interval).astype(int)
-        mask = np.minimum(mask, data.shape[0] - 1)
-
+        mask = np.minimum(mask, n_input_frames - 1)
         # Duplicate frames 
         # n_duplicate = n_input_frames - n_output_frames
         # dup_mask = mask[::n_output_frames // n_duplicate][:n_duplicate]
         # mask = np.sort(np.concatenate((mask, dup_mask)))
 
-        data = data[mask]
+        data = data[mask, ...]
 
-        flatten = lambda x: [z for y in x for z in y]
+        flatten = lambda x: np.array([z for y in x for z in y])
         data = flatten(data)
+
+        # assign consecutive numbers to frames
+        masked_frames = data[:, 0].astype(int)
+        _, frame_counts = np.unique(masked_frames, return_counts=True)
+        adjusted_frames = np.repeat(np.arange(1, n_output_frames+1), frame_counts)
+        data[:,0] = adjusted_frames
 
         directory = STORAGE_DIR_POSITIVES if np.any(bbs[HAS_COLLISION]) else STORAGE_DIR_NEGATIVES
         filename = str(metadata.id) + ".csv"
