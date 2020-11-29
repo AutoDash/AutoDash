@@ -55,6 +55,7 @@ class CsvExporter(iExecutor):
         if not metadata.start_i:
             raise StopSignal(f"Metadata is not clipped")
         collision_frame = np.min(metadata.accident_locations)
+        collision_frame += 10 # We need 10 frames after accident
         info = ffmpeg.probe(item.filepath)
         streams = [ stream for stream in info.get('streams', []) if stream.get('codec_type') == 'video']
         if len(streams) > 1:
