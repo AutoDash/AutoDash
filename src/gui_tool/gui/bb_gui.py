@@ -1,6 +1,5 @@
 from src.gui_tool.utils.key_mapper import KeyMapper
 from .bb_context import BBContext
-from .bb.BoundingBoxManager import BoundingBoxManager
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from .tinker_subuis.text_popup import TextPopup
@@ -63,12 +62,13 @@ class BBGUIManager(VideoPlayerGUIManager):
                InternalBBoxMode(self)
            ]
         )
-        self.bbm = BoundingBoxManager(self.vcm.get_frames_count())
-        self.bbm.set_to(*context.get_bbox_fields_as_list())
 
     def start(self):
         super(BBGUIManager, self).start()
-        self.context.set_bbox_fields_from_list(self.bbm.extract())
+        self.context.set_bbox_fields_from_list(self.bbm.extract_in_range(
+            0,
+            self.vcm.get_frames_count()
+        ))
 
     def modify_frame(self, frame, frame_index):
         frame = self.bbm.modify_frame(frame, frame_index)
@@ -77,6 +77,9 @@ class BBGUIManager(VideoPlayerGUIManager):
     def can_commit(self):
         if len(self.bbm.get_accident_locations()) == 0 and self.bbm.get_n_selected() > 0:
             self.logger.log("[ERROR]: If there is an accident, must specify accident location")
+            return False
+        if len(self.bbm.get_accident_locations()) > 0 and self.bbm.get_n_selected() == 0:
+            self.logger.log("[ERROR]: If an accident location is specified, you must select the participants")
             return False
         return True
 
