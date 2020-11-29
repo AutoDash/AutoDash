@@ -1,13 +1,14 @@
 from .iExecutor import iExecutor
 from ..data.VideoItem import VideoItem
 from ..signals.StopSignal import StopSignal
-from ..utils import get_project_root
+from ..utils import get_project_root 
 import os
 import csv
 import re
 import numpy as np
 from pathlib import Path
 import ffmpeg
+import pdb;
 
 STORAGE_DIR_POSITIVES = Path(os.path.join(get_project_root(), "data_files_positives"))
 STORAGE_DIR_POSITIVES.mkdir(parents=True, exist_ok=True)
@@ -15,6 +16,8 @@ STORAGE_DIR_NEGATIVES = Path(os.path.join(get_project_root(), "data_files_negati
 STORAGE_DIR_NEGATIVES.mkdir(parents=True, exist_ok=True)
 STORAGE_DIR_VIDEOS = Path(os.path.join(get_project_root(), "feature_videos"))
 STORAGE_DIR_VIDEOS.mkdir(parents=True, exist_ok=True)
+
+FRAME, ID, CLASS, X1, Y1, X2, Y2, HAS_COLLISION = 'frames', 'ids', 'clss', 'x1s', 'y1s', 'x2s', 'y2s', 'has_collision'
 
 class CsvExporter(iExecutor):
     def __init__(self, *parents, target_fps=20, clip_length='5s', length_threshold='3s'):
@@ -59,37 +62,63 @@ class CsvExporter(iExecutor):
         if len(streams) < 1:
             raise StopSignal(f"Video {item.id} has no video streams. Could not determine FPS")
         fps = float(streams[0]['nb_frames']) / float(streams[0]['duration'])
-        dtype = [
-            ('frames', np.uint),
-            ('ids', np.uint),
-            ('clss', np.object),
-            ('x1s', np.uint),
-            ('y1s', np.uint),
-            ('x2s', np.uint),
-            ('y2s', np.uint),
-            ('has_collision', np.uint),
-        ]
-        normalized_frames = np.array(bbs['frames'], dtype=np.int)
+
+        headers = [FRAME, ID, CLASS, X1, Y1, X2, Y2, HAS_COLLISION]
+
+        #dtype = [
+        #    (FRAME, np.uint),
+        #    (ID, np.uint),
+        #    (CLASS, np.object),
+        #    (X1, np.uint),
+        #    (Y1, np.uint),
+        #    (X2, np.uint),
+        #    (Y2, np.uint),
+        #    (HAS_COLLISION, np.uint),
+        #]
+
         begin = int(collision_frame - np.floor(self.clip_len_s * fps))
         if begin + self.len_thresh_s * fps < 0:
             # We are under the minimum threshold
             raise StopSignal(f"Video {item.id} is shorter than {self.len_thresh_s}s")
         begin = max(begin, 0)
-        normalized_frames -= begin
-        data = np.array([*zip(normalized_frames, bbs['ids'], bbs['clss'], 
-            bbs['x1s'], bbs['y1s'], bbs['x2s'], bbs['y2s'], bbs['has_collision'])])
-        data = data[np.logical_and(normalized_frames >= 0, normalized_frames <= collision_frame - begin)]
-        data.sort(axis=0)
-        data = np.split(data[:,1:], np.unique(data[:, 0], return_index=True)[1][1:])
-        mask = np.floor(np.arange((collision_frame - begin) * self.target_fps / fps)).astype(int)
-        
-        # This line is broken
-        data = data[mask].astype(dtype).flatten()
 
-        directory = STORAGE_DIR_POSITIVES if np.any(data['has_collision']) else STORAGE_DIR_NEGATIVES
+        normalized_frames = np.array(bbs[FRAME]).astype(np.int) - begin
+
+        data = np.array([*zip(normalized_frames, bbs[ID], bbs[CLASS], 
+            bbs[X1], bbs[Y1], bbs[X2], bbs[Y2], bbs[HAS_COLLISION])], dtype=str)
+        
+        data = data[np.logical_and(normalized_frames >= 0, normalized_frames <= collision_frame - begin), ...]
+
+        # Sort data by frame
+        data = data[np.argsort(data[:,0].astype(int)), ...]
+
+        # Group data by frame
+        _, unique_indices = np.unique(data[:,0].astype(np.int), return_index=True)
+        data = np.array(np.split(data, unique_indices[1:], axis=0))
+        
+        # Mask for downsampling fps
+        n_input_frames  = collision_frame - begin
+        n_output_frames = round(n_input_frames * (self.target_fps / fps))
+        sample_interval = float(n_input_frames) / n_output_frames
+
+        # select frames to sample
+        mask = np.round(np.arange(n_output_frames) * sample_interval).astype(int)
+        mask = np.minimum(mask, data.shape[0] - 1)
+
+        # Duplicate frames 
+        # n_duplicate = n_input_frames - n_output_frames
+        # dup_mask = mask[::n_output_frames // n_duplicate][:n_duplicate]
+        # mask = np.sort(np.concatenate((mask, dup_mask)))
+
+        data = data[mask]
+
+        flatten = lambda x: [z for y in x for z in y]
+        data = flatten(data)
+
+        directory = STORAGE_DIR_POSITIVES if np.any(bbs[HAS_COLLISION]) else STORAGE_DIR_NEGATIVES
         filename = str(metadata.id) + ".csv"
         np.savetxt(directory / filename, data, delimiter=',',
-            fmt='%d,%d,%s,%d,%d,%d,%d,%d',
+            fmt='%s,%s,%s,%s,%s,%s,%s,%s',
             comments='')
         stream = ffmpeg.input(item.filepath)
         stream = stream.trim(start_frame=begin + metadata.start_i, end_frame=collision_frame + metadata.start_i)
