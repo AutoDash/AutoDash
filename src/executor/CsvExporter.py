@@ -122,7 +122,7 @@ class CsvExporter(iExecutor):
             comments='')
         stream = ffmpeg.input(item.filepath)
         stream = stream.trim(start_frame=begin + metadata.start_i, end_frame=collision_frame + metadata.start_i)
-        stream = ffmpeg.filter(stream, 'fps', fps=self.target_fps, round='up')
+        stream = ffmpeg.filter(stream, 'fps', fps=self.target_fps, round='near')
         stream = stream.output(str(STORAGE_DIR_VIDEOS / (str(metadata.id) + '.mp4')))
         stream = ffmpeg.overwrite_output(stream)
         stream.run()
