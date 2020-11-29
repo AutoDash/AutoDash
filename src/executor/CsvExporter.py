@@ -56,8 +56,12 @@ class CsvExporter(iExecutor):
             raise StopSignal(f"Metadata is not clipped")
         collision_frame = np.min(metadata.accident_locations)
 
-        if (collision_frame > max(map(int, bbs[FRAME]))):
-            raise StopSignal(f"Incorrectly labelled collision frame ({collision_frame}) for video with {max(map(int, bbs[FRAME]))} frames")
+        max_frame = max(map(int, bbs[FRAME]))
+
+        if (collision_frame > max_frame):
+            raise StopSignal(f"Incorrectly labelled collision frame ({collision_frame}) for video with {max_frame} frames")
+
+        collision_frame = min(collision_frame + 10, max_frame) # We need 10 frames after accident
 
         info = ffmpeg.probe(item.filepath)
         streams = [ stream for stream in info.get('streams', []) if stream.get('codec_type') == 'video']
