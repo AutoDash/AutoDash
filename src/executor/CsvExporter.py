@@ -42,8 +42,8 @@ class CsvExporter(iExecutor):
         return time_s
 
     def run(self, item: VideoItem):
-        print("Start exporting file")
         metadata = iExecutor.get_metadata(item)
+        print(f"Start exporting file: {metadata.id}")
         bbs = metadata.bb_fields.to_json()
         if bbs is None or len(bbs) == 0:
             raise StopSignal("No bounding box fields for this item")
@@ -57,6 +57,7 @@ class CsvExporter(iExecutor):
         collision_frame = np.min(metadata.accident_locations)
 
         max_frame = max(map(int, bbs[FRAME]))
+        min_frame = min(map(int, bbs[FRAME]))
 
         if (collision_frame > max_frame):
             raise StopSignal(f"Incorrectly labelled collision frame ({collision_frame}) for video with {max_frame} frames")
@@ -88,15 +89,14 @@ class CsvExporter(iExecutor):
         if begin + self.len_thresh_s * fps < 0:
             # We are under the minimum threshold
             raise StopSignal(f"Video {item.id} is shorter than {self.len_thresh_s}s")
-        begin = max(begin, 0)
+        begin = max(begin, min_frame)
 
         normalized_frames = np.array(bbs[FRAME]).astype(np.int) 
 
         data = np.array([*zip(normalized_frames, bbs[ID], bbs[CLASS], 
             bbs[X1], bbs[Y1], bbs[X2], bbs[Y2], bbs[HAS_COLLISION])], dtype=str)
-
+    
         normalized_frames -= begin
-        
         data = data[np.logical_and(normalized_frames >= 0, normalized_frames <= collision_frame - begin), ...]
 
         # Sort data by frame
@@ -114,6 +114,7 @@ class CsvExporter(iExecutor):
         # select frames to sample
         mask = np.round(np.arange(n_output_frames) * sample_interval).astype(int)
         mask = np.minimum(mask, n_input_frames - 1)
+
         # Duplicate frames 
         # n_duplicate = n_input_frames - n_output_frames
         # dup_mask = mask[::n_output_frames // n_duplicate][:n_duplicate]
