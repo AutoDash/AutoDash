@@ -1,0 +1,13 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: Filterer
+    config:
+      filter_str: "url == 'https://www.youtube.com/watch?v=vhACO_m5pH0'"
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
+  - executor: UniversalDownloader
+  - executor: Labeler
+  - executor: FirebaseUpdater
+  - executor: Printer
