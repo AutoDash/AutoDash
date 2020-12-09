@@ -57,7 +57,7 @@ class BBObject:
     def crop_range(self, start_i, end_i):
         new_bboxes = {}
         for i, box in self.bboxes.items():
-            if box.frame >= start_i and box.frame <= end_i:
+            if box.frame >= start_i and box.frame < end_i:
                 new_bboxes[i] = box.shift(-start_i)
         self.bboxes = new_bboxes
 
@@ -104,9 +104,13 @@ class BBFields:
             obj.crop_range(start_i, end_i)
         self.accident_locations = [
             x - start_i for x in self.accident_locations
-            if x >= start_i and x <= end_i
+            if x >= start_i and x < end_i
         ]
         return self
+
+    def clear(self):
+        self.objects.clear()
+        self.accident_locations.clear()
 
     def has_collision(self):
         for obj in self.objects.values():
@@ -159,7 +163,7 @@ class BBFields:
                 __BBObj_kvp_from_json,
                 json['objects'],
             ))
-            return BBFields(objects, json['accident_locations'])
+            return BBFields(objects, json.get('accident_locations', []))
         else:  # for backwards compatability with old objects
             fields = BBFields({}, json.get('accident_locations', []))
             items = OldBBFields(**json)
