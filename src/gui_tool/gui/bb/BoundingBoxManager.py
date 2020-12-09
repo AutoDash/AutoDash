@@ -118,7 +118,7 @@ class BoundingBoxManager(object):
     def get_unused_ids(self):
         unused_ids = set()
         for id, d in self.objects.items():
-            if d.bboxes or not d.obj_class:
+            if not d.bboxes or not d.obj_class:
                 unused_ids.add(id)
         return unused_ids
 
@@ -167,3 +167,6 @@ class BoundingBoxManager(object):
 
     def get_accident_locations(self):
         return self.accident_locations.copy()
+
+    def clear_bounding_boxes(self):
+        self.bbox_fields.clear()

@@ -171,7 +171,7 @@ class SPMode(InternalMode):
                 "Are you sure you want to clear ALL bounding boxes, across ALL sections of this video?",
                 ["Confirm", "Cancel"]).run()
             if res == "Confirm":
-                self.par.bbm = BoundingBoxManager(self.par.bbm.total_frames)
+                self.par.bbm.clear_bounding_boxes()
                 self.log("All bounding boxes removed")
 
     def get_state_message(self):
