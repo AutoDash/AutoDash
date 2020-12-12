@@ -22,7 +22,7 @@ database_arg_mapper = {
 # Needed for PyInstaller to work :(
 from src.executor import AutoLabeler, CsvExporter, DeferTaskExecutor, ExecFilterer, FaceBlurrer, Filterer, FirebaseSource, FirebaseUpdater
 from src.executor import Labeler, LocalStorageSource, LocalStorageUpdater, ObjectDetector, Printer, RedditCrawler, Splitter, UniversalDownloader
-from src.executor import YoutubeCrawler, iDatabaseExecutor, iExecutor, uTaskCollector
+from src.executor import YoutubeCrawler, iDatabaseExecutor, uTaskCollector
 
 
 class PipelineCLIParser(ArgumentParser):
