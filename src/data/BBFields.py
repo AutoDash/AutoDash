@@ -1,7 +1,7 @@
 from .Exceptions import InvalidData
 import json
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Tuple, Optional, Callable
 
 
 @dataclass
@@ -39,6 +39,15 @@ class BBox:
             raise RuntimeError("Trying to Shift frame to < 0")
         return BBox(self.frame + amount, *self.get_flat_points())
 
+    def scale(self, ratio_x: float, ratio_y: float):
+        return BBox(
+            self.frame,
+            int(self.x1 * ratio_x),
+            int(self.y1 * ratio_y),
+            int(self.x2 * ratio_x),
+            int(self.y2 * ratio_y),
+        )
+
     @staticmethod
     def from_json(arr):
         return BBox(*arr)
@@ -51,14 +60,18 @@ class BBObject:
     obj_class: str = ''
     bboxes: Dict[int, BBox] = field(default_factory=lambda: {})
 
+    def set_bbox(self, frame_num: int, x1: int, y1: int, x2: int, y2: int):
+        self.bboxes[frame_num] = BBox(frame_num, x1, y1, x2, y2)
+
     def __repr__(self):
         return f"""{{"class": {self.obj_class}, "bboxes": <bbox array of length {len(self.bboxes)}> }}"""
 
-    def crop_range(self, start_i, end_i):
+    def map_boxes(self, mapping_func: Callable[[BBox], Optional[BBox]]):
         new_bboxes = {}
         for i, box in self.bboxes.items():
-            if box.frame >= start_i and box.frame < end_i:
-                new_bboxes[i] = box.shift(-start_i)
+            ret = mapping_func(box)
+            if ret:
+                new_bboxes[i] = ret
         self.bboxes = new_bboxes
 
     def clone(self):
@@ -85,23 +98,78 @@ class BBObject:
 class BBFields:
     objects: Dict[int, BBObject]
     accident_locations: List[int]
+    resolution: Tuple[int, int]
+    _scale: Tuple[float, float]
 
-    def __init__(self, objects={}, accident_locations=[]):
+    def __init__(self, objects={}, accident_locations=[], resolution=None):
         self.objects = objects
         self.accident_locations = accident_locations
+        self.resolution = resolution
+        self._scale = (1, 1)
 
     def __repr__(self):
         return f"""{{
         "objects":"{self.objects}",
-        "accident_locations: {self.accident_locations}
+        "accident_locations: {self.accident_locations},
+        "resolution: {self.resolution},
         }}"""
 
     def items(self):
         return self.objects.items()
 
-    def crop_range(self, start_i, end_i):
+    def set_resolution(self, new_resolution: Tuple[int, int]):
+        if not self.resolution or new_resolution == self.resolution:
+            self.resolution = new_resolution
+            self._scale = (1, 1)
+            return
+
+        ratio_x = new_resolution[0] / self.resolution[0]
+        ratio_y = new_resolution[1] / self.resolution[1]
+
+        def _scale_bbox(box):
+            return box.scale(ratio_x, ratio_y)
+
+        if ratio_x > 1 and ratio_y > 1:
+            # new resolution is higher, scale existing boxes
+            self.map_boxes(_scale_bbox)
+            self.resolution = new_resolution
+            self._scale = (1, 1)
+        else:
+            # new resolution is lower, scale any new bboxes
+            self._scale = (ratio_x, ratio_y)
+
+    def set_bbox(self, object_id: int, frame_num: int, x1: int, y1: int,
+                 x2: int, y2: int):
+        self.objects[object_id].set_bbox(
+            frame_num,
+            int(x1 / self._scale[0]),
+            int(y1 / self._scale[1]),
+            int(x2 / self._scale[0]),
+            int(y2 / self._scale[1]),
+        )
+
+    def get_bbox(self, object_id: int, frame_num: int) -> Optional[BBox]:
+        if (not object_id in self.objects
+                or not frame_num in self.objects[object_id].bboxes):
+            return None
+
+        bbox = self.objects[object_id].bboxes[frame_num]
+
+        return bbox.scale(*self._scale)
+
+    def map_boxes(self, mapping_func: Callable[[BBox], Optional[BBox]]):
         for obj in self.objects.values():
-            obj.crop_range(start_i, end_i)
+            obj.map_boxes(mapping_func)
+
+    def crop_range(self, start_i: int, end_i: int):
+        def _crop(box: BBox) -> Optional[BBox]:
+            if box.frame >= start_i and box.frame < end_i:
+                return box.shift(-start_i)
+            else:
+                return None
+
+        self.map_boxes(_crop)
+
         self.accident_locations = [
             x - start_i for x in self.accident_locations
             if x >= start_i and x < end_i
@@ -132,6 +200,7 @@ class BBFields:
         return {
             "objects": [v.to_json() for v in self.objects.values()],
             "accident_locations": self.accident_locations.copy(),
+            "resolution": self.resolution,
         }
 
     def get_bbs_as_arrs(self):
@@ -163,7 +232,9 @@ class BBFields:
                 __BBObj_kvp_from_json,
                 json['objects'],
             ))
-            return BBFields(objects, json.get('accident_locations', []))
+            al = json.get('accident_locations', [])
+            res = json.get('resolution', None)
+            return BBFields(objects, al, res)
         else:  # for backwards compatability with old objects
             fields = BBFields({}, json.get('accident_locations', []))
             items = OldBBFields(**json)

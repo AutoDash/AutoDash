@@ -63,7 +63,8 @@ class TestDataMigration(unittest.TestCase):
                     "has_collision": False,
                     "class": "truck",
                     "bboxes": [(0, 5, 6, 7, 8)],
-                }]
+                }],
+                "resolution": None
             }
         }
 

@@ -38,6 +38,9 @@ class UniversalDownloader(iExecutor):
             else:
                 raise RuntimeError(f"No registered downloader can handle link: {metadata_item.url}")
         
+        cap = cv2.VideoCapture(vid_item.filepath)
+        w,h = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        vid_item.metadata.bb_fields.set_resolution((w,h))
         return vid_item
 
     def set_pathname(self, pathname):

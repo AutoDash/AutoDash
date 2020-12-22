@@ -1,6 +1,7 @@
 import cv2
 from ...utils.IndexedRect import IndexedRect
 from ....data.BBFields import BBox, BBObject
+from ..bb_context import BBContext
 
 
 class BoundingBoxManager(object):
@@ -22,13 +23,12 @@ class BoundingBoxManager(object):
     }
 
     def __init__(self, total_frames):
-        self.bboxes = {}
         self.id_to_cls = {}
         self.selected = set()
         self.accident_locations = []
         self.total_frames = total_frames
 
-    def set_to(self, context, selected):
+    def set_to(self, context: BBContext, selected):
         self.selected.update(selected)
         self.bbox_fields = context.bbox_fields
         self.objects = context.bbox_fields.objects
@@ -53,9 +53,10 @@ class BoundingBoxManager(object):
         return frame
 
     def handleClickSelection(self, i, x, y):
-        for id, obj in self.objects.items():
-            if i in obj.bboxes:
-                p1, p2 = obj.bboxes[i].get_points()
+        for id in self.objects:
+            bbox = self.bbox_fields.get_bbox(id, i)
+            if bbox:
+                p1, p2 = bbox.get_points()
                 if p1[0] < x < p2[0] and p1[1] < y < p2[1]:
                     if id in self.selected:
                         self.selected.remove(id)
@@ -78,7 +79,8 @@ class BoundingBoxManager(object):
         for o in range(ir2.i - ir1.i + 1):
             frame = ir1.i + o
             new_pt = [pts1[i] + int(slopes[i] * o) for i in range(4)]
-            self.objects[id].bboxes[frame] = BBox(
+            self.bbox_fields.set_bbox(
+                id,
                 frame,
                 new_pt[0],
                 new_pt[1],
