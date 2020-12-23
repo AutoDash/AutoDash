@@ -2,6 +2,7 @@ from typing import Union
 from .BBFields import BBFields
 import json
 import hashlib
+import copy
 
 import os
 
@@ -84,7 +85,7 @@ class MetaDataItem:
             'id': self.id,
             'is_cancelled': self.is_cancelled,
             'is_split_url': self.is_split_url,
-            'tags': self.tags,
+            'tags': copy.deepcopy(self.tags),
             'enum_tags': self.enum_tags,
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
