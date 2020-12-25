@@ -3,7 +3,6 @@ import json
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional, Callable
 
-
 @dataclass
 class BBox:
     frame: int
@@ -313,5 +312,4 @@ class OldBBFields:
                         != len(getattr(self, param)):
                     raise InvalidData(f"Length of all arrays must be equal")
             else:
-                raise InvalidData(
-                    f"Invalid Bounding-Box, param: {param} missing")
+                setattr(self, param, [])
