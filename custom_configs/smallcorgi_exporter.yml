@@ -9,7 +9,7 @@ processingStages:
       filter_str: is_cancelled != 1
   - executor: Filterer
     config:
-      filter_str: accident_locations
+      filter_str: collision_locations
   - executor: UniversalDownloader
   - executor: CsvExporter
     config:

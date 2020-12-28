@@ -39,7 +39,7 @@ SELECTION_MODE_INSTRUCTIONS = [
         "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
-    ["l", "Mark accident location"],
+    ["l", "Mark collision location"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
@@ -75,11 +75,11 @@ class BBGUIManager(VideoPlayerGUIManager):
         return frame
 
     def can_commit(self):
-        if len(self.bbm.get_accident_locations()) == 0 and self.bbm.get_n_selected() > 0:
-            self.logger.log("[ERROR]: If there is an accident, must specify accident location")
+        if len(self.bbm.get_collision_locations()) == 0 and self.bbm.get_n_selected() > 0:
+            self.logger.log("[ERROR]: If there is an collision, must specify collision location")
             return False
-        if len(self.bbm.get_accident_locations()) > 0 and self.bbm.get_n_selected() == 0:
-            self.logger.log("[ERROR]: If an accident location is specified, you must select the participants")
+        if len(self.bbm.get_collision_locations()) > 0 and self.bbm.get_n_selected() == 0:
+            self.logger.log("[ERROR]: If an collision location is specified, you must select the participants")
             return False
         return True
 
@@ -96,8 +96,8 @@ class InternaSelectionMode(InternalMode):
                     "part of collision" if id_has_collision else "not part of collision"
                 ))
                 self.par.bbm.objects[modified_id].has_collision = id_has_collision
-                if len(self.par.bbm.get_accident_locations()) == 0:
-                    self.warn("No accident location specified")
+                if len(self.par.bbm.get_collision_locations()) == 0:
+                    self.warn("No collision location specified")
     def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
         if key_mapper.consume("n"):
@@ -120,20 +120,20 @@ class InternaSelectionMode(InternalMode):
                 self.log("Enum tag update cancelled")
         elif key_mapper.consume("l"):
             ind = self.par.vcm.get_frame_index()
-            if self.par.bbm.has_accident_location(ind):
-                self.par.bbm.remove_accident_location(ind)
-                self.log("Accident location removed:{0}".format(ind))
+            if self.par.bbm.has_collision_location(ind):
+                self.par.bbm.remove_collision_location(ind)
+                self.log("collision location removed:{0}".format(ind))
             else:
-                self.par.bbm.add_accident_location(ind)
-                self.log("Accident location added:{0}".format(ind))
-            self.log("Is now {0}".format(self.par.bbm.get_accident_locations()))
+                self.par.bbm.add_collision_location(ind)
+                self.log("collision location added:{0}".format(ind))
+            self.log("Is now {0}".format(self.par.bbm.get_collision_locations()))
 
 
     def get_state_message(self):
         ac_msg = ""
-        if self.par.bbm.get_n_selected() > 0 or len(self.par.bbm.get_accident_locations()) > 0:
-            ac_msg = "AC: {0}".format(self.par.bbm.get_accident_locations())
-        if len(self.par.bbm.get_accident_locations()) == 0 and self.par.bbm.get_n_selected() > 0:
+        if self.par.bbm.get_n_selected() > 0 or len(self.par.bbm.get_collision_locations()) > 0:
+            ac_msg = "AC: {0}".format(self.par.bbm.get_collision_locations())
+        if len(self.par.bbm.get_collision_locations()) == 0 and self.par.bbm.get_n_selected() > 0:
             ac_msg = "WARN: NO AC"
         return [
             "Selection Mode",
