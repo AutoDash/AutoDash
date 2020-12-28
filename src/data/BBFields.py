@@ -97,20 +97,20 @@ class BBObject:
 
 class BBFields:
     objects: Dict[int, BBObject]
-    accident_locations: List[int]
+    collision_locations: List[int]
     resolution: Tuple[int, int]
     _scale: Tuple[float, float]
 
-    def __init__(self, objects={}, accident_locations=[], resolution=None):
+    def __init__(self, objects={}, collision_locations=[], resolution=None):
         self.objects = objects
-        self.accident_locations = accident_locations
+        self.collision_locations = collision_locations
         self.resolution = resolution
         self._scale = (1, 1)
 
     def __repr__(self):
         return f"""{{
         "objects":"{self.objects}",
-        "accident_locations: {self.accident_locations},
+        "collision_locations: {self.collision_locations},
         "resolution: {self.resolution},
         }}"""
 
@@ -170,15 +170,15 @@ class BBFields:
 
         self.map_boxes(_crop)
 
-        self.accident_locations = [
-            x - start_i for x in self.accident_locations
+        self.collision_locations = [
+            x - start_i for x in self.collision_locations
             if x >= start_i and x < end_i
         ]
         return self
 
     def clear(self):
         self.objects.clear()
-        self.accident_locations.clear()
+        self.collision_locations.clear()
 
     def has_collision(self):
         for obj in self.objects.values():
@@ -197,12 +197,12 @@ class BBFields:
         return BBFields.from_json(self.to_json())
 
     def to_json(self):
-        if not self.objects and not self.accident_locations:
+        if not self.objects and not self.collision_locations:
             return None
 
         return {
             "objects": [v.to_json() for v in self.objects.values()],
-            "accident_locations": self.accident_locations.copy(),
+            "collision_locations": self.collision_locations.copy(),
             "resolution": self.resolution,
         }
 
@@ -230,16 +230,21 @@ class BBFields:
         if not json:
             return BBFields()
 
-        if "objects" in json:
-            objects = dict(map(
-                __BBObj_kvp_from_json,
-                json['objects'],
-            ))
-            al = json.get('accident_locations', [])
+        if "frames" not in json:
+            objects = dict(
+                map(
+                    __BBObj_kvp_from_json,
+                    json.get('objects', []),
+                ))
+
+            collisions = json.get('collision_locations', [])
+            accidents = json.get('accident_locations', [])
+            collisions.extend(accidents)
+
             res = json.get('resolution', None)
-            return BBFields(objects, al, res)
+            return BBFields(objects, collisions, res)
         else:  # for backwards compatability with old objects
-            fields = BBFields({}, json.get('accident_locations', []))
+            fields = BBFields({}, json.get('collision_locations', []))
             items = OldBBFields(**json)
             for i in range(len(items)):
                 frame, id, clss, x1, y1, x2, y2, has_collision = items.get_row(

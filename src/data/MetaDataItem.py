@@ -21,10 +21,15 @@ class MetaDataItem:
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
 
+        collision_locations = kwargs.get("collision_locations", [])
+
         accident_locations = kwargs.get("accident_locations", [])
+        collision_locations.extend(accident_locations)
+
         bb_fields_json = kwargs.get("bb_fields", {})
-        if accident_locations:
-            bb_fields_json["accident_locations"] = accident_locations
+
+        if collision_locations:
+            bb_fields_json["collision_locations"] = collision_locations
         self.bb_fields = BBFields.from_json(bb_fields_json)
 
         self.start_i = kwargs.get("start_i", None)
@@ -68,7 +73,6 @@ class MetaDataItem:
             'bb_fields': dict,
             'start_i': int,
             'end_i': int,
-            'accident_locations': list,
         }
 
     def encode(self) -> str:

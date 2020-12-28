@@ -52,7 +52,7 @@ class TestDataMigration(unittest.TestCase):
                 "tag1": "val1"
             },
             "bb_fields": {
-                "accident_locations": [1, 10, 100],
+                "collision_locations": [1, 10, 100],
                 "objects": [{
                     "id": 1,
                     "has_collision": True,
@@ -64,7 +64,8 @@ class TestDataMigration(unittest.TestCase):
                     "class": "truck",
                     "bboxes": [(0, 5, 6, 7, 8)],
                 }],
-                "resolution": None
+                "resolution":
+                None
             }
         }
 

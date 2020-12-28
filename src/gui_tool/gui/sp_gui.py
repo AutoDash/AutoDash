@@ -70,15 +70,15 @@ class SPGUIManager(VideoPlayerGUIManager):
         success = True
         for i, bb_field in enumerate(bbfs):
             has_collision = bb_field.has_collision()
-            accident_locs = bb_field.accident_locations
-            if len(accident_locs) > 0 and not has_collision:
+            collision_locs = bb_field.collision_locations
+            if len(collision_locs) > 0 and not has_collision:
                 self.logger.log(
-                    "[WARN]: Section {0} has accident location despite no marked participants"
+                    "[WARN]: Section {0} has collision location despite no marked participants"
                     .format(i + 1))
                 success = False
-            if len(accident_locs) == 0 and has_collision:
+            if len(collision_locs) == 0 and has_collision:
                 self.logger.log(
-                    "[WARN]: Section {0} contains marked accident participants, but no accident location"
+                    "[WARN]: Section {0} contains marked collision participants, but no collision location"
                     .format(i + 1))
                 success = False
         return success
@@ -94,7 +94,7 @@ class SPGUIManager(VideoPlayerGUIManager):
         if not self.verify_bounding_box_consistency():
             return "\n".join([
                 "WARNING:",
-                "There are warnings related to accident locations.",
+                "There are warnings related to collision locations.",
                 "You cannot fix them in this GUI tool without clearing all bonding boxes.",
                 "Hitting continue will ignore this problem",
                 "Do you wish to continue?"

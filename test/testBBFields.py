@@ -17,13 +17,13 @@ class TestBBFields(unittest.TestCase):
                 "class": "truck",
                 "bboxes": [(0, 11, 12, 13, 14), (1, 15, 16, 17, 18)]
             }],
-            "accident_locations": [1, 2, 3],
+            "collision_locations": [1, 2, 3],
             "resolution": (360, 360)
         })
 
     def test_from_json(self):
         fields = self._sample_bbField()
-        self.assertListEqual(fields.accident_locations, [1, 2, 3])
+        self.assertListEqual(fields.collision_locations, [1, 2, 3])
         self.assertTupleEqual(fields.resolution, (360, 360))
         self.assertEqual(len(fields.objects), 2)
 

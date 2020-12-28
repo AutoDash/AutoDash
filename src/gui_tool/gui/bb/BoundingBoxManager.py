@@ -11,7 +11,7 @@ class BoundingBoxManager(object):
         "lineType": 1,
         "thickness": 1
     }
-    ACCIDENT_LOCATION_BOX_DISPLAY = {
+    COLLISION_LOCATION_BOX_DISPLAY = {
         "color": (0, 255, 255),
         "lineType": 1,
         "thickness": 2
@@ -25,24 +25,24 @@ class BoundingBoxManager(object):
     def __init__(self, total_frames):
         self.id_to_cls = {}
         self.selected = set()
-        self.accident_locations = []
+        self.collision_locations = []
         self.total_frames = total_frames
 
     def set_to(self, context: BBContext, selected):
         self.selected.update(selected)
         self.bbox_fields = context.bbox_fields
         self.objects = context.bbox_fields.objects
-        self.accident_locations = self.bbox_fields.accident_locations
-        self.accident_locations.sort()
+        self.collision_locations = self.bbox_fields.collision_locations
+        self.collision_locations.sort()
 
     def modify_frame(self, frame, i):
         for id, obj in self.objects.items():
             if i in obj.bboxes:
                 p1, p2 = obj.bboxes[i].get_points()
                 if id in self.selected:
-                    if i in self.accident_locations:
+                    if i in self.collision_locations:
                         cv2.rectangle(frame, p1, p2,
-                                      **self.ACCIDENT_LOCATION_BOX_DISPLAY)
+                                      **self.COLLISION_LOCATION_BOX_DISPLAY)
                     else:
                         cv2.rectangle(frame, p1, p2,
                                       **self.SELECTED_BOX_DISPLAY)
@@ -153,22 +153,22 @@ class BoundingBoxManager(object):
         bbox = self.objects[id].bboxes[i]
         return IndexedRect(bbox.frame, *bbox.get_flat_points())
 
-    def add_accident_location(self, loc):
-        if loc not in self.accident_locations:
-            self.accident_locations.append(loc)
-            self.accident_locations.sort()
+    def add_collision_location(self, loc):
+        if loc not in self.collision_locations:
+            self.collision_locations.append(loc)
+            self.collision_locations.sort()
 
-    def remove_accident_location(self, loc):
-        for i, val in enumerate(self.accident_locations):
+    def remove_collision_location(self, loc):
+        for i, val in enumerate(self.collision_locations):
             if val == loc:
-                del self.accident_locations[i]
+                del self.collision_locations[i]
                 break
 
-    def has_accident_location(self, loc):
-        return loc in self.accident_locations
+    def has_collision_location(self, loc):
+        return loc in self.collision_locations
 
-    def get_accident_locations(self):
-        return self.accident_locations.copy()
+    def get_collision_locations(self):
+        return self.collision_locations.copy()
 
     def clear_bounding_boxes(self):
         self.bbox_fields.clear()
