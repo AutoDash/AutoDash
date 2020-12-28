@@ -197,6 +197,9 @@ class BBFields:
         return BBFields.from_json(self.to_json())
 
     def to_json(self):
+        if not self.objects and not self.accident_locations:
+            return None
+
         return {
             "objects": [v.to_json() for v in self.objects.values()],
             "accident_locations": self.accident_locations.copy(),
