@@ -13,6 +13,7 @@ class MetaDataItem:
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
         self.id = kwargs.get("id", None)
+        print(f'Parsing item {self.id}')
         self.collision_type = kwargs.get("collision_type", None)
         self.description = kwargs.get("description", None)
         self.location = kwargs.get("location", None)

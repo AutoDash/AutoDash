@@ -12,8 +12,7 @@ class SegmentSplitter(iExecutor):
     def split_segment(self, metadata):
         # First we find the length of BBs
         bbs = metadata.bb_fields.get_bbs_as_arrs()
-        begin = metadata.start_i
-        fps = 30 # TODO: Should store fps in bb_fields... metadata.bb_fields.fps
+        fps = 20 # TODO: Should store fps in bb_fields... metadata.bb_fields.fps
         accident_locations = metadata.bb_fields.accident_locations
         if len(accident_locations) < 1:
             raise StopSignal("Item has no accident_locations")
@@ -25,14 +24,14 @@ class SegmentSplitter(iExecutor):
             ('y1', np.int),        
             ('x2', np.int),        
             ('y2', np.int),        
+            ('has_collision', np.bool),        
         ]
         bbs = np.array(bbs, dtype=dtype)
         accident_locations = np.sort(accident_locations)
         frames = np.unique(bbs['frame'])
         segments = [ ]
-        breakpoint()
-        segments += self.create_positives(begin, accident_locations, frames, fps)
-        segments += self.create_negatives(begin, segments, accident_locations, frames, fps)        
+        segments += self.create_positives(accident_locations, frames, fps)
+        segments += self.create_negatives(segments, accident_locations, frames, fps)        
         items = [ ]
         for begin, end in segments:
             item = metadata.clone()
@@ -40,16 +39,17 @@ class SegmentSplitter(iExecutor):
             items.append(item)
         return items
 
-    def create_positives(self, begin, ALs, frames, fps):
+    def create_positives(self, ALs, frames, fps):
         cover = [ ]
+        begin = 0
         for al in ALs:
             # Check for minimum range
             if (al - begin) < self.len_thresh_s * fps:
                 continue
-            begin += max(0, al - self.clip_len_s)
+            begin += max(0, int(al - self.clip_len_s * fps))
             # Check for minimum BB coverage
             it_begin = np.searchsorted(frames, begin)
-            it_end = np.searchsorted(frames, begin + al, 'right')
+            it_end = np.searchsorted(frames, al)
             if (it_end - it_begin + 1) < self.len_thresh_s * fps:
                 continue
             # Add coverage
@@ -57,10 +57,13 @@ class SegmentSplitter(iExecutor):
             begin = frames[it_end]
         return cover
 
-    def create_negatives(self, begin, positive_cover, ALs, frames, fps):
+    def create_negatives(self, positive_cover, ALs, frames, fps):
         cover = [ ]
-        for cover in positive_cover:
-            end, next_begin = cover
+        begin = 0
+        end = frames[-1]
+        positive_cover.append((end, end))
+        for prange in positive_cover:
+            end, next_begin = prange
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, end)
             n_covers = int((it_end - it_begin) / fps / self.clip_len_s)
