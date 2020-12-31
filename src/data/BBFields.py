@@ -91,7 +91,7 @@ class BBObject:
             bbox = BBox.from_json(json)
             return (bbox.frame, bbox)
 
-        bboxes = dict(map(__bbox_kvp_from_json, obj['bboxes']))
+        bboxes = dict(map(__bbox_kvp_from_json, obj.get('bboxes', [])))
         return BBObject(obj['id'], obj['has_collision'], obj['class'], bboxes)
 
 
