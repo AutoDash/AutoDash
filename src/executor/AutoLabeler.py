@@ -13,5 +13,9 @@ class AutoLabeler(iExecutor):
 
     def run(self, item: Union[VideoItem, MetaDataItem]):
         metadata = self.get_metadata(item)
-        metadata.add_tag(self.key, self.val)
+        # Update metadata attribute if it exists, otherwise add tag
+        if self.key in MetaDataItem.attributes():
+            setattr(metadata, self.key, self.val)
+        else:
+            metadata.add_tag(self.key, self.val)
         return item

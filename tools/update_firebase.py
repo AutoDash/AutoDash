@@ -6,7 +6,7 @@ def update_states_of_in_progress_metadata():
     f = FirebaseAccessor()
     fu = FirebaseUpdater()
 
-    fc = FilterCondition( "tags['state'] == 'in-progress'")
+    fc = FilterCondition( "state == 'in-progress'")
 
     all_videos = f.fetch_newest_videos(filter_cond=fc)
     print("Num videos to go: " + str(len(all_videos)))
@@ -17,11 +17,11 @@ def update_states_of_in_progress_metadata():
 
         if inp == "c":
             # clear state
-            video.add_tag('state', '')
+            video.state = ''
             fu.run(video)
         elif inp == "f":
             # Finished
-            video.add_tag('state', 'processed')
+            video.state = 'processed'
             fu.run(video)
 
 

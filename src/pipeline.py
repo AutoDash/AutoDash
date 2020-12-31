@@ -111,14 +111,14 @@ def run_recur(source_executor, item, dataUpdater):
     except StopSignal as e:
         print(f"Stopping Pipeline for metadataitem {item}\n\n\n reason: {e}")
         metadata = iExecutor.get_metadata(item)
-        if metadata.tags['state'] == 'in-progress':
-            metadata.add_tag('state', '')
+        if metadata.state == 'in-progress':
+            metadata.state = ''
         dataUpdater.safe_run(metadata)
         return
     except CancelSignal:
         metadata = iExecutor.get_metadata(item)
         metadata.is_cancelled = True
-        metadata.add_tag('state', 'processed')
+        metadata.state = 'processed'
         dataUpdater.safe_run(metadata)
         return
     except RuntimeError as e:
@@ -131,7 +131,7 @@ def run_recur(source_executor, item, dataUpdater):
     for next_item in items:
         metadata = iExecutor.get_metadata(next_item)
         if metadata.is_cancelled == True:
-            metadata.add_tag('state', 'processed')
+            metadata.state = 'processed'
             dataUpdater.safe_run(metadata)
         else:
             run_recur(source_executor.get_next(), next_item, dataUpdater)
