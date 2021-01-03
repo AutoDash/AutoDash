@@ -7,7 +7,7 @@ from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .utils import get_project_root
-from .signals import CancelSignal, StopSignal
+from .signals import CancelSignal, StopSignal, SkipSignal
 from .database.DataUpdater import DataUpdater
 from collections.abc import Iterable
 
@@ -114,6 +114,9 @@ def run_recur(source_executor, item, dataUpdater):
         if metadata.tags['state'] == 'in-progress':
             metadata.add_tag('state', '')
         dataUpdater.safe_run(metadata)
+        return
+    except SkipSignal as e:
+        print(f"Stopping Pipeline for metadataitem {item}\n\n\n reason: {e}")
         return
     except CancelSignal:
         metadata = iExecutor.get_metadata(item)

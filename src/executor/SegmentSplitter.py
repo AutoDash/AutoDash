@@ -9,13 +9,14 @@ class SegmentSplitter(iExecutor):
         self.clip_len_s = SegmentSplitter.parse_time(clip_length)
         self.len_thresh_s = SegmentSplitter.parse_time(length_threshold)
     
-    def split_segment(self, metadata):
+    def split_segment(self, item):
+        metadata = iExecutor.get_metadata(item)
         # First we find the length of BBs
         bbs = metadata.bb_fields.get_bbs_as_arrs()
-        fps = 20 # TODO: Should store fps in bb_fields... metadata.bb_fields.fps
+        fps = item.fps
         accident_locations = metadata.bb_fields.accident_locations
         if len(accident_locations) < 1:
-            raise StopSignal("Item has no accident_locations")
+            raise SkipSignal("Item has no accident_locations")
         dtype = [
             ('frame', np.int),
             ('id', np.int),
@@ -33,9 +34,12 @@ class SegmentSplitter(iExecutor):
         segments += self.create_positives(accident_locations, frames, fps)
         segments += self.create_negatives(segments, accident_locations, frames, fps)        
         items = [ ]
-        for begin, end in segments:
+        for idx, (begin, end) in enumerate(segments):
             item = metadata.clone()
             item.bb_fields.crop_range(begin, end)
+            item.id = metadata.id + f'-{idx}'
+            item.start_i = begin
+            item.end_i = end
             items.append(item)
         return items
 
@@ -46,10 +50,11 @@ class SegmentSplitter(iExecutor):
             # Check for minimum range
             if (al - begin) < self.len_thresh_s * fps:
                 continue
-            begin += max(0, int(al - self.clip_len_s * fps))
+            begin = max(0, int(al - self.clip_len_s * fps))
             # Check for minimum BB coverage
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, al)
+            it_end = min(frames.shape[0] - 1, it_end) # Prevent out of index access for ALs with no BBs
             if (it_end - it_begin + 1) < self.len_thresh_s * fps:
                 continue
             # Add coverage
@@ -61,8 +66,7 @@ class SegmentSplitter(iExecutor):
         cover = [ ]
         begin = 0
         end = frames[-1]
-        positive_cover.append((end, end))
-        for prange in positive_cover:
+        for prange in positive_cover + [(end, end)]:
             end, next_begin = prange
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, end)
@@ -70,7 +74,7 @@ class SegmentSplitter(iExecutor):
             if n_covers < 1:
                 continue
             delta = (it_end - it_begin) / n_covers
-            cover += [ (it_begin + i * delta, it_begin + (i+ 1) * delta) 
+            cover += [ (int(it_begin + i * delta), int(it_begin + (i+ 1) * delta)) 
                     for i in range(0, n_covers) ]
             begin = next_begin
         return cover
@@ -95,5 +99,5 @@ class SegmentSplitter(iExecutor):
     def run(self, item: VideoItem):
         return map(
             lambda mdi: VideoItem(mdi, filepath=item.filepath),
-            self.split_segment(item.metadata)
+            self.split_segment(item)
             )

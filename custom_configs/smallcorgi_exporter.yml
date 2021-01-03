@@ -7,9 +7,6 @@ processingStages:
   - executor: Filterer
     config:
       filter_str: is_cancelled != 1
-  - executor: Printer
-    config:
-      msg: ""
   - executor: ExecFilterer
     config:
       filter_str: len(data.bb_fields.collision_locations) > 0

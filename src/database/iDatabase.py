@@ -16,12 +16,12 @@ class iReadOnlyDatabase(ABC):
 
     # Used to create metadataItems from the dictionaries that databases return
     @staticmethod
-    def create_metadata(id: str, var_dict: dict) -> MetaDataItem:
-        var_dict['id'] = id
+    def create_metadata(mid: str, var_dict: dict) -> MetaDataItem:
+        var_dict['id'] = mid
         return MetaDataItem(**var_dict)
 
     @abstractmethod
-    def fetch_metadata(self, id: str) -> MetaDataItem:
+    def fetch_metadata(self, mid: str) -> MetaDataItem:
         pass
 
     @abstractmethod
@@ -52,5 +52,5 @@ class iDatabase(iReadOnlyDatabase):
         pass
 
     @abstractmethod
-    def delete_metadata(self, id: str):
+    def delete_metadata(self, mid: str):
         pass
