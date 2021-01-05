@@ -58,6 +58,20 @@ class TestMetaDataItem(unittest.TestCase):
         mdi = MetaDataItem(**json)
         self.assertListEqual(mdi.bb_fields.collision_locations, [1, 2, 3])
 
+    def test_from_json_accident_and_collision_in_root(self):
+        json = {
+            "id": "id",
+            "title": "blah",
+            "url": "www.ca",
+            "download_src": "www.website.ca",
+            "accident_locations": [2, 5, 7],
+            "bb_fields": {
+                "collision_locations": [1, 2, 3]
+            },
+        }
+        mdi = MetaDataItem(**json)
+        self.assertListEqual(mdi.bb_fields.collision_locations, [1, 2, 3])
+
 
 if __name__ == '__main__':
     unittest.main()
