@@ -239,7 +239,9 @@ class BBFields:
 
             collisions = json.get('collision_locations', [])
             accidents = json.get('accident_locations', [])
-            collisions.extend(accidents)
+            # only add collisions in the case where there is no accidents
+            if accidents and not collisions:
+                collisions.extend(accidents)
 
             res = json.get('resolution', None)
             return BBFields(objects, collisions, res)
