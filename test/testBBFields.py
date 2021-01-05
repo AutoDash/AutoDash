@@ -94,6 +94,34 @@ class TestBBFields(unittest.TestCase):
         fields.set_bbox(1, 0, 21, 22, 23, 24)
         self.assertEqual(fields.get_bbox(1, 0), BBox(0, 21, 22, 23, 24))
 
+    def test_clone(self):
+        fields = self._sample_bbField()
+        clone = fields.clone()
+        clone.objects[1].bboxes[1].x1 = 1
+        self.assertEqual(fields.objects[1].bboxes[1].x1, 5)
+        self.assertEqual(clone.objects[1].bboxes[1].x1, 1)
+        fields.objects[1].bboxes[1].x1 = 2
+        self.assertEqual(fields.objects[1].bboxes[1].x1, 2)
+        self.assertEqual(clone.objects[1].bboxes[1].x1, 1)
+        del fields.objects[2]
+        self.assertIsNotNone(clone.objects[2])
+        self.assertFalse(2 in fields.objects)
+
+    def test_crop_range(self):
+        fields = self._sample_bbField()
+        fields.crop_range(0, 1)
+        self.assertEqual(fields.get_bbox(1, 0), BBox(0, 1, 2, 3, 4))
+        self.assertEqual(fields.get_bbox(1, 1), None)
+
+    def test_crop_and_clone(self):
+        fields = self._sample_bbField()
+        fields_2 = fields.clone()
+        fields_2.crop_range(0, 1)
+        self.assertEqual(fields_2.get_bbox(1, 0), BBox(0, 1, 2, 3, 4))
+        self.assertEqual(fields_2.get_bbox(1, 1), None)
+        self.assertEqual(fields.get_bbox(1, 0), BBox(0, 1, 2, 3, 4))
+        self.assertEqual(fields.get_bbox(1, 1), BBox(1, 5, 6, 7, 8))
+
 
 if __name__ == '__main__':
     unittest.main()

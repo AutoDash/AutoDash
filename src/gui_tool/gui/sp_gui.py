@@ -7,6 +7,7 @@ import cv2
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
 from typing import List
 from .bb.BoundingBoxManager import BoundingBoxManager
+from ...data.BBFields import BBFields
 from .tinker_subuis.button_popup import ButtonPopup
 
 SP_MODE_INSTRUCTIONS = [
@@ -45,7 +46,7 @@ class SPGUIManager(VideoPlayerGUIManager):
     def __init__(self, context: BBContext):
         super(SPGUIManager, self).__init__(context, [SPMode(self, context)])
 
-    def get_return_fields(self) -> (List[Section], List[List]):
+    def get_return_fields(self) -> (List[Section], List[BBFields]):
         sections = [
             s.copy() for s in self.mode_handlers[0].sm.get_all_sections()
         ]
