@@ -13,6 +13,7 @@ class BBContext(GUIContext):
         super(BBContext, self).__init__(file_loc, start_index, end_index,
                                         enum_tags)
         self.bbox_fields = bbox_fields
+        self.reckless_intervals = []
         self.additional_tags = {}
 
     def set_bbox_fields_from_list(self, fields: List):
