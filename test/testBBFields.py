@@ -106,6 +106,8 @@ class TestBBFields(unittest.TestCase):
         del fields.objects[2]
         self.assertIsNotNone(clone.objects[2])
         self.assertFalse(2 in fields.objects)
+        clone.collision_locations.append(4)
+        self.assertNotIn(4, fields.collision_locations)
 
     def test_crop_range(self):
         fields = self._sample_bbField()
