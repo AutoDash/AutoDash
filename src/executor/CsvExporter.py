@@ -30,7 +30,7 @@ class CsvExporter(iExecutor):
         bbs = metadata.bb_fields.get_bbs_as_arrs()
         if bbs is None or len(bbs) == 0:
             raise SkipSignal("No bounding box fields for this item")
-        accident_locations = metadata.bb_fields.accident_locations
+        collision_locations = metadata.bb_fields.collision_locations
 
         if not metadata.start_i:
             raise SkipSignal(f"Metadata is not clipped")
@@ -85,7 +85,7 @@ class CsvExporter(iExecutor):
             fmt='%s,%s,%s,%s,%s,%s,%s,%s',
             comments='')
         stream = ffmpeg.input(item.filepath)
-        stream = stream.trim(start_frame=begin, end_frame=end)
+        stream = stream.trim(start_frame=begin, end_frame=end, duration=5)
         stream = ffmpeg.filter(stream, 'fps', fps=self.target_fps, round='near')
         stream = ffmpeg.setpts(stream, expr='PTS-STARTPTS')
         stream = stream.output(str(STORAGE_DIR_VIDEOS / (str(metadata.id) + '.mp4')))

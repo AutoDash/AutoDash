@@ -14,9 +14,9 @@ class SegmentSplitter(iExecutor):
         # First we find the length of BBs
         bbs = metadata.bb_fields.get_bbs_as_arrs()
         fps = item.fps
-        accident_locations = metadata.bb_fields.accident_locations
-        if len(accident_locations) < 1:
-            raise SkipSignal("Item has no accident_locations")
+        collision_locations = metadata.bb_fields.collision_locations
+        if len(collision_locations) < 1:
+            raise SkipSignal("Item has no collision_locations")
         dtype = [
             ('frame', np.int),
             ('id', np.int),
@@ -28,11 +28,11 @@ class SegmentSplitter(iExecutor):
             ('has_collision', np.bool),        
         ]
         bbs = np.array(bbs, dtype=dtype)
-        accident_locations = np.sort(accident_locations)
+        collision_locations = np.sort(collision_locations)
         frames = np.unique(bbs['frame'])
         segments = [ ]
-        segments += self.create_positives(accident_locations, frames, fps)
-        segments += self.create_negatives(segments, accident_locations, frames, fps)        
+        segments += self.create_positives(collision_locations, frames, fps)
+        segments += self.create_negatives(segments, collision_locations, frames, fps)        
         items = [ ]
         for idx, (begin, end) in enumerate(segments):
             item = metadata.clone()
