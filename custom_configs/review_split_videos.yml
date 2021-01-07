@@ -1,0 +1,23 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: Filterer
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
+  - executor: Filterer
+    config:
+      filter_str: "tags['state'] == 'split'"
+  - executor: AutoLabeler
+    config:
+      key: "state"
+      val: "in-progress"
+  - executor: FirebaseUpdater
+  - executor: UniversalDownloader
+  - executor: Labeler
+  - executor: AutoLabeler
+  - executor: Printer
+    config:
+      msg: "labelling complete"
+  - executor: LocalStorageUpdater
+  - executor: FirebaseUpdater

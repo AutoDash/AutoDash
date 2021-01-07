@@ -95,7 +95,7 @@ class BBObject:
         return BBObject(obj['id'], obj['has_collision'], obj['class'], bboxes)
 
 
-class BBFields:
+class BBFields():
     objects: Dict[int, BBObject]
     collision_locations: List[int]
     resolution: Tuple[int, int]
@@ -118,7 +118,7 @@ class BBFields:
         return self.objects.items()
 
     def set_resolution(self, new_resolution: Tuple[int, int]):
-        if not self.resolution or new_resolution == self.resolution:
+        if not self.resolution or new_resolution == self.resolution or not self.objects:
             self.resolution = new_resolution
             self._scale = (1, 1)
             return
@@ -193,13 +193,10 @@ class BBFields:
                 ret.append(obj.bboxes[frame])
         return ret
 
-    def clone(self):
+    def clone(self) -> 'BBFields':
         return BBFields.from_json(self.to_json())
 
     def to_json(self):
-        if not self.objects and not self.collision_locations:
-            return None
-
         return {
             "objects": [v.to_json() for v in self.objects.values()],
             "collision_locations": self.collision_locations.copy(),
