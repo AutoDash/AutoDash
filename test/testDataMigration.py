@@ -20,6 +20,7 @@ class TestDataMigration(unittest.TestCase):
             'is_cancelled': False,
             'is_split_url': False,
             'location': None,
+            'state': None,
             'tags': {
                 "tag1": "val1"
             },
@@ -48,6 +49,7 @@ class TestDataMigration(unittest.TestCase):
             'is_cancelled': False,
             'is_split_url': False,
             'location': None,
+            'state': None,
             'tags': {
                 "tag1": "val1"
             },
