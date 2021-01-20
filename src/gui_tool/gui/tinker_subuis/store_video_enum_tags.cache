@@ -1,1 +1,19 @@
-["NoCollision", "CollisionWithStationaryObject", "CollisionWithAnimal", "CollisionWithRecordingVehicle", "MultiCollision", "StationaryCamera", "ManHeldCamera", "LowQualityVideo", "LowVisibility", "PoorLighting", "VideoEditing"]
+CancelWithUnspecifiedReason
+  Cancel
+NoCollision
+  Cancel
+CollisionWithStationaryObject
+CollisionWithAnimal
+  Cancel
+CollisionWithRecordingVehicle
+MultiCollision
+StationaryCamera
+ManHeldCamera
+  Cancel
+LowQualityVideo
+  Cancel
+LowVisibility
+  Cancel
+PoorLighting
+  Cancel
+VideoEditing

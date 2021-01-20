@@ -3,7 +3,7 @@ from tkinter import END
 from .cashe_manager import ListCacheManager
 
 class MultiSelectPopup:
-    def __init__(self, title, cache_name, starting_selected=None, cache_amount=100):
+    def __init__(self, title, cache: ListCacheManager, starting_selected=None):
         self.tags = []
         self.entries = []
         self.root = Tk()
@@ -13,7 +13,7 @@ class MultiSelectPopup:
         self.options_frame = Frame(self.root)
         self.button_frame = Frame(self.root)
 
-        self.cm = ListCacheManager(cache_name, cache_amount)
+        self.cm = cache
         options = self.cm.retrieve()
 
         if starting_selected is None:

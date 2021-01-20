@@ -2,6 +2,7 @@ from src.gui_tool.utils.key_mapper import KeyMapper
 from .bb_context import BBContext
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
+from .tinker_subuis.cashe_manager import ListCacheManager
 from .tinker_subuis.text_popup import TextPopup
 from .tinker_subuis.select_popup import SelectPopup
 import cv2
@@ -62,6 +63,7 @@ class BBGUIManager(VideoPlayerGUIManager):
                InternalBBoxMode(self)
            ]
         )
+        self.tag_list_manager = ListCacheManager("video_enum_tags", 100)
 
     def start(self):
         super(BBGUIManager, self).start()
@@ -109,7 +111,7 @@ class InternaSelectionMode(InternalMode):
             par.context.set_additional_tags(tags)
             self.log("Additional tags set")
         elif key_mapper.consume("v"):
-            window = MultiSelectPopup("Select custom enum tags", "video_enum_tags", self.par.context.enum_tags)
+            window = MultiSelectPopup("Select custom enum tags", self.par.tag_list_manager, self.par.context.enum_tags)
             enum_tags = window.run()
             if enum_tags is not None:
                 self.log("Updated from {0}".format(self.par.context.enum_tags))
