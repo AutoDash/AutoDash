@@ -99,9 +99,6 @@ class VideoFile(object):
 
     def current(self):
         return self.current_frame
-    
-    def current_time(self):
-        return self.current_time
 
     def get_timeframe_range(self, time_delta_ms):
         time_end_ms = self.current_time + int(time_delta_ms)
