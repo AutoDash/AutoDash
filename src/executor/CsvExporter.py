@@ -66,16 +66,19 @@ class CsvExporter(iExecutor):
         data = np.array(np.split(data, unique_indices[1:], axis=0))
         
         # Mask for downsampling fps
-        n_input_frames  = end - begin
-        n_output_frames = round(n_input_frames * (self.target_fps / fps))
+        n_input_frames  = end - begin + 1
+        n_output_frames = int(n_input_frames * (self.target_fps / fps))
         sample_interval = float(n_input_frames) / n_output_frames
 
         # select frames to sample
-        mask = np.round(np.arange(n_output_frames) * sample_interval).astype(int)
-        mask = np.minimum(mask, data.shape[0] - 1)
-
+        mask = np.floor(np.arange(n_output_frames) * sample_interval).astype(int)
         data = data[mask]
 
+        # Reframe
+        frame_number = 0
+        for frame in data:
+            frame[:, 0] = frame_number
+            frame_number += 1
         flatten = lambda x: [z for y in x for z in y]
         data = flatten(data)
 
