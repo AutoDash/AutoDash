@@ -38,7 +38,6 @@ class CsvExporter(iExecutor):
             raise SkipSignal(f"Metadata is not clipped")
         begin = metadata.start_i
         end = metadata.end_i
-        
         headers = [FRAME, ID, CLASS, X1, Y1, X2, Y2, HAS_COLLISION]
 
         dtype = [
@@ -72,6 +71,7 @@ class CsvExporter(iExecutor):
 
         # select frames to sample
         mask = np.floor(np.arange(n_output_frames) * sample_interval).astype(int)
+        mask = np.minimum(mask, data.shape[0] - 1)
         data = data[mask]
 
         # Reframe
