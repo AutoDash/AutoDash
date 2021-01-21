@@ -1,7 +1,6 @@
 CancelWithUnspecifiedReason
   Cancel
 NoCollision
-  Cancel
 CollisionWithStationaryObject
 CollisionWithAnimal
 CollisionWithRecordingVehicle
