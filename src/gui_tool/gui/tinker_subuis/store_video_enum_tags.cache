@@ -4,7 +4,6 @@ NoCollision
   Cancel
 CollisionWithStationaryObject
 CollisionWithAnimal
-  Cancel
 CollisionWithRecordingVehicle
 MultiCollision
 StationaryCamera
