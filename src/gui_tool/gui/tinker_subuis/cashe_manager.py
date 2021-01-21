@@ -70,7 +70,7 @@ class ListCacheManager(object):
 
     def contains_subfield(self, data: List[str], field: str) -> bool:
         for d in data:
-            if d in self.sub_fields and field in self.sub_fields[d]:
+            if self.has_subfield(d, field):
                 return True
         return False
 

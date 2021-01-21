@@ -34,10 +34,10 @@ BBOX_MODE_INSTRUCTIONS = [
 ]
 SELECTION_MODE_INSTRUCTIONS = [
     ["mouse click", "Select bounding box"],
-    ["n",
-        "Toggle whether it is a dashcam video",
-        "NOTE: by default, all videos will be dashcam",
-        "Pressing n the first time will mark the video as not dashcam"],
+    # ["n",
+    #     "Toggle whether it is a dashcam video",
+    #     "NOTE: by default, all videos will be dashcam",
+    #     "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
     ["l", "Mark collision location"],
@@ -103,8 +103,9 @@ class InternaSelectionMode(InternalMode):
     def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
         if key_mapper.consume("n"):
-            par.context.mark_is_dashcam(not par.context.is_dashcam)
-            self.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
+            pass
+            # par.context.mark_is_dashcam(not par.context.is_dashcam)
+            # self.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
         elif key_mapper.consume("t"):
             window = AdditionalTagWindow()
             tags = window.get_user_tags()
@@ -118,6 +119,11 @@ class InternaSelectionMode(InternalMode):
                 self.log("Now: {0}".format(enum_tags))
                 self.par.context.enum_tags = enum_tags
                 self.log("Remember to commit any new tags!")
+
+                contains_cancel_flag = self.par.tag_list_manager.contains_subfield(enum_tags, "Cancel")
+                if par.context.is_dashcam != (not contains_cancel_flag):
+                    par.context.mark_is_dashcam(not contains_cancel_flag)
+                    self.log("Marked video as {0}".format("active" if par.context.is_dashcam else "canceled"))
             else:
                 self.log("Enum tag update cancelled")
         elif key_mapper.consume("l"):

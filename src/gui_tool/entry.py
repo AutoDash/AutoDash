@@ -12,6 +12,11 @@ from .GUIExceptions import ManualTaggingAbortedException
 from .gui.sp_gui import SPGUIManager, Section, SectionStatus
 from ..data.BBFields import BBFields
 
+def retag_if_needed(tag_list_manager, mdi: MetaDataItem):
+    if mdi.is_cancelled and not tag_list_manager.contains_subfield(mdi.enum_tags, "Cancel"):
+        mdi.enum_tags.append("CancelWithUnspecifiedReason")
+    elif not mdi.is_cancelled and tag_list_manager.contains_subfield(mdi.enum_tags, "Cancel"):
+        mdi.is_cancelled = True
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi: MetaDataItem):
@@ -33,13 +38,14 @@ def tag_file(file_loc, mdi: MetaDataItem):
             gui.start()
 
             mdi.bb_fields = context.get_bbox_fields()
-            mdi.enum_tags = context.enum_tags
+            mdi.enum_tags = context.enum_tags.copy()
 
             for key, val in context.additional_tags:
                 mdi.add_tag(key, val)
 
-            if not context.is_dashcam:
-                raise CancelSignal("Marked as not a dashcam video")
+            retag_if_needed(gui.tag_list_manager, mdi)
+            if gui.tag_list_manager.contains_subfield(mdi.enum_tags, "Cancel"):
+                raise CancelSignal("Video was canceled via a tag")
 
             return mdi
 
@@ -77,9 +83,10 @@ def split_file(file_loc, mdi: MetaDataItem):
 
                 m.start_i = sec.start
                 m.end_i = sec.end
-                m.enum_tags = sec.enum_tags
+                m.enum_tags = sec.enum_tags.copy()
                 m.is_split_url = split_vid
-                m.is_cancelled = not (sec.status == SectionStatus.ACTIVE)
+                retag_if_needed(gui.tag_list_manager, m)
+                m.is_cancelled = gui.tag_list_manager.contains_subfield(m.enum_tags, "Cancel")
 
                 m.bb_fields = bbf
 

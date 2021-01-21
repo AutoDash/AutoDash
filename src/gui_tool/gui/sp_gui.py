@@ -17,10 +17,10 @@ SP_MODE_INSTRUCTIONS = [
         "Split is exclusive (current frame is gone)"
     ],
     ["z", "Undo a split"],
-    [
-        "t", "Toggle the current section for deletion",
-        "If deleted, this section will be ignored for the rest of the pipeline"
-    ],
+    # [
+    #     "t", "Toggle the current section for deletion",
+    #     "If deleted, this section will be ignored for the rest of the pipeline"
+    # ],
     ["q", "Jump to previous split"],
     ["e", "Jump to next split"],
     ["v", "Set enum tags for the CURRENT section"],
@@ -131,8 +131,8 @@ class SPMode(InternalMode):
             sm.split(i)
         elif key_mapper.consume("z"):
             sm.erase_split(i)
-        elif key_mapper.consume("t"):
-            sm.toggle_section(i)
+        # elif key_mapper.consume("t"):
+        #     sm.toggle_section(i)
         elif key_mapper.consume("q"):
             p_loc = sm.find_previous_split_location(i)
             if p_loc is not None:
@@ -563,6 +563,9 @@ class SplitManager(object):
         if loc != 0 and info.kind == SMLocInfo.SPLIT:
             return
         self.secs[info.ii].enum_tags = enum_tags.copy()
+
+        if self.par.par.tag_list_manager.contains_subfield(enum_tags, "Cancel") != (self.secs[info.ii].status == SectionStatus.DELETED):
+            self.toggle_section(loc)
 
     def get_n_unique_tag_sets(self) -> int:
         ret = []
