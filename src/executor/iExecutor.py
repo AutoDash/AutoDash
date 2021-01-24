@@ -3,7 +3,7 @@ from typing import Union
 
 from ..data.MetaDataItem import MetaDataItem
 from ..data.VideoItem import VideoItem
-from collections import Iterable
+from collections.abc import Iterable
 
 
 class iExecutor(ABC):
