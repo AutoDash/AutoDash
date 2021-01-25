@@ -8,7 +8,7 @@ from .iExecutor import iExecutor
 
 class ExecFilterer(iExecutor):
 
-    def __init__(self, *parents, filter_str: str = "data.tags.get('state') != 'processed'"):
+    def __init__(self, *parents, filter_str: str = "data.state != 'processed'"):
         super().__init__(*parents)
 
         self.filter_str = filter_str

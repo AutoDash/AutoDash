@@ -22,9 +22,14 @@ class TestAutoLabeler(unittest.TestCase):
         al_prog = AutoLabeler(val="in-progress")
         v = al_prog.run(v)
 
-        self.assertEqual(v.metadata.get_tag('state'), "in-progress")
+        self.assertEqual(v.metadata.state, "in-progress")
 
         al_comp = AutoLabeler()
         v = al_comp.run(v)
 
-        self.assertEqual(v.metadata.get_tag('state'), "processed")
+        self.assertEqual(v.metadata.state, "processed")
+
+        al_comp = AutoLabeler(key="extra", val="test")
+        v = al_comp.run(v)
+
+        self.assertEqual(v.metadata.get_tag("extra"), "test")

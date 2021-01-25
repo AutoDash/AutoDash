@@ -8,7 +8,7 @@ processingStages:
       filter_str: 'is_cancelled != 1'
   - executor: Filterer
     config:
-      filter_str: "tags['state'] != 'in-progress'"
+      filter_str: "state != 'in-progress'"
   - executor: AutoLabeler
     config:
       key: "state"
