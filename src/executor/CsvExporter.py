@@ -49,12 +49,12 @@ class CsvExporter(iExecutor):
             raise StopSignal("No bounding box fields for this item")
 
         # First, we trim the last seconds before the first collision
-        if not metadata.accident_locations or len(metadata.accident_locations) == 0:
+        if not metadata.bb_fields.collision_locations:
             # TODO: This should be a negative
-            raise StopSignal(f"No accident locations labelled for {item.id}")
+            raise StopSignal(f"No collision locations labelled for {item.id}")
         if not metadata.start_i:
             raise StopSignal(f"Metadata is not clipped")
-        collision_frame = np.min(metadata.accident_locations)
+        collision_frame = np.min(metadata.bb_fields.collision_locations)
         info = ffmpeg.probe(item.filepath)
         streams = [ stream for stream in info.get('streams', []) if stream.get('codec_type') == 'video']
         if len(streams) > 1:

@@ -1,8 +1,8 @@
 from src.database.FirebaseAccessor import FirebaseAccessor
 from src.data.FilterCondition import FilterCondition
 
-# Firebase Scripts
 
+# Firebase Scripts
 def get_num_metadata_item():
     f = FirebaseAccessor()
     ids = f.fetch_video_id_list()

@@ -4,9 +4,12 @@ from typing import Union, Any
 from ..data.VideoItem import VideoItem
 from ..data.MetaDataItem import MetaDataItem
 from .iExecutor import iExecutor
+from ..database.iDatabase import iDatabase
+
 
 class UndefinedDatabaseException(Exception):
     '''Raise when attempt to access database before injected into the crawler'''
+
 
 # Interface for any Executor that requires access to a database (either to make changes or get information)
 class iDatabaseExecutor(iExecutor):
@@ -14,7 +17,7 @@ class iDatabaseExecutor(iExecutor):
         super().__init__(*parents, stateful=stateful)
         self.database = None
 
-    def set_database(self, database):
+    def set_database(self, database: iDatabase):
         self.database = database
         return self
 
