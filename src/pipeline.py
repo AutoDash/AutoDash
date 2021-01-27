@@ -7,7 +7,7 @@ from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .utils import get_project_root
-from .signals import CancelSignal, StopSignal
+from .signals import CancelSignal, StopSignal, DeleteSignal
 from .database.DataUpdater import DataUpdater
 from collections.abc import Iterable
 
@@ -121,6 +121,10 @@ def run_recur(source_executor, item, dataUpdater):
         metadata.add_tag('state', 'processed')
         dataUpdater.safe_run(metadata)
         return
+    except DeleteSignal:
+        metadata = iExecutor.get_metadata(item)
+        dataUpdater.database.delete_metadata(metadata.id)
+
     except RuntimeError as e:
         print(e)
         return

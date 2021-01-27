@@ -20,6 +20,7 @@ class MetaDataItem:
         self.enum_tags = kwargs.get("enum_tags", [])
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
+        self.to_be_deleted = kwargs.get("to_be_deleted", False)
 
         accident_locations = kwargs.get("accident_locations", [])
 
