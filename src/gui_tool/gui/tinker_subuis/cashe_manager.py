@@ -1,6 +1,7 @@
 import json
 import os.path as path
 from typing import List
+import yaml
 
 class ListCacheManager(object):
     FIELD_DELIMITER = "\n"
@@ -8,65 +9,34 @@ class ListCacheManager(object):
     def __init__(self, name, capacity):
         self.name = name
         self.capacity = capacity
-        self.data = []
-        self.sub_fields = {}
+        self.data = {}
         self.__file_name = path.join(path.dirname(path.abspath(__file__)), "store_" + self.name + ".cache")
         self.retrieve()
 
 
     def retrieve(self):
-        def parse(str_data):
-            sub_fields = {}
-            data = []
-            for line in str_data.split(self.FIELD_DELIMITER):
-                if line == "":
-                    continue
-                if not line.startswith(self.SUB_FIELD_PREFIX):
-                    data.append(line)
-                    sub_fields[line] = []
-                else:
-                    sub_field = line[len(self.SUB_FIELD_PREFIX):]
-                    sub_fields[data[-1]].append(sub_field)
-            return data, sub_fields
-
         if not path.isfile(self.__file_name):
             self.__store()
-
         with open(self.__file_name, "r") as file:
-            str_data = file.read()
-
-        self.data, self.sub_fields = parse(str_data)
-        return self.data
+            self.data = yaml.load(file, Loader=yaml.FullLoader)
+        return list(self.data.keys())
 
     def __store(self):
-        def encode():
-            res = ""
-            for d in self.data:
-                res += d + "\n"
-                for sf in self.sub_fields[d]:
-                    res += self.SUB_FIELD_PREFIX + sf + self.FIELD_DELIMITER
-            return res
         with open(self.__file_name, "w") as file:
-            file.write(encode())
+            file.write(yaml.dump(self.data))
 
     def insert(self, value):
         if value in self.data:
             return
-        self.data.append(value)
-        self.sub_fields[value] = []
+        self.data[value] = None
         if len(self.data) > self.capacity:
-            self.data = self.data[-self.capacity:]
+            del self.data[list(self.data.keys())[0]]
         self.__store()
 
-    # def __remove_element(self, value):
-    #     for i, v in enumerate(self.data):
-    #         if v == value:
-    #             del self.data[i]
-    #             del self.sub_fields[value]
-    #             return
-
     def has_subfield(self, single_data: str, field: str) -> bool:
-        return single_data in self.sub_fields and field in self.sub_fields[single_data]
+        return single_data in self.data and \
+               self.data[single_data] is not None and \
+               field in self.data[single_data]
 
     def contains_subfield(self, data: List[str], field: str) -> bool:
         for d in data:

@@ -1,17 +1,17 @@
-CancelWithUnspecifiedReason
-  Cancel
-NoCollision
-CollisionWithStationaryObject
-CollisionWithAnimal
-CollisionWithRecordingVehicle
-MultiCollision
-StationaryCamera
-ManHeldCamera
-  Cancel
-LowQualityVideo
-  Cancel
-LowVisibility
-  Cancel
-PoorLighting
-  Cancel
-VideoEditing
+CancelWithUnspecifiedReason:
+- Cancel
+CollisionWithAnimal: null
+CollisionWithRecordingVehicle: null
+CollisionWithStationaryObject: null
+LowQualityVideo:
+- Cancel
+LowVisibility:
+- Cancel
+ManHeldCamera:
+- Cancel
+MultiCollision: null
+NoCollision: null
+PoorLighting:
+- Cancel
+StationaryCamera: null
+VideoEditing: null
