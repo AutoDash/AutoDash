@@ -5,7 +5,7 @@ from .general_gui import VideoPlayerGUIManager
 from .gui_mode import InternalMode
 import cv2
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
-from .tinker_subuis.cashe_manager import ListCacheManager
+from .tinker_subuis.cashe_manager import ENUM_TAG_CACHE
 from typing import List
 from .bb.BoundingBoxManager import BoundingBoxManager
 from ...data.BBFields import BBFields
@@ -45,8 +45,8 @@ class SPGUIManager(VideoPlayerGUIManager):
         LOG_LINES + 1) + 3
 
     def __init__(self, context: BBContext):
-        super(SPGUIManager, self).__init__(context, [SPMode(self, context)])
-        self.tag_list_manager = ListCacheManager("video_enum_tags", 100)
+        super(SPGUIManager, self).__init__(context)
+        self._add_handler(SPMode(self, context))
 
     def get_return_fields(self) -> (List[Section], List[BBFields]):
         sections = [
@@ -150,7 +150,7 @@ class SPMode(InternalMode):
             if curr_tags is None:
                 self.error("Cannot set tags on a split")
             else:
-                window = MultiSelectPopup("Select custom enum tags", self.par.tag_list_manager, curr_tags)
+                window = MultiSelectPopup("Select custom enum tags", ENUM_TAG_CACHE, curr_tags)
                 enum_tags = window.run()
                 if enum_tags is not None:
                     self.log("Updated from {0}".format(curr_tags))
@@ -305,6 +305,7 @@ class SplitManager(object):
             Section(0, self.frame_count, SectionStatus.ACTIVE,
                     initial_enum_tags)
         ]
+        self.set_enum_tags_at(0, self.get_enum_tags_at(0))
 
     def split(self, loc):
         if loc == 0 or loc == self.frame_count - 1:
@@ -564,7 +565,7 @@ class SplitManager(object):
             return
         self.secs[info.ii].enum_tags = enum_tags.copy()
 
-        if self.par.par.tag_list_manager.contains_subfield(enum_tags, "Cancel") != (self.secs[info.ii].status == SectionStatus.DELETED):
+        if ENUM_TAG_CACHE.contains_subfield(enum_tags, "Cancel") != (self.secs[info.ii].status == SectionStatus.DELETED):
             self.toggle_section(loc)
 
     def get_n_unique_tag_sets(self) -> int:

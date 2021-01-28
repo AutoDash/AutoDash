@@ -44,6 +44,10 @@ class ListCacheManager(object):
                 return True
         return False
 
+
+ENUM_TAG_CACHE = ListCacheManager("video_enum_tags", 1000)
+BB_CLASSES_CACHE = ListCacheManager("bb_classes", 10)
+
 if __name__ == "__main__":
     m = ListCacheManager("test", capacity=3)
     for i in [1,2,3,2,3,4,3,4,5]:
