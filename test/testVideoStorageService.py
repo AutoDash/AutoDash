@@ -11,6 +11,7 @@ class TestVideoStorageService(unittest.TestCase):
     @pytest.fixture(autouse=True)
     def initDir(self, tmpdir):
         self.storage = VideoStorageService(tmpdir)
+        tmpdir.chdir()  # change to pytest-provided temporary directory
 
     def test_storage_file_created(self):
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), "storage")))
