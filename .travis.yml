@@ -7,4 +7,4 @@ matrix:
       python: 3.8
       script:
         - ./tools/setup.sh
-        - ./tools/run_tests.sh
+        - pytest -x -v
