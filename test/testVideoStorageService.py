@@ -14,6 +14,8 @@ class TestVideoStorageService(unittest.TestCase):
         tmpdir.chdir()  # change to pytest-provided temporary directory
 
     def test_storage_file_created(self):
+        # create new storage service with no specified
+        tmpService = VideoStorageService()
         self.assertTrue(os.path.exists(os.path.join(os.getcwd(), "storage")))
 
     def test_store_load_delete_video(self):
