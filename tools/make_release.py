@@ -21,12 +21,28 @@ if __name__ == '__main__':
     # Copy custom configurations
     copytree(f'{TOOL_DIR}/../custom_configs', f'{TOOL_DIR}/dist/custom_configs')
     
-    # Zip all the files into package
+    # Zip all the files into package for default release
+    print("Creating General Release")
     system = platform.system()
     arch = platform.architecture()
-    zf = ZipFile(f'{TOOL_DIR}/dist/AutoDash-pipeline-release-{system}-{arch[0]}.zip', 'w')
-    exe_file = 'AutoDash-pipeline'
-    if system == 'Windows':
-        exe_file += '.exe'
-    zf.write(f'{TOOL_DIR}/dist/{exe_file}', compress_type=ZIP_BZIP2)
-    zf.write(f'{TOOL_DIR}/dist/default_configuration.yml', compress_type=ZIP_BZIP2)
+    with ZipFile(f'{TOOL_DIR}/dist/AutoDash-pipeline-release-{system}-{arch[0]}.zip', 'w') as zf:
+        exe_file = 'AutoDash-pipeline'
+        if system == 'Windows':
+            exe_file += '.exe'
+        zf.write(f'{TOOL_DIR}/dist/{exe_file}', compress_type=ZIP_BZIP2)
+        zf.write(f'{TOOL_DIR}/dist/default_configuration.yml', compress_type=ZIP_BZIP2)
+    print("Complete!")
+
+    # Zip all the files into package for readonly release
+    # make the default config the readonly
+    print("Creating Readonly Release")
+    copyfile(f'{TOOL_DIR}/../custom_configs/readonly_configuration.yml', f'{TOOL_DIR}/dist/default_configuration.yml')
+    system = platform.system()
+    arch = platform.architecture()
+    with ZipFile(f'{TOOL_DIR}/dist/AutoDash-pipeline-release-readonly-{system}-{arch[0]}.zip', 'w') as zf:
+        exe_file = 'AutoDash-pipeline'
+        if system == 'Windows':
+            exe_file += '.exe'
+        zf.write(f'{TOOL_DIR}/dist/{exe_file}', compress_type=ZIP_BZIP2)
+        zf.write(f'{TOOL_DIR}/dist/default_configuration.yml', compress_type=ZIP_BZIP2)
+    print("Complete!")
