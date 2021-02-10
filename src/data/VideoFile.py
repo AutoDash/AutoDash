@@ -100,12 +100,11 @@ class VideoFile(object):
     def current(self):
         return self.current_frame
 
-    def get_timeframe_range(self, time_delta_ms):
-        time_end_ms = self.current_time + int(time_delta_ms)
-        timeframes = [ self.current_time ]
-        while self.current_time < time_delta_ms:
-            self.next()
+    def get_timeframe_range(self, frame_end):
+        timeframes = [ ]
+        while self.get_index() < frame_end:
             timeframes.append(self.current_time)
+            self.next()
         return timeframes
 
     def get_frame_count(self) -> int:

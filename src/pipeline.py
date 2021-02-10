@@ -11,7 +11,6 @@ from .signals import CancelSignal, StopSignal, SkipSignal
 from .database.DataUpdater import DataUpdater
 from collections.abc import Iterable
 
-import tensorflow as tf
 import copy
 
 database_arg_mapper = {
@@ -64,9 +63,6 @@ class PipelineCLIParser(ArgumentParser):
 
 def main():
     args = {**vars(PipelineCLIParser().parse_args())}
-
-    if not tf.test.is_gpu_available():
-        print("WARNING: You are running tensorflow in CPU mode.")
 
     # Set up pipeline configuration
     config = PipelineConfiguration()

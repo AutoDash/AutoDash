@@ -1,5 +1,6 @@
 from ..data.VideoItem import VideoItem
 from .iExecutor import iExecutor
+from ..signals.SkipSignal import SkipSignal
 import re
 import numpy as np
 
@@ -17,6 +18,8 @@ class SegmentSplitter(iExecutor):
         collision_locations = metadata.bb_fields.collision_locations
         if len(collision_locations) < 1:
             raise SkipSignal("Item has no collision_locations")
+        if len(bbs) == 0:
+            raise SkipSignal("Item has no bounding boxes")
         dtype = [
             ('frame', np.int),
             ('id', np.int),
@@ -51,12 +54,9 @@ class SegmentSplitter(iExecutor):
             if (al - begin) < self.len_thresh_s * fps:
                 continue
             begin = max(0, int(al - self.clip_len_s * fps))
-            # Check for minimum BB coverage
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, al)
             it_end = min(frames.shape[0] - 1, it_end) # Prevent out of index access for ALs with no BBs
-            if (it_end - it_begin + 1) < self.len_thresh_s * fps:
-                continue
             # Add coverage
             cover.append((frames[it_begin], frames[it_end]))
             begin = frames[it_end]
