@@ -83,7 +83,7 @@ class CsvExporter(iExecutor):
             label_class = unique_object[0, 2]
             label_collision = unique_object[0, 7]
             # @TODO (vroch): Need to insert nan frames for each hole in frames to prevent interpolating over holes
-            interp_frame = np.interp(interp_time, time, unique_object[:,0].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_frame = np.arange(n_frames)
             interp_x1 = np.interp(interp_time, time, unique_object[:,3].astype(np.float), left=float('nan'), right=float('nan'))
             interp_y1 = np.interp(interp_time, time, unique_object[:,4].astype(np.float), left=float('nan'), right=float('nan'))
             interp_x2 = np.interp(interp_time, time, unique_object[:,5].astype(np.float), left=float('nan'), right=float('nan'))
