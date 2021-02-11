@@ -100,8 +100,6 @@ class CsvExporter(iExecutor):
         nan_mask = np.any(np.isnan(interp_data[:,(0,3,4,5,6)].astype(np.float)), axis=1)
         interp_data = interp_data[~nan_mask]
         interp_data = interp_data[np.argsort(interp_data[:,0]), ...]
-        interp_data[:,0] = np.round(interp_data[:,0].astype(np.float)).astype(np.int)
-        interp_data[:,0] =  interp_data[:,0].astype(np.int) - begin
 
         directory = STORAGE_DIR_POSITIVES if len(collision_locations) else STORAGE_DIR_NEGATIVES
         filename = str(metadata.id) + ".csv"
