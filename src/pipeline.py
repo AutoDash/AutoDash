@@ -7,7 +7,7 @@ from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .utils import get_project_root
-from .signals import CancelSignal, StopSignal, DeleteSignal
+from .signals import CancelSignal, StopSignal, DeleteSignal, DriedSourceSignal
 from .database.DataUpdater import DataUpdater
 from collections.abc import Iterable
 
@@ -94,10 +94,15 @@ def run(pipeline, **args):
         filter_cond = FilterCondition(filter_str)
 
     for i in range(iterations):
+        if len(source_executors) == 0:
+            break
         executor = source_executors[i % len(source_executors)]
         item = filter_cond
-        run_recur(executor, item, dataUpdater)
-
+        try:
+            run_recur(executor, item, dataUpdater)
+        except DriedSourceSignal:
+            # source executor has specified that it will return no more data
+            source_executors.pop(i % len(source_executors))
 
 def run_recur(source_executor, item, dataUpdater):
     if not source_executor:

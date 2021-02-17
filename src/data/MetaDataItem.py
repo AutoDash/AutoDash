@@ -52,6 +52,7 @@ class MetaDataItem:
     'bb_fields': {self.bb_fields},
     'start_i': {self.start_i},
     'end_i': {self.end_i},
+    'to_be_deleted': {self.to_be_deleted},
 }}
 """
 
@@ -73,6 +74,7 @@ class MetaDataItem:
             'bb_fields': dict,
             'start_i': int,
             'end_i': int,
+            'to_be_deleted': bool,
         }
 
     def encode(self) -> str:
@@ -94,6 +96,7 @@ class MetaDataItem:
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,
+            'to_be_deleted': self.to_be_deleted,
         }
 
     def to_json_str(self) -> str:

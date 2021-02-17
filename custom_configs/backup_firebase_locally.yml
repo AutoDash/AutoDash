@@ -1,0 +1,4 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: LocalStorageUpdater

@@ -2,10 +2,9 @@ dataSources:
   - executor: IteratorFirebaseSource
     config:
       metadata_ids:
-        - ""
-        - ""
-        - ""
-        - ""
+        - "-MMhOG_TLES0PFiSa24A"
+        - "-MQNhXnrFn-X4W1d3G36"
+        - "-MMhOG_TLES0PFiSa24A"
 processingStages:
   - executor: UniversalDownloader
   - executor: Labeler

@@ -15,5 +15,6 @@ def get_metadata_with_url(url):
     return data
 
 videos = get_metadata_with_url('https://www.youtube.com/watch?v=vhACO_m5pH0')
+print(len(videos))
 for video in videos:
     print(video.id, video.start_i, video.end_i, len(video.bb_fields.objects) != 0)
