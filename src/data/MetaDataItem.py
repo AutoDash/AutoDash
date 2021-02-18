@@ -12,10 +12,11 @@ class MetaDataItem:
         self.title = kwargs["title"]
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
-        self.id = kwargs.get("id", None)
-        self.collision_type = kwargs.get("collision_type", None)
-        self.description = kwargs.get("description", None)
-        self.location = kwargs.get("location", None)
+        self.id = kwargs.get("id")
+        print(f'Parsing item {self.id}')
+        self.collision_type = kwargs.get("collision_type")
+        self.description = kwargs.get("description")
+        self.location = kwargs.get("location")
         self.tags = kwargs.get("tags", {})
         self.enum_tags = kwargs.get("enum_tags", [])
         self.is_cancelled = kwargs.get("is_cancelled", False)
@@ -32,8 +33,8 @@ class MetaDataItem:
                 bb_fields_json["collision_locations"] = accident_locations
         self.bb_fields = BBFields.from_json(bb_fields_json)
 
-        self.start_i = kwargs.get("start_i", None)
-        self.end_i = kwargs.get("end_i", None)
+        self.start_i = kwargs.get("start_i")
+        self.end_i = kwargs.get("end_i")
 
     def __repr__(self) -> str:
         return f"Metadata {self.id}:\n\n" + f"""

@@ -164,6 +164,8 @@ class InternalBBoxMode(InternalMode):
         self.selected_id = 1
 
     def handle_click(self, event, x, y, flags, param):
+        x = max(0, min(x, self.par.vcm.get_width()-1))
+        y = max(0, min(y, self.par.vcm.get_height()-1))
         if event == cv2.EVENT_LBUTTONDOWN:
             self.irb.set_initial_point(x, y)
         elif event == cv2.EVENT_MOUSEMOVE:
