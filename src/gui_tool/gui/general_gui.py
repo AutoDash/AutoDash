@@ -7,6 +7,7 @@ from .tinker_subuis.button_popup import ButtonPopup
 import cv2
 from ..GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 from .bb_context import BBContext
+from .tinker_subuis.cashe_manager import ListCacheManager
 
 
 class VideoPlayerGUIManager(object):
@@ -37,14 +38,14 @@ class VideoPlayerGUIManager(object):
         ],
     ]
 
-    def __init__(self, context: BBContext, mode_handlers: list):
+    def __init__(self, context: BBContext):
         self.context = context
         self.vcm = self.context.vcm
         self.frame_rate = 25
         self.logger = RotatingLog(self.LOG_LINES)
         self.ignore_index_change_interval = self.vcm.get_frames_count() // 200
 
-        self.mode_handlers = mode_handlers
+        self.mode_handlers = []
         self.mode_handler_i = 0
 
         self.key_mapper = KeyMapper()
@@ -56,6 +57,9 @@ class VideoPlayerGUIManager(object):
                 if obj.has_collision
             ],
         )
+
+    def _add_handler(self, mode_handler):
+        self.mode_handlers.append(mode_handler)
 
     def start(self):
         self.set_GUI()

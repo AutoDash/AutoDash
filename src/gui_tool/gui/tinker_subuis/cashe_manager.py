@@ -1,11 +1,15 @@
 import json
 import os.path as path
+from typing import List
+import yaml
 
 class ListCacheManager(object):
+    FIELD_DELIMITER = "\n"
+    SUB_FIELD_PREFIX = "  "
     def __init__(self, name, capacity):
         self.name = name
         self.capacity = capacity
-        self.data = []
+        self.data = {}
         self.__file_name = path.join(path.dirname(path.abspath(__file__)), "store_" + self.name + ".cache")
         self.retrieve()
 
@@ -13,36 +17,42 @@ class ListCacheManager(object):
     def retrieve(self):
         if not path.isfile(self.__file_name):
             self.__store()
-
         with open(self.__file_name, "r") as file:
-            data = json.load(file)
-
-        self.data = data
-        return data
+            self.data = yaml.load(file, Loader=yaml.FullLoader)
+        return list(self.data.keys())
 
     def __store(self):
         with open(self.__file_name, "w") as file:
-            json.dump(self.data, file)
+            file.write(yaml.dump(self.data))
 
     def insert(self, value):
         if value in self.data:
-            self.__remove_element(value)
-        self.data.append(value)
+            return
+        self.data[value] = None
         if len(self.data) > self.capacity:
-            self.data = self.data[-self.capacity:]
+            del self.data[list(self.data.keys())[0]]
         self.__store()
 
-    def __remove_element(self, value):
-        for i, v in enumerate(self.data):
-            if v == value:
-                del self.data[i]
-                return
+    def has_subfield(self, single_data: str, field: str) -> bool:
+        return single_data in self.data and \
+               self.data[single_data] is not None and \
+               field in self.data[single_data]
+
+    def contains_subfield(self, data: List[str], field: str) -> bool:
+        for d in data:
+            if self.has_subfield(d, field):
+                return True
+        return False
+
+
+ENUM_TAG_CACHE = ListCacheManager("video_enum_tags", 1000)
+BB_CLASSES_CACHE = ListCacheManager("bb_classes", 10)
 
 if __name__ == "__main__":
     m = ListCacheManager("test", capacity=3)
     for i in [1,2,3,2,3,4,3,4,5]:
         m.insert(i)
-        print(m.retrieve())
+        print(m.retrieve(), m.sub_fields)
 
 
 

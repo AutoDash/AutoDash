@@ -2,6 +2,7 @@ from src.gui_tool.utils.key_mapper import KeyMapper
 from .bb_context import BBContext
 from .tinker_subuis.additional_tags import AdditionalTagWindow
 from .tinker_subuis.multiselect_popup import MultiSelectPopup
+from .tinker_subuis.cashe_manager import ENUM_TAG_CACHE, BB_CLASSES_CACHE
 from .tinker_subuis.text_popup import TextPopup
 from .tinker_subuis.select_popup import SelectPopup
 import cv2
@@ -33,10 +34,10 @@ BBOX_MODE_INSTRUCTIONS = [
 ]
 SELECTION_MODE_INSTRUCTIONS = [
     ["mouse click", "Select bounding box"],
-    ["n",
-        "Toggle whether it is a dashcam video",
-        "NOTE: by default, all videos will be dashcam",
-        "Pressing n the first time will mark the video as not dashcam"],
+    # ["n",
+    #     "Toggle whether it is a dashcam video",
+    #     "NOTE: by default, all videos will be dashcam",
+    #     "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
     ["l", "Mark collision location"],
@@ -56,12 +57,9 @@ class BBGUIManager(VideoPlayerGUIManager):
     IMG_STARTING_Y = LOG_LINE_HEIGHT * LOG_LINES + LOG_LINE_MARGIN * (LOG_LINES + 1) + 3
 
     def __init__(self, context: BBContext):
-        super(BBGUIManager, self).__init__(context,
-           [
-               InternaSelectionMode(self),
-               InternalBBoxMode(self)
-           ]
-        )
+        super(BBGUIManager, self).__init__(context)
+        self._add_handler(InternaSelectionMode(self))
+        self._add_handler(InternalBBoxMode(self))
 
     def start(self):
         super(BBGUIManager, self).start()
@@ -101,21 +99,27 @@ class InternaSelectionMode(InternalMode):
     def handle_keyboard(self, key_mapper: KeyMapper):
         par = self.par
         if key_mapper.consume("n"):
-            par.context.mark_is_dashcam(not par.context.is_dashcam)
-            self.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
+            pass
+            # par.context.mark_is_dashcam(not par.context.is_dashcam)
+            # self.log("Marked video as {0}".format("dashcam" if par.context.is_dashcam else "not dashcam"))
         elif key_mapper.consume("t"):
             window = AdditionalTagWindow()
             tags = window.get_user_tags()
             par.context.set_additional_tags(tags)
             self.log("Additional tags set")
         elif key_mapper.consume("v"):
-            window = MultiSelectPopup("Select custom enum tags", "video_enum_tags", self.par.context.enum_tags)
+            window = MultiSelectPopup("Select custom enum tags", ENUM_TAG_CACHE, self.par.context.enum_tags)
             enum_tags = window.run()
             if enum_tags is not None:
                 self.log("Updated from {0}".format(self.par.context.enum_tags))
                 self.log("Now: {0}".format(enum_tags))
                 self.par.context.enum_tags = enum_tags
                 self.log("Remember to commit any new tags!")
+
+                contains_cancel_flag = ENUM_TAG_CACHE.contains_subfield(enum_tags, "Cancel")
+                if par.context.is_dashcam != (not contains_cancel_flag):
+                    par.context.mark_is_dashcam(not contains_cancel_flag)
+                    self.log("Marked video as {0}".format("active" if par.context.is_dashcam else "canceled"))
             else:
                 self.log("Enum tag update cancelled")
         elif key_mapper.consume("l"):
@@ -200,7 +204,7 @@ class InternalBBoxMode(InternalMode):
                 self.error("Could not update class. ID {0} does not exist".format(self.selected_id))
             else:
                 cls = SelectPopup("Enter new class for the selected object",
-                      "bb_classes", 10,
+                      BB_CLASSES_CACHE, 10,
                       BB_CLASS_DEFAULT_OPTIONS).run()
                 prev = bbm.get_cls(self.selected_id)
                 if cls == None:

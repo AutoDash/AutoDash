@@ -2,7 +2,7 @@ from tkinter import Tk, Frame, Entry, Button
 from tkinter import END
 from .cashe_manager import ListCacheManager
 class SelectPopup:
-    def __init__(self, title, cache_name, cache_amount, defaults):
+    def __init__(self, title, cache: ListCacheManager, cache_amount, defaults):
         self.tags = []
         self.entries = []
         self.root = Tk()
@@ -11,7 +11,7 @@ class SelectPopup:
 
         self.frame = Frame(self.root)
 
-        self.cm = ListCacheManager(cache_name, max(cache_amount - len(defaults), 0))
+        self.cm = cache
         self.defaults = defaults
         options = defaults + [v for v in self.cm.retrieve() if v not in defaults]
         i = 0

@@ -1,1 +1,4 @@
-["bus", "industrialMachinery", "train", "bicycle"]
+bus: null
+industrialMachinery: null
+train: null
+bicycle: null
