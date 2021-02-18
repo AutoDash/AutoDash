@@ -1,6 +1,7 @@
 from ..crawler.RedditAccessor import get_posts, reload_posts
-from ..crawler.iCrawler import iCrawler, CrawlerException
+from ..crawler.iCrawler import iCrawler
 from ..data.MetaDataItem import MetaDataItem
+from ..signals.DriedSourceSignal import DriedSourceSignal
 
 
 class RedditCrawler(iCrawler):
@@ -24,14 +25,14 @@ class RedditCrawler(iCrawler):
                     metadata.add_tag('reddit_post_info', reddit_tag)
                     return metadata
 
-        raise CrawlerException("Reddit crawler could not find any new videos")
+        raise DriedSourceSignal("Reddit crawler could not find any new videos")
 
     def next_downloadable(self) -> MetaDataItem:
         posts = get_posts()
 
         try:
             return self.find_next_downloadable(posts)
-        except CrawlerException:
+        except DriedSourceSignal:
             reload_posts()
             posts = get_posts()
         # Try to find a new downloadable after updating posts, but if this fails then give up
