@@ -7,6 +7,7 @@ from .tinker_subuis.button_popup import ButtonPopup
 import cv2
 from ..GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 from .bb_context import BBContext
+from .tinker_subuis.text_popup import TextPopup
 
 
 class VideoPlayerGUIManager(object):
@@ -29,6 +30,7 @@ class VideoPlayerGUIManager(object):
         ["s", "10 back"],
         ["d", "1 forward"],
         ["w", "10 forward"],
+        ["j", "Jump To Index"],
         ["Space", "Pause/unpause"],
         ["Enter * 2", "Finish and continue"],
         [
@@ -141,6 +143,16 @@ class VideoPlayerGUIManager(object):
                     self.get_mode_handler().INSTRUCTIONS,
                 )
                 window.run()
+            elif self.key_mapper.consume("j"):
+                loc = TextPopup("Enter Index").run()
+                try:
+                    iloc = int(loc)
+                    if iloc >= 0 and iloc <= self.vcm.get_frames_count() - 1:
+                        self.vcm.start_from(iloc)
+                    else:
+                        self.logger.log("[Error]: Invalid input {0} (still on {1} of {2})".format(loc, self.vcm.get_frame_index(), self.vcm.get_frames_count()))
+                except:
+                        self.logger.log("[Error]: Invalid input {0} (still on {1} of {2})".format(loc, self.vcm.get_frame_index(), self.vcm.get_frames_count()))
             elif self.key_mapper.consume("a"):
                 self.vcm.shift_frame_index(-1)
             elif self.key_mapper.consume("s"):
