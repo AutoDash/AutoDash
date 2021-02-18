@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
-import cv2
 import numpy as np
 import os
+import cv2
 class VideoStartOrEndOutOfBoundsException(RuntimeError):
     '''Invalid start or end location in VideoFile'''
 
@@ -109,6 +108,9 @@ class VideoFile(object):
 
     def get_frame_count(self) -> int:
         return self.frame_count
+    
+    def get_fps(self) -> float:
+        return self.capture.get(cv2.CAP_PROP_FPS)
 
     def __len__(self):
         return self.get_frame_count()

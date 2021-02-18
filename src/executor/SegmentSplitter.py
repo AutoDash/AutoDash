@@ -1,4 +1,5 @@
 from ..data.VideoItem import VideoItem
+from ..data.VideoFile import VideoFile
 from .iExecutor import iExecutor
 from ..signals.SkipSignal import SkipSignal
 import re
@@ -14,7 +15,7 @@ class SegmentSplitter(iExecutor):
         metadata = iExecutor.get_metadata(item)
         # First we find the length of BBs
         bbs = metadata.bb_fields.get_bbs_as_arrs()
-        fps = item.fps
+        fps = VideoFile(item.filepath).get_fps()
         collision_locations = metadata.bb_fields.collision_locations
         if len(collision_locations) < 1:
             raise SkipSignal("Item has no collision_locations")
