@@ -144,11 +144,12 @@ class VideoPlayerGUIManager(object):
                 )
                 window.run()
             elif self.key_mapper.consume("j"):
-                loc = TextPopup("Enter Index").run()
+                loc = TextPopup("Enter index to jump to, or close the window to cancel").run()
                 try:
                     iloc = int(loc)
                     if iloc >= 0 and iloc <= self.vcm.get_frames_count() - 1:
                         self.vcm.start_from(iloc)
+                        self.logger.log("Jumped to index {0}".format(iloc))
                     else:
                         self.logger.log("[Error]: Invalid input {0} (still on {1} of {2})".format(loc, self.vcm.get_frame_index(), self.vcm.get_frames_count()))
                 except:
