@@ -129,6 +129,7 @@ def run_recur(source_executor, item, dataUpdater):
     except DeleteSignal:
         metadata = iExecutor.get_metadata(item)
         dataUpdater.database.delete_metadata(metadata.id)
+        return
 
     except RuntimeError as e:
         print(e)

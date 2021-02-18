@@ -1,0 +1,15 @@
+dataSources:
+  - executor: IteratorFirebaseSource
+    config:
+      metadata_ids:
+        - "-MQNhsBhqW1j2mPfO_rh"
+        - "-MQNhq7gK3HJS2-8B5Oy"
+        - "-MQNwxQdLp8EfdSt6knZ"
+        - "-MQNhXnrFn-X4W1d3G36"
+        - "-MM9C_2n3rv8xOmzZ51F"
+        - "-MM9C_dXNpIM385FEqJn"
+processingStages:
+  - executor: UniversalDownloader
+  - executor: Printer
+  - executor: Labeler
+  - executor: DatabaseCleaner
