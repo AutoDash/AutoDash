@@ -18,8 +18,5 @@ class BBContext(GUIContext):
     def get_bbox_fields(self):
         return self.bbox_fields
 
-    def get_bbox_fields_as_list(self):
-        return self.bbox_fields.get_bbs_as_arrs()
-
     def set_additional_tags(self, tags):
         self.additional_tags = tags
