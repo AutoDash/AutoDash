@@ -39,11 +39,15 @@ class YoutubeCrawler(iCrawler):
         self.get_n *= 2
 
     def next_downloadable(self) -> MetaDataItem:
+        print("YoutubeCrawler.next_downloadable")
+
         while True:  # Loop until return
             zero_cases = 0
             while len(self.search_results) == 0:
                 if zero_cases > 3:
+                    print("YoutubeCrawler.next_downloadable zero_cases > 3")
                     raise CrawlerException("YouTube crawler could not find more results")
+                print("YoutubeCrawler.next_downloadable update search results")
                 self.__update_search_results()
                 zero_cases += 1
 

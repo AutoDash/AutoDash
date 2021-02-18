@@ -13,14 +13,14 @@ from .BoundingBoxInputManager import IndexedRectBuilder, BoundingBoxInputManager
 
 GENERAL_INSTRUCTIONS = [
     ["m", "Switch mode"],
-    ["h", "Open instructions page"],
+    ["h or F1", "Open instructions page"],
     ["a", "1 back"],
     ["s", "10 back"],
     ["d", "1 forward"],
     ["w", "10 forward"],
     ["Space", "Pause/unpause"],
-    ["Enter * 2", "Finish and continue"],
-    ["Esc * 2", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
+    ["Enter", "Finish and continue"],
+    ["Esc", "Abort and restart tagging. Will raise ManualTaggingAbortedException"],
 ]
 BBOX_MODE_INSTRUCTIONS = [
     ["click & drag", "Create bounding box range for commands"],
@@ -133,7 +133,7 @@ class VideoPlayerGUIManager(object):
             cv2.setTrackbarPos(self.PROGRESS_BAR_NAME, self.WINDOW_NAME, frame_index)
 
             self.key_mapper.append(cv2.waitKey(self.frame_rate) & 0xFF)
-            if self.key_mapper.consume(("esc", "esc")):  # Escape key
+            if self.key_mapper.consume("esc"):  # Escape key
                 res = ButtonPopup(
                     "Confirm restart",
                     "Hitting confirm will destroy all progress. You will have to restart. Continue?",
@@ -141,7 +141,7 @@ class VideoPlayerGUIManager(object):
                 ).run()
                 if res == "Confirm":
                     raise ManualTaggingAbortedException("Tagging operation aborted")
-            elif self.key_mapper.consume(("enter", "enter")):  # Enter
+            elif self.key_mapper.consume("enter"):  # Enter
                 res = ButtonPopup(
                     "Confirm commit",
                     "Hitting confirm will commit all changes. You will not be able to undo any changes afterwards. Continue?",
@@ -149,7 +149,7 @@ class VideoPlayerGUIManager(object):
                 ).run()
                 if res == "Confirm":
                     break
-            elif self.key_mapper.consume("h"):
+            elif self.key_mapper.consume("h") or self.key_mapper.consume("f1"):
                 window = HelpPopup(
                     "GUI controls reference",
                     self.instructions + [["", ""]] + self.get_mode_handler().instructions

@@ -1,6 +1,6 @@
 dataSources:
   - executor: YoutubeCrawler
-  - executor: RedditCrawler
+#  - executor: RedditCrawler
 processingStages:
   - executor: Filterer
   - executor: Filterer

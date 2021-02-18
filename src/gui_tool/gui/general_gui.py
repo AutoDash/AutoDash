@@ -24,15 +24,15 @@ class VideoPlayerGUIManager(object):
 
     INSTRUCTIONS = [
         ["m or tab", "Switch mode"],
-        ["h", "Open instructions page"],
+        ["h or F1", "Open instructions page"],
         ["a", "1 back"],
         ["s", "10 back"],
         ["d", "1 forward"],
         ["w", "10 forward"],
         ["Space", "Pause/unpause"],
-        ["Enter * 2", "Finish and continue"],
+        ["Enter", "Finish and continue"],
         [
-            "Esc * 2",
+            "Esc",
             "Abort and restart tagging. Will raise ManualTaggingAbortedException"
         ],
     ]
@@ -116,7 +116,7 @@ class VideoPlayerGUIManager(object):
                                frame_index)
 
             self.key_mapper.append(cv2.waitKey(self.frame_rate) & 0xFF)
-            if self.key_mapper.consume(("esc", "esc")):  # Escape key
+            if self.key_mapper.consume("esc"):  # Escape key
                 res = ButtonPopup(
                     "Confirm restart",
                     "Hitting confirm will destroy all progress. You will have to restart. Continue?",
@@ -125,7 +125,7 @@ class VideoPlayerGUIManager(object):
                 if res == "Confirm":
                     raise ManualTaggingAbortedException(
                         "Tagging operation aborted")
-            elif self.key_mapper.consume(("enter", "enter")):  # Enter
+            elif self.key_mapper.consume("enter"):  # Enter
                 if not self.can_commit():
                     self.logger.log("[ERROR] Commit operation failed")
                 else:
