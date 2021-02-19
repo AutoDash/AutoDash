@@ -29,6 +29,8 @@ class CsvExporter(iExecutor):
         metadata = iExecutor.get_metadata(item)
         video = VideoFile(item.filepath)
         video.set_index(metadata.start_i)
+        video_width = video.get_frame_width()
+        video_height = video.get_frame_height()
         timeframes = video.get_timeframe_range(metadata.end_i)
         timeframes = np.array(timeframes)
         bbs = metadata.bb_fields.get_bbs_as_arrs()
@@ -85,9 +87,13 @@ class CsvExporter(iExecutor):
             # @TODO (vroch): Need to insert nan frames for each hole in frames to prevent interpolating over holes
             interp_frame = np.arange(n_frames)
             interp_x1 = np.interp(interp_time, time, unique_object[:,3].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_x1 = interp_x1.clip(0, video_width - 1)
             interp_y1 = np.interp(interp_time, time, unique_object[:,4].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_y1 = interp_y1.clip(0, video_height - 1)
             interp_x2 = np.interp(interp_time, time, unique_object[:,5].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_x2 = interp_x2.clip(0, video_width - 1)
             interp_y2 = np.interp(interp_time, time, unique_object[:,6].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_y2 = interp_y2.clip(0, video_height - 1)
             interp_data += [ (frame, label_id, label_class, x1, y1, x2, y2, label_collision) 
                     for (frame, x1, y1, x2, y2) 
                     in zip(interp_frame, interp_x1, interp_y1,
@@ -99,7 +105,11 @@ class CsvExporter(iExecutor):
         interp_data = np.array(interp_data)
         nan_mask = np.any(np.isnan(interp_data[:,(0,3,4,5,6)].astype(np.float)), axis=1)
         interp_data = interp_data[~nan_mask]
-        interp_data = interp_data[np.argsort(interp_data[:,0]), ...]
+        interp_data = interp_data[np.argsort(interp_data[:,0].astype(np.int)), ...]
+        interp_data[:,3] = np.round(interp_data[:,3].astype(np.float)).astype(np.int)
+        interp_data[:,4] = np.round(interp_data[:,4].astype(np.float)).astype(np.int)
+        interp_data[:,5] = np.round(interp_data[:,5].astype(np.float)).astype(np.int)
+        interp_data[:,6] = np.round(interp_data[:,6].astype(np.float)).astype(np.int)
 
         directory = STORAGE_DIR_POSITIVES if len(collision_locations) else STORAGE_DIR_NEGATIVES
         filename = str(metadata.id) + ".csv"

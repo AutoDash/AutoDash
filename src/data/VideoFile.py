@@ -112,6 +112,12 @@ class VideoFile(object):
     def get_fps(self) -> float:
         return self.capture.get(cv2.CAP_PROP_FPS)
 
+    def get_frame_width(self) -> int:
+        return self.capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+    
+    def get_frame_height(self) -> int:
+        return self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
     def __len__(self):
         return self.get_frame_count()
 
@@ -136,5 +142,23 @@ class VideoFile(object):
     def get_height(self):
         return self.frame_height
 
+    def get_time_delta(self, frame_begin, frame_end):
+        current_frame = self.capture.get(cv2.CAP_PROP_POS_FRAMES)
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame_begin)
+        time_at_begin = self.capture.get(cv2.CAP_PROP_POS_MSEC)
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame_end)
+        time_at_end = self.capture.get(cv2.CAP_PROP_POS_MSEC)
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
+        return time_at_end - time_at_begin
+    
+    def get_frame_after_time_elapsed(self, frame, timedelta):
+        current_frame = self.capture.get(cv2.CAP_PROP_POS_FRAMES)
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame)
+        self.capture.set(cv2.CAP_PROP_POS_MSEC, self.capture.get(cv2.CAP_PROP_POS_MSEC) + timedelta)
+        frame_at_rewind = self.capture.get(cv2.CAP_PROP_POS_FRAMES)
+        self.capture.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
+        return frame_at_rewind
+    
+    
     def release(self):
         self.capture.release()
