@@ -8,7 +8,7 @@ class Printer(iExecutor):
 
     def run(self, item):
         if item is not None:
-            print(f"printer loaded, item {item}, message: {self.msg}")
+            print(f"printer loaded, item {item}, message: {self.msg}", flush=True)
         else:
-            print(f"printer loaded, message: {self.msg}")
+            print(f"printer loaded, message: {self.msg}", flush=True)
         return item
