@@ -13,14 +13,18 @@ class SegmentSplitter(iExecutor):
     
     def split_segment(self, item):
         metadata = iExecutor.get_metadata(item)
+        video = VideoFile(item.filepath)
         # First we find the length of BBs
         bbs = metadata.bb_fields.get_bbs_as_arrs()
-        fps = VideoFile(item.filepath).get_fps()
         collision_locations = metadata.bb_fields.collision_locations
         if len(collision_locations) < 1:
             raise SkipSignal("Item has no collision_locations")
         if len(bbs) == 0:
             raise SkipSignal("Item has no bounding boxes")
+        if metadata.start_i is None:
+            metadata.start_i = 0
+        if metadata.end_i is None:
+            metadata.end_i = video.true_length
         dtype = [
             ('frame', np.int),
             ('id', np.int),
@@ -35,8 +39,8 @@ class SegmentSplitter(iExecutor):
         collision_locations = np.sort(collision_locations)
         frames = np.unique(bbs['frame'])
         segments = [ ]
-        segments += self.create_positives(collision_locations, frames, fps)
-        segments += self.create_negatives(segments, collision_locations, frames, fps)        
+        segments += self.create_positives(collision_locations, frames, metadata, video)
+        segments += self.create_negatives(segments, collision_locations, frames, metadata, video)        
         items = [ ]
         for idx, (begin, end) in enumerate(segments):
             item = metadata.clone()
@@ -47,14 +51,16 @@ class SegmentSplitter(iExecutor):
             items.append(item)
         return items
 
-    def create_positives(self, ALs, frames, fps):
+    def create_positives(self, ALs, frames, metadata, video):
         cover = [ ]
         begin = 0
         for al in ALs:
+            min_end = video.get_frame_after_time_elapsed(begin + metadata.start_i, self.len_thresh_s * 1000)
             # Check for minimum range
-            if (al - begin) < self.len_thresh_s * fps:
+            if al + metadata.start_i < min_end:
                 continue
-            begin = max(0, int(al - self.clip_len_s * fps))
+            begin = video.get_frame_after_time_elapsed(metadata.start_i + al, -self.clip_len_s)
+            begin = max(0, begin - metadata.start_i)
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, al)
             it_end = min(frames.shape[0] - 1, it_end) # Prevent out of index access for ALs with no BBs
@@ -63,7 +69,7 @@ class SegmentSplitter(iExecutor):
             begin = frames[it_end]
         return cover
 
-    def create_negatives(self, positive_cover, ALs, frames, fps):
+    def create_negatives(self, positive_cover, ALs, frames, metadata, video):
         cover = [ ]
         begin = 0
         end = frames[-1]
@@ -71,7 +77,8 @@ class SegmentSplitter(iExecutor):
             end, next_begin = prange
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, end)
-            n_covers = int((it_end - it_begin) / fps / self.clip_len_s)
+            total_delta = video.get_time_delta(begin + metadata.start_i, end + metadata.start_i)
+            n_covers = int(total_delta / self.clip_len_s)
             if n_covers < 1:
                 continue
             delta = (it_end - it_begin) / n_covers
