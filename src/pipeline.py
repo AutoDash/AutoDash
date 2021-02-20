@@ -7,11 +7,10 @@ from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .utils import get_project_root
-from .signals import CancelSignal, StopSignal, DeleteSignal, DriedSourceSignal
+from .signals import CancelSignal, StopSignal, SkipSignal, DeleteSignal, DriedSourceSignal
 from .database.DataUpdater import DataUpdater
 from collections.abc import Iterable
 
-import tensorflow as tf
 import copy
 
 database_arg_mapper = {
@@ -65,9 +64,6 @@ class PipelineCLIParser(ArgumentParser):
 def main():
     args = {**vars(PipelineCLIParser().parse_args())}
 
-    if not tf.test.is_gpu_available():
-        print("WARNING: You are running tensorflow in CPU mode.")
-
     # Set up pipeline configuration
     config = PipelineConfiguration()
     config.read(f"{get_project_root()}/{args['config']}")
@@ -119,6 +115,9 @@ def run_recur(source_executor, item, dataUpdater):
         if metadata.tags['state'] == 'in-progress':
             metadata.add_tag('state', '')
         dataUpdater.safe_run(metadata)
+        return
+    except SkipSignal as e:
+        print(f"Stopping Pipeline for metadataitem {item}\n\n\n reason: {e}")
         return
     except CancelSignal:
         metadata = iExecutor.get_metadata(item)

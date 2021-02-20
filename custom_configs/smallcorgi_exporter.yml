@@ -3,16 +3,18 @@ dataSources:
 processingStages:
   - executor: Filterer
     config:
-      filter_str: tags['state'] != 'in-progress'
+      filter_str: tags['state'] == 'processed'
   - executor: Filterer
     config:
       filter_str: is_cancelled != 1
-  - executor: Filterer
+  - executor: ExecFilterer
     config:
-      filter_str: collision_locations
+      filter_str: len(data.bb_fields.collision_locations) > 0
   - executor: UniversalDownloader
+  - executor: SegmentSplitter
+    config:
+      clip_length: 5s
+      length_threshold: 3s
   - executor: CsvExporter
     config:
       target_fps: 20
-      clip_length: 5s
-      length_threshold: 3s

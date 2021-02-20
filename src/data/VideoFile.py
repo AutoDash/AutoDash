@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
-import cv2
 import numpy as np
 import os
+import cv2
 class VideoStartOrEndOutOfBoundsException(RuntimeError):
     '''Invalid start or end location in VideoFile'''
 
@@ -32,8 +31,8 @@ class VideoFile(object):
 
         self.source = cv2.VideoCapture(file_loc)
         self.true_length = int(self.source.get(cv2.CAP_PROP_FRAME_COUNT))
-        start = start if start is not None else 0
-        end = end if end is not None else self.true_length
+        start = start or 0
+        end = end or self.true_length
         self._start = start
         self._end = end
 
@@ -77,6 +76,7 @@ class VideoFile(object):
         if skip_n > 0:
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, skip_n)
         ret, self.current_frame = self.capture.read()
+        self.current_time = self.capture.get(cv2.CAP_PROP_POS_MSEC)
 
     def set_index(self, location: int = None):
         self.__set_capture(self.__alter_index(location))
@@ -92,14 +92,25 @@ class VideoFile(object):
             ret, frame = self.capture.read()
             if ret:
                 self.current_frame = frame
+                self.current_time = self.capture.get(cv2.CAP_PROP_POS_MSEC)
 
         return self.current_frame
 
     def current(self):
         return self.current_frame
 
+    def get_timeframe_range(self, frame_end):
+        timeframes = [ ]
+        while self.get_index() < frame_end:
+            timeframes.append(self.current_time)
+            self.next()
+        return timeframes
+
     def get_frame_count(self) -> int:
         return self.frame_count
+    
+    def get_fps(self) -> float:
+        return self.capture.get(cv2.CAP_PROP_FPS)
 
     def __len__(self):
         return self.get_frame_count()
