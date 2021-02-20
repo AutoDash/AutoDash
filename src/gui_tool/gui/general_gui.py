@@ -186,14 +186,14 @@ class VideoPlayerGUIManager(object):
                 starting_index = (self.LOG_START_X, self.LOG_LINE_HEIGHT *
                                   (i + 1) + self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index, font, font_scale,
-                            font_color, lineType=cv2.LINE_AA)
+                            font_color, thickness=1, lineType=cv2.LINE_AA)
 
             for i, msg in enumerate(
                     self.get_mode_handler().get_state_message()):
                 starting_index = (0, self.LOG_LINE_HEIGHT * (i + 1) +
                                   self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index, font, font_scale,
-                            font_color, lineType=cv2.LINE_AA)
+                            font_color, thickness=1, lineType=cv2.LINE_AA)
 
         write_top_text()
         displayed = cv2.cvtColor(frame, cv2.IMREAD_COLOR)

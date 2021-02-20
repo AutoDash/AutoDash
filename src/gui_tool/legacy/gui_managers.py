@@ -408,7 +408,8 @@ class InternalBBoxMode(InternalMode):
 
     def modify_frame(self, frame, i):
         if self.irb.has_initial_point():
-            cv2.rectangle(frame, self.irb.get_initial_point(), self.mouse_position, **self.BOX_DRAWING_DISPLAY)
+            cv2.rectangle(frame, self.irb.get_initial_point(), self.mouse_position,
+                          **self.BOX_DRAWING_DISPLAY, lineType=cv2.LINE_AA)
         return frame
 
     def get_state_message(self):
