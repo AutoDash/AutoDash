@@ -1,5 +1,6 @@
 from ..data.MetaDataItem import MetaDataItem
 from ..executor.iDatabaseExecutor import iDatabaseExecutor
+from ..signals import DriedSourceSignal
 
 
 # Not abstract, so a user can choose to default what database to interact with using this Executor
@@ -10,7 +11,9 @@ class IteratorSource(iDatabaseExecutor):
         super().__init__(parents, stateful=True)
         self.ids = metadata_ids
 
-    def run(self) -> MetaDataItem:
+    def run(self, ignored_item) -> MetaDataItem:
+        if len(self.ids) == 0:
+            raise DriedSourceSignal
         metadata_id = self.ids.pop(0)
         return self.database.fetch_metadata(metadata_id)
 

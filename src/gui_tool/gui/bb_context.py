@@ -9,9 +9,10 @@ class BBContext(GUIContext):
                  bbox_fields: BBFields,
                  start_index=None,
                  end_index=None,
-                 enum_tags=None):
+                 enum_tags=None,
+                 to_be_deleted=False):
         super(BBContext, self).__init__(file_loc, start_index, end_index,
-                                        enum_tags)
+                                        enum_tags, to_be_deleted)
         self.bbox_fields = bbox_fields
         self.additional_tags = {}
 

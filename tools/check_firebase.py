@@ -8,6 +8,14 @@ def get_num_metadata_item():
     ids = f.fetch_video_id_list()
     return len(ids)
 
+
+def get_metadata_with_id(id):
+    f = FirebaseAccessor()
+    fc = FilterCondition("id == '{}'".format(id))
+    data = f.fetch_newest_videos(filter_cond=fc)
+    return data
+
+
 def get_metadata_with_url(url):
     f = FirebaseAccessor()
     fc = FilterCondition("url == '{}'".format(url))

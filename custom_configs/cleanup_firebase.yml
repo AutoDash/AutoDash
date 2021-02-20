@@ -3,10 +3,8 @@ dataSources:
     config:
       metadata_ids:
         - ""
-        - ""
 processingStages:
   - executor: UniversalDownloader
-  - executor: Labeler
-  - executor: AutoLabeler
-  - executor: FirebaseUpdater
   - executor: Printer
+  - executor: Labeler
+  - executor: DatabaseCleaner

@@ -40,6 +40,7 @@ SELECTION_MODE_INSTRUCTIONS = [
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
     ["l", "Mark collision location"],
+    ["k", "Toggle marking video for deletion"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
@@ -127,6 +128,9 @@ class InternaSelectionMode(InternalMode):
                 self.par.bbm.add_collision_location(ind)
                 self.log("collision location added:{0}".format(ind))
             self.log("Is now {0}".format(self.par.bbm.get_collision_locations()))
+        elif key_mapper.consume("k"):
+            par.context.mark_to_be_deleted(not par.context.to_be_deleted)
+            self.log("Marked video to {0}".format("be deleted" if par.context.to_be_deleted else "not be deleted"))
 
 
     def get_state_message(self):
