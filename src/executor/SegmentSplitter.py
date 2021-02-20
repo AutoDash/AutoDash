@@ -46,8 +46,8 @@ class SegmentSplitter(iExecutor):
             item = metadata.clone()
             item.bb_fields.crop_range(begin, end)
             item.id = metadata.id + f'-{idx}'
-            item.start_i = begin
-            item.end_i = end
+            item.start_i = begin + metadata.start_i
+            item.end_i = end + metadata.start_i
             items.append(item)
         return items
 
@@ -77,14 +77,18 @@ class SegmentSplitter(iExecutor):
             end, next_begin = prange
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, end)
-            total_delta = 1000 * video.get_time_delta(begin + metadata.start_i, end + metadata.start_i)
+            total_delta = video.get_time_delta(begin + metadata.start_i, end + metadata.start_i) / 1000
             n_covers = int(total_delta / self.clip_len_s)
+            begin = next_begin
             if n_covers < 1:
                 continue
             delta = (it_end - it_begin) / n_covers
-            cover += [ (int(it_begin + i * delta), int(it_begin + (i+ 1) * delta)) 
+            cover_frames = [ it_begin ]
+            for _ in range(0, n_covers):
+                next_frame = video.get_frame_after_time_elapsed(cover_frames[-1], self.clip_len_s * 1000)
+                cover_frames.append(next_frame)
+            cover += [ (int(cover_frames[i]), int(cover_frames[i+1])) 
                     for i in range(0, n_covers) ]
-            begin = next_begin
         return cover
             
 
