@@ -11,6 +11,8 @@ class MetaDataItem:
     def __init__(self, **kwargs):
         self.title = kwargs["title"]
         self.url = kwargs["url"]
+        self.date_created = kwargs["date_created"]
+        self.video_length = kwargs["video_length"]
         self.download_src = kwargs["download_src"]
         self.id = kwargs.get("id")
         print(f'Parsing item {self.id}')
@@ -40,6 +42,8 @@ class MetaDataItem:
 {{
     'title': {self.title},
     'url': {self.url},
+    'date_created': {self.date_created},
+    'video_length': {self.video_length},
     'download_src': {self.download_src},
     'collision_type': {self.collision_type},
     'description': {self.description},
@@ -61,6 +65,8 @@ class MetaDataItem:
         return {
             'title': str,
             'url': str,
+            'date_created': str,
+            'video_length': int,
             'download_src': str,
             'collision_type': str,
             'description': str,
@@ -82,6 +88,8 @@ class MetaDataItem:
         return {
             'title': self.title,
             'url': self.url,
+            'date_created': self.date_created,
+            'video_length': self.video_length,
             'download_src': self.download_src,
             'collision_type': self.collision_type,
             'description': self.description,
