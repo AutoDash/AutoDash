@@ -59,7 +59,7 @@ class SegmentSplitter(iExecutor):
             # Check for minimum range
             if al + metadata.start_i < min_end:
                 continue
-            begin = video.get_frame_after_time_elapsed(metadata.start_i + al, -self.clip_len_s)
+            begin = video.get_frame_after_time_elapsed(metadata.start_i + al, -self.clip_len_s * 1000)
             begin = max(0, begin - metadata.start_i)
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, al)
@@ -77,7 +77,7 @@ class SegmentSplitter(iExecutor):
             end, next_begin = prange
             it_begin = np.searchsorted(frames, begin)
             it_end = np.searchsorted(frames, end)
-            total_delta = video.get_time_delta(begin + metadata.start_i, end + metadata.start_i)
+            total_delta = 1000 * video.get_time_delta(begin + metadata.start_i, end + metadata.start_i)
             n_covers = int(total_delta / self.clip_len_s)
             if n_covers < 1:
                 continue
