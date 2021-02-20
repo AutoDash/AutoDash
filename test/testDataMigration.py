@@ -47,6 +47,7 @@ class TestDataMigration(unittest.TestCase):
             'enum_tags': ["enum_tag1", "enum_tag2"],
             'is_cancelled': False,
             'is_split_url': False,
+            'to_be_deleted': False,
             'location': None,
             'tags': {
                 "tag1": "val1"
