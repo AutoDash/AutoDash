@@ -180,18 +180,18 @@ class VideoPlayerGUIManager(object):
             3), np.uint8)
 
         def write_top_text():
-            font = cv2.FONT_HERSHEY_SIMPLEX
+            font = cv2.FONT_HERSHEY_DUPLEX
             font_scale = 0.5
             font_color = (255, 255, 255)
             for i, msg in enumerate(self.logger.get_logs()):
                 starting_index = (self.LOG_START_X, self.LOG_LINE_HEIGHT * (i+1) + self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index,
-                            font, font_scale, font_color)
+                            font, font_scale, font_color, lineType=cv2.LINE_AA)
 
             for i, msg in enumerate(self.get_mode_handler().get_state_message()):
                 starting_index = (0, self.LOG_LINE_HEIGHT * (i + 1) + self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index,
-                            font, font_scale, font_color)
+                            font, font_scale, font_color, lineType=cv2.LINE_AA)
 
         write_top_text()
         displayed = cv2.cvtColor(frame, cv2.IMREAD_COLOR)

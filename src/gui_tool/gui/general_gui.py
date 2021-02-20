@@ -69,13 +69,12 @@ class VideoPlayerGUIManager(object):
             self.cleanup()
 
     def set_GUI(self):
-        cv2.namedWindow(self.WINDOW_NAME)
-        cv2.resizeWindow(self.WINDOW_NAME, self.vcm.get_width(),
-                         self.vcm.get_height() + self.IMG_STARTING_Y)
+        cv2.namedWindow(self.WINDOW_NAME, cv2.WINDOW_NORMAL | cv2.WINDOW_GUI_NORMAL)
+        cv2.resizeWindow(self.WINDOW_NAME, self.context.file_width,
+                         self.context.file_height + self.IMG_STARTING_Y)
         cv2.setMouseCallback(
             self.WINDOW_NAME,
-            lambda event, x, y, flags, param: self.handleClick(
-                event, x, y, flags, param))
+            lambda event, x, y, flags, param: self.handleClick(event, x, y, flags, param))
 
         def set_frame_rate_callback(value):
             self.frame_rate = max(1, value)
@@ -175,27 +174,26 @@ class VideoPlayerGUIManager(object):
 
     def build_frame(self, frame):
         img = np.zeros(
-            (self.context.file_height + self.IMG_STARTING_Y,
-             self.context.file_width, 3),
+            (self.context.file_height + self.IMG_STARTING_Y, self.context.file_width, 3),
             np.uint8,
         )
 
         def write_top_text():
-            font = cv2.FONT_HERSHEY_SIMPLEX
+            font = cv2.FONT_HERSHEY_DUPLEX
             font_scale = 0.5
             font_color = (255, 255, 255)
             for i, msg in enumerate(self.logger.get_logs()):
                 starting_index = (self.LOG_START_X, self.LOG_LINE_HEIGHT *
                                   (i + 1) + self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index, font, font_scale,
-                            font_color)
+                            font_color, lineType=cv2.LINE_AA)
 
             for i, msg in enumerate(
                     self.get_mode_handler().get_state_message()):
                 starting_index = (0, self.LOG_LINE_HEIGHT * (i + 1) +
                                   self.LOG_LINE_MARGIN * i)
                 cv2.putText(img, msg, starting_index, font, font_scale,
-                            font_color)
+                            font_color, lineType=cv2.LINE_AA)
 
         write_top_text()
         displayed = cv2.cvtColor(frame, cv2.IMREAD_COLOR)

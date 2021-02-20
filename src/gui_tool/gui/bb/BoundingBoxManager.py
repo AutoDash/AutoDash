@@ -17,7 +17,7 @@ class BoundingBoxManager(object):
         "thickness": 2
     }
     BOX_I_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+        "fontFace": cv2.FONT_HERSHEY_DUPLEX,
         "fontScale": 0.5,
         "color": (255, 255, 255)
     }
@@ -49,7 +49,7 @@ class BoundingBoxManager(object):
                 else:
                     cv2.rectangle(frame, p1, p2, **self.BOX_DISPLAY)
                 cv2.putText(frame, str(id), (p1[0] + 2, p1[1] + 15),
-                            **self.BOX_I_DISPLAY)
+                            **self.BOX_I_DISPLAY, lineType=cv2.LINE_AA)
         return frame
 
     def handleClickSelection(self, i, x, y):
