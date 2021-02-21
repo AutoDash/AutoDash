@@ -109,7 +109,7 @@ def run(pipeline, **args):
 def submit_metadata(item, dataUpdater, reason):
     print(f"Stopping Pipeline for metadataitem {item}\n\n\n reason: {reason}")
     metadata = iExecutor.get_metadata(item)
-    if metadata.tags['state'] == 'in-progress':
+    if metadata.tags.get('state') == 'in-progress':
         metadata.add_tag('state', '')
     dataUpdater.safe_run(metadata)
 
@@ -139,7 +139,7 @@ def process(source_executor, source_item, dataUpdater):
             dataUpdater.database.delete_metadata(metadata.id)
             continue
         except KeyboardInterrupt as e:
-            submit_metadata(item, dataUpdater, "keyboard interrupt")
+            submit_all_metadata(work, dataUpdater)
             raise e
         except RuntimeError as e:
             print(e)
@@ -161,6 +161,11 @@ def process(source_executor, source_item, dataUpdater):
                 cancel_item(metadata, dataUpdater)
             else:
                 work.append((executor.get_next(), next_item))
+
+
+def submit_all_metadata(work_queue, dataUpdater):
+    for (_, item) in work_queue:
+        submit_metadata(item, dataUpdater, "Program Quit")
 
 
 def cancel_item(metadata: MetaDataItem, dataUpdater: DataUpdater):

@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 import unittest
 from src.pipeline import run as administrator
+from src.pipeline import process
 from src.executor.iExecutor import iExecutor
 from multiprocessing import Queue
 from queue import Empty as EmptyException
 from src.PipelineConfiguration import PipelineConfiguration
 from src.data.MetaDataItem import MetaDataItem
+import pytest
+from unittest.mock import MagicMock
 
 events = Queue()
+
 
 class TestExecutor(iExecutor):
     def __init__(self, event_num, parents=[]):
@@ -26,7 +30,10 @@ class MultipleReturnExecutor(iExecutor):
         super().__init__(parents)
 
     def run(self, obj):
-        return [MetaDataItem(title=None, url=None, download_src=None) for _ in range(self.iters)]
+        return [
+            MetaDataItem(title=None, url=None, download_src=None)
+            for _ in range(self.iters)
+        ]
 
 
 class ExceptionExecutor(iExecutor):
@@ -37,75 +44,99 @@ class ExceptionExecutor(iExecutor):
         raise RuntimeError()
 
 
-class TestAdministrator(unittest.TestCase):
-    def test_main_single_process(self):
-        num_items = 10
+def test_main_single_process():
+    num_items = 10
 
-        pc = PipelineConfiguration()
-        ptr = TestExecutor(0)
+    pc = PipelineConfiguration()
+    ptr = TestExecutor(0)
 
-        for x in range(1, num_items):
-            ptr = TestExecutor(x, ptr)
+    for x in range(1, num_items):
+        ptr = TestExecutor(x, ptr)
 
-        pc.load_graph(ptr)
+    pc.load_graph(ptr)
 
-        administrator(pc, n_workers=1, max_iterations=1, storage='local')
+    administrator(pc, n_workers=1, max_iterations=1, storage='local')
 
-        for i in range(num_items):
-            self.assertEqual(events.get(timeout=2), i, "items in wrong order")
+    for i in range(num_items):
+        assert events.get(timeout=2) == i, "items in wrong order"
 
-        self.assertRaises(EmptyException, events.get, True, 0.25)
+    with pytest.raises(EmptyException):
+        events.get(True, 0.25)
 
-    def test_main_multiple_returns_with_exceptions(self):
-        num_items = 10
 
-        pc = PipelineConfiguration()
+def test_main_multiple_returns_with_exceptions():
+    num_items = 10
 
-        graph = MultipleReturnExecutor(num_items)
-        TestExecutor(ExceptionExecutor(TestExecutor(1, graph)))
+    pc = PipelineConfiguration()
 
-        pc.load_graph(graph)
+    graph = MultipleReturnExecutor(num_items)
+    TestExecutor(ExceptionExecutor(TestExecutor(1, graph)))
 
-        administrator(pc, n_workers=1, max_iterations=1, storage='local')
+    pc.load_graph(graph)
 
-        for i in range(num_items):
-            self.assertEqual(events.get(timeout=2), 1, "not enough items")
+    administrator(pc, n_workers=1, max_iterations=1, storage='local')
 
-        self.assertRaises(EmptyException, events.get, True, 0.25)
+    for i in range(num_items):
+        assert events.get(timeout=2) == 1, "not enough items"
 
-    def test_main_multiple_returns(self):
-        num_items = 10
+    with pytest.raises(EmptyException):
+        events.get(True, 0.25)
 
-        pc = PipelineConfiguration()
 
-        graph = MultipleReturnExecutor(num_items)
-        TestExecutor(1, graph)
+def test_main_multiple_returns():
+    num_items = 10
 
-        pc.load_graph(graph)
+    pc = PipelineConfiguration()
 
-        administrator(pc, n_workers=1, max_iterations=1, storage='local')
+    graph = MultipleReturnExecutor(num_items)
+    TestExecutor(1, graph)
 
-        for i in range(num_items):
-            self.assertEqual(events.get(timeout=2), 1, "not enough items")
+    pc.load_graph(graph)
 
-        self.assertRaises(EmptyException, events.get, True, 0.25)
+    administrator(pc, n_workers=1, max_iterations=1, storage='local')
 
-    def test_main_multi_process(self):
-        num_items = 10
+    for i in range(num_items):
+        assert events.get(timeout=2) == 1, "not enough items"
 
-        pc = PipelineConfiguration()
-        ptr = TestExecutor(0)
+    with pytest.raises(EmptyException):
+        events.get(True, 0.25)
 
-        for x in range(1, num_items):
-            ptr = TestExecutor(x, ptr)
 
-        pc.load_graph(ptr)
+def test_main_multi_process():
 
-        administrator(pc, max_iterations=3, storage='local')
-        for i in range(num_items*3):
-            events.get(timeout=2)
+    num_items = 10
 
-        self.assertRaises(EmptyException, events.get, True, 0.25)
+    pc = PipelineConfiguration()
+    ptr = TestExecutor(0)
+
+    for x in range(1, num_items):
+        ptr = TestExecutor(x, ptr)
+
+    pc.load_graph(ptr)
+
+    administrator(pc, max_iterations=3, storage='local')
+    for i in range(num_items * 3):
+        events.get(timeout=2)
+
+    with pytest.raises(EmptyException):
+        events.get(True, 0.25)
+
+
+def test_ctrl_c():
+    def raise_ki(self):
+        raise KeyboardInterrupt
+
+    parent = MultipleReturnExecutor(3)
+
+    child = MultipleReturnExecutor(1, parent)
+    child.run = raise_ki
+    parent.next = child
+
+    mock_data_updater = MagicMock()
+
+    with pytest.raises(KeyboardInterrupt):
+        process(parent, None, mock_data_updater)
+        assert mock_data_updater.call_count == 2
 
 
 if __name__ == '__main__':
