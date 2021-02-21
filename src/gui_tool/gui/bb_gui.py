@@ -76,13 +76,14 @@ class BBGUIManager(VideoPlayerGUIManager):
         return frame
 
     def can_commit(self):
-        if len(self.bbm.get_collision_locations()) == 0 and self.bbm.get_n_selected() > 0:
-            self.logger.log("[ERROR]: If there is an collision, must specify collision location")
-            return False
-        if len(self.bbm.get_collision_locations()) > 0 and self.bbm.get_n_selected() == 0:
-            self.logger.log("[ERROR]: If an collision location is specified, you must select the participants")
-            return False
         return True
+
+    def get_commit_message(self):
+        if len(self.bbm.get_collision_locations()) == 0 and self.bbm.get_n_selected() > 0:
+            return "[WARN]: If there is an collision, should specify collision location"
+        if len(self.bbm.get_collision_locations()) > 0 and self.bbm.get_n_selected() == 0:
+            return "[WARN]: If an collision location is specified, you should select the participants"
+        return super(BBGUIManager, self).get_commit_message()
 
 class InternaSelectionMode(InternalMode):
     def __init__(self, parent: VideoPlayerGUIManager):
