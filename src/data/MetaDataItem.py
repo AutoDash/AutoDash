@@ -3,6 +3,7 @@ from .BBFields import BBFields
 import json
 import hashlib
 import copy
+from datetime import datetime
 
 import os
 
@@ -11,9 +12,8 @@ class MetaDataItem:
     def __init__(self, **kwargs):
         self.title = kwargs["title"]
         self.url = kwargs["url"]
-        self.date_created = kwargs["date_created"]
-        self.video_length = kwargs["video_length"]
         self.download_src = kwargs["download_src"]
+        self.date_created = kwargs.get("date_created", get_current_time_epoch_millis())
         self.id = kwargs.get("id")
         print(f'Parsing item {self.id}')
         self.collision_type = kwargs.get("collision_type")
@@ -42,9 +42,8 @@ class MetaDataItem:
 {{
     'title': {self.title},
     'url': {self.url},
-    'date_created': {self.date_created},
-    'video_length': {self.video_length},
     'download_src': {self.download_src},
+    'date_created': {self.date_created},
     'collision_type': {self.collision_type},
     'description': {self.description},
     'location': {self.location},
@@ -65,9 +64,8 @@ class MetaDataItem:
         return {
             'title': str,
             'url': str,
-            'date_created': str,
-            'video_length': int,
             'download_src': str,
+            'date_created': int,
             'collision_type': str,
             'description': str,
             'location': str,
@@ -88,9 +86,8 @@ class MetaDataItem:
         return {
             'title': self.title,
             'url': self.url,
-            'date_created': self.date_created,
-            'video_length': self.video_length,
             'download_src': self.download_src,
+            'date_created': self.date_created,
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
@@ -154,3 +151,9 @@ def gen_filename(id: str):
 
 def get_id_from_filename(filename: str):
     return filename.split('_')[0]
+
+
+# Get current time in UTC since Unix epoch
+def get_current_time_epoch_millis():
+    epoch = datetime.utcfromtimestamp(0)
+    return int((datetime.utcnow() - epoch).total_seconds() * 1000)
