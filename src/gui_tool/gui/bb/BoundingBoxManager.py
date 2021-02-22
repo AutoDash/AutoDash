@@ -26,6 +26,8 @@ class BoundingBoxManager(object):
         self.id_to_cls = {}
         self.selected = set()
         self.collision_locations = []
+        self.reckless_start = None
+        self.reckless_intervals = []
         self.total_frames = total_frames
 
     def set_to(self, context: BBContext, selected):
@@ -34,6 +36,7 @@ class BoundingBoxManager(object):
         self.objects = context.bbox_fields.objects
         self.collision_locations = self.bbox_fields.collision_locations
         self.collision_locations.sort()
+        self.reckless_intervals = context.reckless_intervals
 
     def modify_frame(self, frame, i):
         for id, obj in self.objects.items():
@@ -172,3 +175,33 @@ class BoundingBoxManager(object):
 
     def clear_bounding_boxes(self):
         self.bbox_fields.clear()
+    
+    def has_reckless_start_frame(self):
+        return self.reckless_start != None
+
+    def get_reckless_start_frame(self):
+        return self.reckless_start
+
+    def set_reckless_start_frame(self, loc):
+        self.reckless_start = loc
+
+    def set_reckless_end_frame(self, loc):
+        self.reckless_intervals.append((self.reckless_start, loc))
+
+    def clear_reckless_start(self):
+        self.reckless_start = None
+
+    def clear_reckless_frames(self, loc):
+        removed = []
+        if self.has_reckless_start_frame():
+            removed.append(self.get_reckless_start_frame())
+            self.clear_reckless_start()
+
+        for interval in list(self.reckless_intervals):
+            start, end = interval
+            if start <= loc and loc <= end:
+                removed.append(interval)
+                self.reckless_intervals.remove(interval)
+
+        return removed
+

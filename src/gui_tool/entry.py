@@ -35,6 +35,7 @@ def tag_file(file_loc, mdi: MetaDataItem):
 
             mdi.bb_fields = context.get_bbox_fields()
             mdi.enum_tags = context.enum_tags
+            mdi.reckless_intervals = context.reckless_intervals
 
             for key, val in context.additional_tags:
                 mdi.add_tag(key, val)
@@ -91,3 +92,4 @@ def split_file(file_loc, mdi: MetaDataItem):
 
         except ManualTaggingAbortedException as e:
             print("Aborted. Will restart")
+

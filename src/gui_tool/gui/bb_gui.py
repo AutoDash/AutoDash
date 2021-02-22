@@ -40,6 +40,8 @@ SELECTION_MODE_INSTRUCTIONS = [
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
     ["l", "Mark collision location"],
+    ["i", "Mark reckless driving start and end timestamps"],
+    ["j", "Clear reckless driving labels over current frame"],
     ["k", "Toggle marking video for deletion"],
 ]
 
@@ -128,6 +130,20 @@ class InternaSelectionMode(InternalMode):
                 self.par.bbm.add_collision_location(ind)
                 self.log("collision location added:{0}".format(ind))
             self.log("Is now {0}".format(self.par.bbm.get_collision_locations()))
+        elif key_mapper.consume("i"):
+            ind = self.par.vcm.get_frame_index()
+            if self.par.bbm.has_reckless_start_frame():
+                self.par.bbm.set_reckless_end_frame(ind)
+                self.log("Reckless interval created:({0}, {1})"\
+                        .format(self.par.bbm.get_reckless_start_frame(), ind))
+                self.par.bbm.clear_reckless_start()
+            else:
+                self.par.bbm.set_reckless_start_frame(ind)
+                self.log("Reckless start frame set:{0}".format(ind))
+        elif key_mapper.consume("j"):
+            ind = self.par.vcm.get_frame_index()
+            removed = self.par.bbm.clear_reckless_frames(ind)
+            self.log("Remove reckless frames:{0}".format(removed))
         elif key_mapper.consume("k"):
             par.context.mark_to_be_deleted(not par.context.to_be_deleted)
             self.log("Marked video to {0}".format("be deleted" if par.context.to_be_deleted else "not be deleted"))

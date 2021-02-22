@@ -14,6 +14,7 @@ class BBContext(GUIContext):
         super(BBContext, self).__init__(file_loc, start_index, end_index,
                                         enum_tags, to_be_deleted)
         self.bbox_fields = bbox_fields
+        self.reckless_intervals = []
         self.additional_tags = {}
 
     def get_bbox_fields(self):

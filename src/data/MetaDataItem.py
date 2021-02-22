@@ -23,6 +23,7 @@ class MetaDataItem:
         self.enum_tags = kwargs.get("enum_tags", [])
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
+        self.reckless_intervals = kwargs.get("reckless_intervals", [])
         self.to_be_deleted = kwargs.get("to_be_deleted", False)
 
         accident_locations = kwargs.get("accident_locations", [])
@@ -56,6 +57,7 @@ class MetaDataItem:
     'bb_fields': {self.bb_fields},
     'start_i': {self.start_i},
     'end_i': {self.end_i},
+    'reckless_intervals': {self.reckless_intervals},
     'to_be_deleted': {self.to_be_deleted},
 }}
 """
@@ -79,6 +81,7 @@ class MetaDataItem:
             'bb_fields': dict,
             'start_i': int,
             'end_i': int,
+            'reckless_intervals': list,
             'to_be_deleted': bool,
         }
 
@@ -102,6 +105,7 @@ class MetaDataItem:
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,
+            'reckless_intervals': self.reckless_intervals,
             'to_be_deleted': self.to_be_deleted,
         }
 
