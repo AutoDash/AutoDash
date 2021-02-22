@@ -28,6 +28,7 @@ def tag_file(file_loc, mdi: MetaDataItem):
                 start_index=mdi.start_i,
                 end_index=mdi.end_i,
                 enum_tags=mdi.enum_tags,
+                to_be_deleted=mdi.to_be_deleted,
             )
             gui = BBGUIManager(context)
             gui.start()
@@ -41,6 +42,8 @@ def tag_file(file_loc, mdi: MetaDataItem):
 
             if not context.is_dashcam:
                 raise CancelSignal("Marked as not a dashcam video")
+
+            mdi.to_be_deleted = context.to_be_deleted
 
             return mdi
 

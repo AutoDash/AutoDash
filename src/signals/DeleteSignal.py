@@ -1,0 +1,3 @@
+
+class DeleteSignal(Exception):
+    pass

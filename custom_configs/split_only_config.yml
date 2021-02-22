@@ -1,12 +1,14 @@
 dataSources:
-  - executor: FirebaseSource
+  - executor: YoutubeCrawler
+  - executor: RedditCrawler
 processingStages:
   - executor: Filterer
-    config:
-      filter_str: tags['state'] != 'processed'
   - executor: Filterer
     config:
-      filter_str: is_cancelled != 1
+      filter_str: 'is_cancelled != 1'
+  - executor: Filterer
+    config:
+      filter_str: "tags['state'] != 'in-progress'"
   - executor: AutoLabeler
     config:
       key: "state"
@@ -15,9 +17,12 @@ processingStages:
   - executor: UniversalDownloader
   - executor: Printer
   - executor: Splitter
-  - executor: Labeler
   - executor: AutoLabeler
-  - executor: FirebaseUpdater
+    config:
+      key: "state"
+      val: "split"
   - executor: Printer
     config:
-      msg: "labelling and video uploaded"
+      msg: "labelling complete"
+  - executor: LocalStorageUpdater
+  - executor: FirebaseUpdater

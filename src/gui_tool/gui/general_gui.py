@@ -7,6 +7,7 @@ from .tinker_subuis.button_popup import ButtonPopup
 import cv2
 from ..GUIExceptions import ManualTaggingAbortedException, ManualTaggingExitedException
 from .bb_context import BBContext
+from .tinker_subuis.text_popup import TextPopup
 
 
 class VideoPlayerGUIManager(object):
@@ -29,10 +30,11 @@ class VideoPlayerGUIManager(object):
         ["s", "10 back"],
         ["d", "1 forward"],
         ["w", "10 forward"],
+        ["j", "Jump To Index"],
         ["Space", "Pause/unpause"],
-        ["Enter * 2", "Finish and continue"],
+        ["Enter", "Finish and continue"],
         [
-            "Esc * 2",
+            "Esc",
             "Abort and restart tagging. Will raise ManualTaggingAbortedException"
         ],
     ]
@@ -116,7 +118,7 @@ class VideoPlayerGUIManager(object):
                                frame_index)
 
             self.key_mapper.append(cv2.waitKey(self.frame_rate) & 0xFF)
-            if self.key_mapper.consume(("esc", "esc")):  # Escape key
+            if self.key_mapper.consume("esc"):  # Escape key
                 res = ButtonPopup(
                     "Confirm restart",
                     "Hitting confirm will destroy all progress. You will have to restart. Continue?",
@@ -125,7 +127,7 @@ class VideoPlayerGUIManager(object):
                 if res == "Confirm":
                     raise ManualTaggingAbortedException(
                         "Tagging operation aborted")
-            elif self.key_mapper.consume(("enter", "enter")):  # Enter
+            elif self.key_mapper.consume("enter"):  # Enter
                 if not self.can_commit():
                     self.logger.log("[ERROR] Commit operation failed")
                 else:
@@ -141,6 +143,17 @@ class VideoPlayerGUIManager(object):
                     self.get_mode_handler().INSTRUCTIONS,
                 )
                 window.run()
+            elif self.key_mapper.consume("j"):
+                loc = TextPopup("Enter index to jump to, or close the window to cancel").run()
+                try:
+                    iloc = int(loc)
+                    if iloc >= 0 and iloc <= self.vcm.get_frames_count() - 1:
+                        self.vcm.start_from(iloc)
+                        self.logger.log("Jumped to index {0}".format(iloc))
+                    else:
+                        self.logger.log("[Error]: Invalid input {0} (still on {1} of {2})".format(loc, self.vcm.get_frame_index(), self.vcm.get_frames_count()))
+                except:
+                        self.logger.log("[Error]: Invalid input {0} (still on {1} of {2})".format(loc, self.vcm.get_frame_index(), self.vcm.get_frames_count()))
             elif self.key_mapper.consume("a"):
                 self.vcm.shift_frame_index(-1)
             elif self.key_mapper.consume("s"):

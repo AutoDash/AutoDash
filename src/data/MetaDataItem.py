@@ -3,6 +3,7 @@ from .BBFields import BBFields
 import json
 import hashlib
 import copy
+from datetime import datetime
 
 import os
 
@@ -12,15 +13,18 @@ class MetaDataItem:
         self.title = kwargs["title"]
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
-        self.id = kwargs.get("id", None)
-        self.collision_type = kwargs.get("collision_type", None)
-        self.description = kwargs.get("description", None)
-        self.location = kwargs.get("location", None)
+        self.date_created = kwargs.get("date_created", get_current_time_epoch_millis())
+        self.id = kwargs.get("id")
+        print(f'Parsing item {self.id}')
+        self.collision_type = kwargs.get("collision_type")
+        self.description = kwargs.get("description")
+        self.location = kwargs.get("location")
         self.tags = kwargs.get("tags", {})
         self.enum_tags = kwargs.get("enum_tags", [])
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
         self.reckless_intervals = kwargs.get("reckless_intervals", [])
+        self.to_be_deleted = kwargs.get("to_be_deleted", False)
 
         accident_locations = kwargs.get("accident_locations", [])
 
@@ -32,8 +36,8 @@ class MetaDataItem:
                 bb_fields_json["collision_locations"] = accident_locations
         self.bb_fields = BBFields.from_json(bb_fields_json)
 
-        self.start_i = kwargs.get("start_i", None)
-        self.end_i = kwargs.get("end_i", None)
+        self.start_i = kwargs.get("start_i")
+        self.end_i = kwargs.get("end_i")
 
     def __repr__(self) -> str:
         return f"Metadata {self.id}:\n\n" + f"""
@@ -41,6 +45,7 @@ class MetaDataItem:
     'title': {self.title},
     'url': {self.url},
     'download_src': {self.download_src},
+    'date_created': {self.date_created},
     'collision_type': {self.collision_type},
     'description': {self.description},
     'location': {self.location},
@@ -52,7 +57,8 @@ class MetaDataItem:
     'bb_fields': {self.bb_fields},
     'start_i': {self.start_i},
     'end_i': {self.end_i},
-    'reckless_intervals': {self.reckless_intervals}
+    'reckless_intervals': {self.reckless_intervals},
+    'to_be_deleted': {self.to_be_deleted},
 }}
 """
 
@@ -63,6 +69,7 @@ class MetaDataItem:
             'title': str,
             'url': str,
             'download_src': str,
+            'date_created': int,
             'collision_type': str,
             'description': str,
             'location': str,
@@ -74,7 +81,8 @@ class MetaDataItem:
             'bb_fields': dict,
             'start_i': int,
             'end_i': int,
-            'reckless_intervals': list
+            'reckless_intervals': list,
+            'to_be_deleted': bool,
         }
 
     def encode(self) -> str:
@@ -85,6 +93,7 @@ class MetaDataItem:
             'title': self.title,
             'url': self.url,
             'download_src': self.download_src,
+            'date_created': self.date_created,
             'collision_type': self.collision_type,
             'description': self.description,
             'location': self.location,
@@ -96,7 +105,8 @@ class MetaDataItem:
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,
-            'reckless_intervals': self.reckless_intervals
+            'reckless_intervals': self.reckless_intervals,
+            'to_be_deleted': self.to_be_deleted,
         }
 
     def to_json_str(self) -> str:
@@ -149,3 +159,9 @@ def gen_filename(id: str):
 
 def get_id_from_filename(filename: str):
     return filename.split('_')[0]
+
+
+# Get current time in UTC since Unix epoch
+def get_current_time_epoch_millis():
+    epoch = datetime.utcfromtimestamp(0)
+    return int((datetime.utcnow() - epoch).total_seconds() * 1000)

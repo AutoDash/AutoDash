@@ -1,0 +1,10 @@
+dataSources:
+  - executor: IteratorFirebaseSource
+    config:
+      metadata_ids:
+        - ""
+processingStages:
+  - executor: UniversalDownloader
+  - executor: Splitter
+  - executor: FirebaseUpdater
+  - executor: Printer

@@ -9,7 +9,7 @@ from ..data.VideoItem import VideoItem
 from ..data.MetaDataItem import MetaDataItem
 from .iExecutor import iExecutor
 from ..downloader.YoutubeDownloader import YoutubeDownloader
-from ..downloader.ImgurDownloader import ImgurDownloader
+# from ..downloader.ImgurDownloader import ImgurDownloader # temporarily removed because it cant be fetched with pip
 
 class UniversalDownloader(iExecutor):
     def __init__(self, *args):
@@ -19,7 +19,7 @@ class UniversalDownloader(iExecutor):
         self.video_storage = VideoStorageService()
 
         self.register_downloader("(.*youtube.*|.*youtu\.be.*)", YoutubeDownloader())
-        self.register_downloader(".*imgur.*", ImgurDownloader())
+        # self.register_downloader(".*imgur.*", ImgurDownloader())
 
     def register_downloader(self, regex: str, downloader: iDownloader):
         self.registered_downloaders.append((regex, downloader))

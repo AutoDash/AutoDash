@@ -40,8 +40,9 @@ SELECTION_MODE_INSTRUCTIONS = [
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
     ["l", "Mark collision location"],
-    ["k", "Mark reckless driving start and end timestamps"],
-    ["j", "Clear reckless driving labels over current frame"]
+    ["i", "Mark reckless driving start and end timestamps"],
+    ["j", "Clear reckless driving labels over current frame"],
+    ["k", "Toggle marking video for deletion"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
@@ -129,7 +130,7 @@ class InternaSelectionMode(InternalMode):
                 self.par.bbm.add_collision_location(ind)
                 self.log("collision location added:{0}".format(ind))
             self.log("Is now {0}".format(self.par.bbm.get_collision_locations()))
-        elif key_mapper.consume("k"):
+        elif key_mapper.consume("i"):
             ind = self.par.vcm.get_frame_index()
             if self.par.bbm.has_reckless_start_frame():
                 self.par.bbm.set_reckless_end_frame(ind)
@@ -143,6 +144,9 @@ class InternaSelectionMode(InternalMode):
             ind = self.par.vcm.get_frame_index()
             removed = self.par.bbm.clear_reckless_frames(ind)
             self.log("Remove reckless frames:{0}".format(removed))
+        elif key_mapper.consume("k"):
+            par.context.mark_to_be_deleted(not par.context.to_be_deleted)
+            self.log("Marked video to {0}".format("be deleted" if par.context.to_be_deleted else "not be deleted"))
 
 
     def get_state_message(self):
@@ -176,6 +180,8 @@ class InternalBBoxMode(InternalMode):
         self.selected_id = 1
 
     def handle_click(self, event, x, y, flags, param):
+        x = max(0, min(x, self.par.vcm.get_width()-1))
+        y = max(0, min(y, self.par.vcm.get_height()-1))
         if event == cv2.EVENT_LBUTTONDOWN:
             self.irb.set_initial_point(x, y)
         elif event == cv2.EVENT_MOUSEMOVE:
