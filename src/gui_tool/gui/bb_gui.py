@@ -41,7 +41,7 @@ SELECTION_MODE_INSTRUCTIONS = [
     ["v", "Opens window for user customizable enum tags"],
     ["l", "Mark collision location"],
     ["i", "Mark reckless driving start and end timestamps"],
-    ["j", "Clear reckless driving labels over current frame"],
+    ["u", "Clear reckless driving labels over current frame"],
     ["k", "Toggle marking video for deletion"],
 ]
 
@@ -140,7 +140,7 @@ class InternaSelectionMode(InternalMode):
             else:
                 self.par.bbm.set_reckless_start_frame(ind)
                 self.log("Reckless start frame set:{0}".format(ind))
-        elif key_mapper.consume("j"):
+        elif key_mapper.consume("u"):
             ind = self.par.vcm.get_frame_index()
             removed = self.par.bbm.clear_reckless_frames(ind)
             self.log("Remove reckless frames:{0}".format(removed))
