@@ -4,6 +4,7 @@ import json
 import hashlib
 import copy
 from datetime import datetime
+from enum import Enum
 
 import os
 
@@ -38,6 +39,7 @@ class MetaDataItem:
 
         self.start_i = kwargs.get("start_i")
         self.end_i = kwargs.get("end_i")
+        self.status = kwargs.get("status", MDIStatus.IN_PROGRESS)
 
     def __repr__(self) -> str:
         return f"Metadata {self.id}:\n\n" + f"""
@@ -59,6 +61,7 @@ class MetaDataItem:
     'end_i': {self.end_i},
     'reckless_intervals': {self.reckless_intervals},
     'to_be_deleted': {self.to_be_deleted},
+    'status': {self.status.value},
 }}
 """
 
@@ -83,6 +86,7 @@ class MetaDataItem:
             'end_i': int,
             'reckless_intervals': list,
             'to_be_deleted': bool,
+            'status': str,
         }
 
     def encode(self) -> str:
@@ -107,6 +111,7 @@ class MetaDataItem:
             'end_i': self.end_i,
             'reckless_intervals': self.reckless_intervals,
             'to_be_deleted': self.to_be_deleted,
+            'status': self.status.value,
         }
 
     def to_json_str(self) -> str:
@@ -165,3 +170,15 @@ def get_id_from_filename(filename: str):
 def get_current_time_epoch_millis():
     epoch = datetime.utcfromtimestamp(0)
     return int((datetime.utcnow() - epoch).total_seconds() * 1000)
+
+
+class MDIStatus(Enum):
+    # metadata that has been fully processed
+    # meaining it has bounding boxes, labels, and is not cancelled
+    PROCESSED = "processed"
+    # metadata has been canceled by the user
+    # this means the metadata is considered to be not valid for whatever reason  
+    CANCELED = "canceled"
+    # metadata that is not yet completed, and should be
+    # processed by the pipeline
+    IN_PROGRESS = "in-progress"

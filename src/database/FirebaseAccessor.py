@@ -6,7 +6,7 @@ from firebase_admin import credentials, db
 from firebase_admin.db import Reference
 
 from ..data.FilterCondition import FilterCondition
-from ..data.MetaDataItem import MetaDataItem
+from ..data.MetaDataItem import MetaDataItem, MDIStatus
 from .iDatabase import iDatabase, AlreadyExistsException, NotExistingException
 from ..utils import get_project_root
 
@@ -21,6 +21,17 @@ class MissingCredentials(Exception):
 class FirebaseAccessor(iDatabase):
 
     initialized = False
+    metadata_lists = {
+        MDIStatus.PROCESSED: "completed-videos",
+        MDIStatus.CANCELED: "canceled-videos",
+        MDIStatus.IN_PROGRESS: "in-progress-videos",
+    }
+    status_filters = {
+        "processed": [MDIStatus.PROCESSED],
+        "canceled": [MDIStatus.CANCELED],
+        "in-progress": [MDIStatus.IN_PROGRESS],
+        "all": [MDIStatus.PROCESSED, MDIStatus.CANCELED, MDIStatus.IN_PROGRESS]
+    }
 
     # Must be initialized only once
     def initial_firebase(self):
@@ -47,6 +58,9 @@ class FirebaseAccessor(iDatabase):
 
     def __metadata_reference(self):
         return db.reference('metadata')
+    
+    def __references(self, status_filter: str):
+        return (db.reference(x) for x in self.status_filters[status_filter])
 
     def __query_list(self, ref: Reference) -> List[str]:
         vals = ref.get()
