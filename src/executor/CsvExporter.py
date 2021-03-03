@@ -122,7 +122,12 @@ class CsvExporter(iExecutor):
         stream = ffmpeg.setpts(stream, expr='PTS-STARTPTS')
         stream = stream.output(str(STORAGE_DIR_VIDEOS / (str(metadata.id) + '.mp4')))
         stream = ffmpeg.overwrite_output(stream)
-        stream.run()
+        try:
+            stream.run()
+        except KeyboardInterrupt:
+            # Prevent corrupting video
+            stream.run()
+            raise
         print(f"Done exporting file {filename}")
         return item
 
