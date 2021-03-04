@@ -145,18 +145,24 @@ class VideoFile(object):
     def get_time_delta(self, frame_begin, frame_end):
         current_frame = self.capture.get(cv2.CAP_PROP_POS_FRAMES)
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame_begin)
+        self.capture.grab()
         time_at_begin = self.capture.get(cv2.CAP_PROP_POS_MSEC)
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame_end)
+        self.capture.grab()
         time_at_end = self.capture.get(cv2.CAP_PROP_POS_MSEC)
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
+        self.capture.grab()
         return time_at_end - time_at_begin
     
     def get_frame_after_time_elapsed(self, frame, timedelta):
         current_frame = self.capture.get(cv2.CAP_PROP_POS_FRAMES)
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, frame)
+        self.capture.grab()
         self.capture.set(cv2.CAP_PROP_POS_MSEC, self.capture.get(cv2.CAP_PROP_POS_MSEC) + timedelta)
+        self.capture.grab()
         frame_at_rewind = self.capture.get(cv2.CAP_PROP_POS_FRAMES)
         self.capture.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
+        self.capture.grab()
         return frame_at_rewind
     
     
