@@ -10,11 +10,11 @@ class BBContext(GUIContext):
                  start_index=None,
                  end_index=None,
                  enum_tags=None,
-                 to_be_deleted=False):
+                 to_be_deleted=False,
+                 reckless_intervals=None):
         super(BBContext, self).__init__(file_loc, start_index, end_index,
-                                        enum_tags, to_be_deleted)
+                                        enum_tags, to_be_deleted, reckless_intervals)
         self.bbox_fields = bbox_fields
-        self.reckless_intervals = []
         self.additional_tags = {}
 
     def get_bbox_fields(self):
