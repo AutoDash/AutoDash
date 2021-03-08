@@ -5,19 +5,24 @@ from ..bb_context import BBContext
 
 
 class BoundingBoxManager(object):
-    BOX_DISPLAY = {"color": (255, 255, 255), "lineType": 1, "thickness": 1}
+    BOX_DISPLAY = {
+        "color": (255, 255, 255),
+        "lineType": cv2.LINE_AA,
+        "thickness": 2
+    }
     SELECTED_BOX_DISPLAY = {
         "color": (255, 255, 0),
-        "lineType": 1,
-        "thickness": 1
+        "lineType": cv2.LINE_AA,
+        "thickness": 2
     }
     COLLISION_LOCATION_BOX_DISPLAY = {
         "color": (0, 255, 255),
-        "lineType": 1,
-        "thickness": 2
+        "lineType": cv2.LINE_AA,
+        "thickness": 3
     }
     BOX_I_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+        "fontFace": cv2.FONT_HERSHEY_DUPLEX,
+        "lineType": cv2.LINE_AA,
         "fontScale": 0.5,
         "color": (255, 255, 255)
     }
@@ -50,7 +55,8 @@ class BoundingBoxManager(object):
                         cv2.rectangle(frame, p1, p2,
                                       **self.SELECTED_BOX_DISPLAY)
                 else:
-                    cv2.rectangle(frame, p1, p2, **self.BOX_DISPLAY)
+                    cv2.rectangle(frame, p1, p2,
+                                  **self.BOX_DISPLAY)
                 cv2.putText(frame, str(id), (p1[0] + 2, p1[1] + 15),
                             **self.BOX_I_DISPLAY)
         return frame

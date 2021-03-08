@@ -167,7 +167,7 @@ class InternaSelectionMode(InternalMode):
 class InternalBBoxMode(InternalMode):
     BOX_DRAWING_DISPLAY = {
         "color": (150, 255, 150),
-        "lineType": 2,
+        "lineType": cv2.LINE_AA,
         "thickness": 2
     }
     DEFAULT_CLASS = "NONE"
@@ -315,7 +315,8 @@ class InternalBBoxMode(InternalMode):
 
     def modify_frame(self, frame, i):
         if self.irb.has_initial_point():
-            cv2.rectangle(frame, self.irb.get_initial_point(), self.mouse_position, **self.BOX_DRAWING_DISPLAY)
+            cv2.rectangle(frame, self.irb.get_initial_point(),
+                          self.mouse_position, **self.BOX_DRAWING_DISPLAY)
         return frame
 
     def get_state_message(self):

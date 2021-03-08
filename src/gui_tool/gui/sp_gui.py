@@ -269,25 +269,25 @@ class Section(object):
 class SplitManager(object):
     # Color in BGR
     SPLIT_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+        "fontFace": cv2.FONT_HERSHEY_DUPLEX,
         "fontScale": 1,
         "thickness": 2,
         "color": (153, 51, 51)
     }
     DELETED_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+        "fontFace": cv2.FONT_HERSHEY_DUPLEX,
         "fontScale": 1,
         "thickness": 2,
         "color": (10, 10, 204)
     }
     ACTIVE_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+        "fontFace": cv2.FONT_HERSHEY_DUPLEX,
         "fontScale": 1,
         "thickness": 2,
         "color": (51, 204, 51)
     }
     ENUM_DISPLAY = {
-        "fontFace": cv2.FONT_HERSHEY_SIMPLEX,
+        "fontFace": cv2.FONT_HERSHEY_DUPLEX,
         "fontScale": 0.5,
         "thickness": 1,
         "color": (150, 150, 150)
@@ -413,13 +413,15 @@ class SplitManager(object):
                 color = f_by_status(sec.status)["color"]
                 cv2.rectangle(frame, (t(sec.start - 1), 10), (t(sec.end), 20),
                               color,
-                              thickness=-1)
+                              thickness=-1,
+                              lineType=cv2.LINE_AA)
             on_split = loc == 0
             for sec in self.secs[:-1]:
                 mark_loc = t(sec.end)
                 cv2.rectangle(frame, (mark_loc - 1, 8), (mark_loc + 1, 22),
                               self.SPLIT_DISPLAY["color"],
-                              thickness=-1)
+                              thickness=-1,
+                              lineType=cv2.LINE_AA)
                 if mark_loc == current_x:  # Having current ontop of split when it is not a split is misleading
                     if sec.end > loc:
                         current_x -= 1
@@ -429,11 +431,13 @@ class SplitManager(object):
                         on_split = True
             cv2.rectangle(frame, (current_x - 1, 5), (current_x + 1, 25),
                           self.CURRENT_LOC_COLOR,
-                          thickness=-1)
+                          thickness=-1,
+                          lineType=cv2.LINE_AA)
             if on_split:
                 cv2.rectangle(frame, (current_x, 5), (current_x, 25),
                               self.SPLIT_DISPLAY["color"],
-                              thickness=-1)
+                              thickness=-1,
+                              lineType=cv2.LINE_AA)
 
         build_minimap()
 
@@ -504,6 +508,7 @@ class SplitManager(object):
                 (get_location(p.text, p.x_loc, p.formatter),
                  (p.line_num + 1) * 30 + 25),
                 **p.formatter,
+                lineType=cv2.LINE_AA
             )
 
         if DEBUG_MODE:
