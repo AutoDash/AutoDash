@@ -52,24 +52,23 @@ class CsvExporter(iExecutor):
             (FRAME, np.int),
             (ID, np.int),
             (CLASS, np.object),
-            (X1, np.int),
-            (Y1, np.int),
-            (X2, np.int),
-            (Y2, np.int),
+            (X1, np.float),
+            (Y1, np.float),
+            (X2, np.float),
+            (Y2, np.float),
             (HAS_COLLISION, np.int),
         ]
 
-        bbs = np.array(bbs, dtype=dtype)
-        frames = np.array(bbs[FRAME])
+        data = np.array(bbs, dtype=dtype)
 
-        data = np.array([*zip(frames, bbs[ID], bbs[CLASS], 
-            bbs[X1], bbs[Y1], bbs[X2], bbs[Y2], bbs[HAS_COLLISION])], dtype=str)
+        #data = np.array([*zip(frames, bbs[ID], bbs[CLASS], 
+        #    bbs[X1], bbs[Y1], bbs[X2], bbs[Y2], bbs[HAS_COLLISION])])
 
         # Sort data by object id
-        data = data[np.argsort(data[:,1].astype(int)), ...]
+        data = np.sort(data, order=ID)
 
         # Group data by object id
-        _, unique_indices = np.unique(data[:,1], return_index=True)
+        _, unique_indices = np.unique(data[ID], return_index=True)
         data = np.split(data, unique_indices[1:], axis=0)
 
         interp_data = []
@@ -79,20 +78,26 @@ class CsvExporter(iExecutor):
             if unique_object.shape[0] == 0:
                 continue
             # Sort data by frame
-            unique_object = unique_object[np.argsort(unique_object[:,0].astype(int)), ...]
-            time = timeframes[unique_object[:,0].astype(int)]
-            label_id = unique_object[0, 1]
-            label_class = unique_object[0, 2]
-            label_collision = unique_object[0, 7]
-            # @TODO (vroch): Need to insert nan frames for each hole in frames to prevent interpolating over holes
+            unique_object = np.sort(unique_object, order=FRAME)
+            # Deal with holes
             interp_frame = np.arange(n_frames)
-            interp_x1 = np.interp(interp_time, time, unique_object[:,3].astype(np.float), left=float('nan'), right=float('nan'))
+            holes, = np.where((unique_object[FRAME][1:] - unique_object[FRAME][:-1]) != 1)
+            # Need +1 to have correct index for insertion
+            holes = holes + 1
+            label_id = unique_object[ID][0]
+            label_class = unique_object[CLASS][0]
+            label_collision = unique_object[HAS_COLLISION][0]
+            nan_frame = (0, label_id, label_class, np.nan, np.nan, np.nan, np.nan, label_collision)
+            time = timeframes[unique_object[FRAME]]
+            unique_object = np.insert(unique_object, holes, nan_frame, axis=0)
+            time = np.insert(time, holes, np.nan)
+            interp_x1 = np.interp(interp_time, time, unique_object['x1s'], left=float('nan'), right=float('nan'))
             interp_x1 = interp_x1.clip(0, video_width - 1)
-            interp_y1 = np.interp(interp_time, time, unique_object[:,4].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_y1 = np.interp(interp_time, time, unique_object['y1s'], left=float('nan'), right=float('nan'))
             interp_y1 = interp_y1.clip(0, video_height - 1)
-            interp_x2 = np.interp(interp_time, time, unique_object[:,5].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_x2 = np.interp(interp_time, time, unique_object['x2s'], left=float('nan'), right=float('nan'))
             interp_x2 = interp_x2.clip(0, video_width - 1)
-            interp_y2 = np.interp(interp_time, time, unique_object[:,6].astype(np.float), left=float('nan'), right=float('nan'))
+            interp_y2 = np.interp(interp_time, time, unique_object['y2s'], left=float('nan'), right=float('nan'))
             interp_y2 = interp_y2.clip(0, video_height - 1)
             interp_data += [ (frame, label_id, label_class, x1, y1, x2, y2, label_collision) 
                     for (frame, x1, y1, x2, y2) 
@@ -102,19 +107,20 @@ class CsvExporter(iExecutor):
 
         
         # Sort data by frame
-        interp_data = np.array(interp_data)
-        nan_mask = np.any(np.isnan(interp_data[:,(0,3,4,5,6)].astype(np.float)), axis=1)
+        interp_data = np.array(interp_data, dtype=dtype)
+        nan_mask = np.array([list(row) for row in interp_data[['x1s','x2s','y1s','y2s']]])
+        nan_mask = np.any(np.isnan(nan_mask), axis=1)
         interp_data = interp_data[~nan_mask]
-        interp_data = interp_data[np.argsort(interp_data[:,0].astype(np.int)), ...]
-        interp_data[:,3] = np.round(interp_data[:,3].astype(np.float)).astype(np.int)
-        interp_data[:,4] = np.round(interp_data[:,4].astype(np.float)).astype(np.int)
-        interp_data[:,5] = np.round(interp_data[:,5].astype(np.float)).astype(np.int)
-        interp_data[:,6] = np.round(interp_data[:,6].astype(np.float)).astype(np.int)
+        interp_data = interp_data[np.argsort(interp_data['frames']), ...]
+        interp_data['x1s'] = np.round(interp_data['x1s'])
+        interp_data['y1s'] = np.round(interp_data['y1s'])
+        interp_data['x2s'] = np.round(interp_data['x2s'])
+        interp_data['y2s'] = np.round(interp_data['y2s'])
 
         directory = STORAGE_DIR_POSITIVES if len(collision_locations) else STORAGE_DIR_NEGATIVES
         filename = str(metadata.id) + ".csv"
         np.savetxt(directory / filename, interp_data, delimiter=',',
-            fmt='%s,%s,%s,%s,%s,%s,%s,%s',
+            fmt='%d,%d,%s,%d,%d,%d,%d,%d',
             comments='')
         stream = ffmpeg.input(item.filepath)
         stream = stream.trim(start_frame=begin, end_frame=end, duration=5)
