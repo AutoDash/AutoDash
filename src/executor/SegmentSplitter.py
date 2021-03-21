@@ -12,7 +12,7 @@ class SegmentSplitter(iExecutor):
         super().__init__(*parents)
         self.clip_len_s = SegmentSplitter.parse_time(clip_length)
         self.len_thresh_s = SegmentSplitter.parse_time(length_threshold)
-        self.frames_after_al = min(0, frames_after_al)
+        self.frames_after_al = max(0, frames_after_al)
         self.post_collision_delay = SegmentSplitter.parse_time(post_collision_delay)
 
     def split_segment(self, item):
@@ -59,8 +59,9 @@ class SegmentSplitter(iExecutor):
         for al in ALs:
             min_end = video.get_frame_after_time_elapsed(begin + metadata.start_i, self.len_thresh_s * 1000)
             # Check for minimum range
-            if al + metadata.start_i < min_end:
+            if al + metadata.start_i + self.frames_after_al < min_end:
                 begin = al
+                raise SkipSignal("Not enough time before first collision")
                 continue
             begin = video.get_frame_after_time_elapsed(metadata.start_i + al + self.frames_after_al, -self.clip_len_s * 1000)
             begin = max(0, begin - metadata.start_i)

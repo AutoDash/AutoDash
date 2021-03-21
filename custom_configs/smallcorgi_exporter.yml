@@ -8,7 +8,7 @@ processingStages:
   - executor: SegmentSplitter
     config:
       clip_length: 5s
-      length_threshold: 1s
+      length_threshold: 5s
       frames_after_al: 10
   - executor: CsvExporter
     config:
