@@ -4,14 +4,12 @@ processingStages:
   - executor: Filterer
     config:
       filter_str: is_cancelled != 1
-  - executor: ExecFilterer
-    config:
-      filter_str: len(data.bb_fields.collision_locations) > 0
   - executor: UniversalDownloader
   - executor: SegmentSplitter
     config:
       clip_length: 5s
-      length_threshold: 3s
+      length_threshold: 1s
+      frames_after_al: 10
   - executor: CsvExporter
     config:
       target_fps: 20
