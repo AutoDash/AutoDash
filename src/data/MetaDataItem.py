@@ -13,9 +13,9 @@ class MetaDataItem:
         self.title = kwargs["title"]
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
-        self.date_created = kwargs.get("date_created", get_current_time_epoch_millis())
+        self.date_created = kwargs.get("date_created",
+                                       get_current_time_epoch_millis())
         self.id = kwargs.get("id")
-        print(f'Parsing item {self.id}')
         self.collision_type = kwargs.get("collision_type")
         self.description = kwargs.get("description")
         self.location = kwargs.get("location")
