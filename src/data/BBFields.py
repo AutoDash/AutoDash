@@ -174,7 +174,7 @@ class BBFields():
             if x >= start_i and x < end_i
         ]
         if len(self.collision_locations) == 0:
-            for (iden, obj) in self.objects:
+            for obj in self.objects.values():
                 obj.has_collision = False
         return self
 
