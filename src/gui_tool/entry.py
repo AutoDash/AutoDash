@@ -15,7 +15,6 @@ from ..data.BBFields import BBFields
 
 # Lets the user tag the file. Modifies MetaDataItem in place
 def tag_file(file_loc, mdi: MetaDataItem):
-
     # Initial Tk to avoid macOS error
     t = Tk()
     t.destroy()

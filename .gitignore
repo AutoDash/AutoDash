@@ -14,3 +14,5 @@ dist/
 tools/build/
 tools/dist/
 *.mp4
+**~
+**.un~
