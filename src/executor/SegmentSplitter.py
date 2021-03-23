@@ -48,8 +48,8 @@ class SegmentSplitter(iExecutor):
             item = metadata.clone()
             item.bb_fields.crop_range(begin, end)
             item.id = metadata.id + f'-{idx}'
-            item.start_i = begin + metadata.start_i
-            item.end_i = end + metadata.start_i
+            item.start_i = int(begin + metadata.start_i)
+            item.end_i = int(end + metadata.start_i)
             items.append(item)
         return items
 
