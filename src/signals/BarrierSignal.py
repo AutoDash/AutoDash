@@ -1,0 +1,3 @@
+
+class BarrierSignal(Exception):
+    pass
