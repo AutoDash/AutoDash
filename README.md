@@ -77,3 +77,14 @@ Now you can run the readonly configuration:
 ./run --storage local --config custom_configs/review_processed_videos_readonly.yml
 ```
 This will go though the database, and display in the GUI any video that has been processed.
+
+# Troubleshooting
+## Runtime Errors
+   - If you encounter an exception `google.auth.exceptions.RefreshError` with the payload
+   ```json
+   {
+      "error": "invalid_grant",
+      "error_description": "Invalid JWT: Token must be a short-lived token (60 minutes) and in a reasonable timeframe. Check your iat and exp values and use a clock with skew to account for clock differences between systems."
+   }
+   ```
+   this most likely means that the clock time on your system is out of sync. You must synchronize your clock with the Internet using a server such as `time.nist.gov`. On Ubuntu, this can be accomplished by installing `ntpdate` and running `sudo ntpdate time.nist.gov`.
