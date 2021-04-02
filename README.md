@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/AutoDash/AutoDash.svg?branch=master)](https://travis-ci.com/AutoDash/AutoDash)
 
-AutoDash is a pipeline aggregating dashcam footage for (near-)collision incidents. The goal of this pipeline is to provide a standard dataset for studies involving car collisions from an egocentric perspective.
+AutoDash is semi-automated software Pipeline for assembling collision and near-collision dashcam footage datasets. The goal of this pipeline is to provide a standard dataset for studies involving car collisions from an egocentric perspective.
 
 # Requirements
 
