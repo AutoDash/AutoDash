@@ -29,6 +29,7 @@ def tag_file(file_loc, mdi: MetaDataItem):
                 end_index=mdi.end_i,
                 enum_tags=mdi.enum_tags,
                 to_be_deleted=mdi.to_be_deleted,
+                reckless_intervals=mdi.reckless_intervals
             )
             gui = BBGUIManager(context)
             gui.start()
@@ -65,6 +66,7 @@ def split_file(file_loc, mdi: MetaDataItem):
                 start_index=mdi.start_i,
                 end_index=mdi.end_i,
                 enum_tags=mdi.enum_tags,
+                reckless_intervals=mdi.reckless_intervals
             )
             gui = SPGUIManager(context)
             rs, bbfs = gui.start()
