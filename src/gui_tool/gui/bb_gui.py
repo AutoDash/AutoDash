@@ -158,8 +158,9 @@ class InternaSelectionMode(InternalMode):
             self.log("Marked video to {0}".format("be deleted" if par.context.to_be_deleted else "not be deleted"))
         elif key_mapper.consume("o"):
             new_location = SelectPopup("Enter location of accident", "video_locations", 10, VIDEO_LOCATION_DEFAULT_OPTIONS).run()
-            par.context.set_location(new_location)
-            self.log(f"Updated Location to {new_location}")
+            if new_location is not None:
+                par.context.set_location(new_location)
+                self.log(f"Updated Location to {new_location}")
 
 
     def get_state_message(self):
