@@ -43,14 +43,14 @@ SELECTION_MODE_INSTRUCTIONS = [
     ["i", "Mark reckless driving start and end timestamps"],
     ["u", "Clear reckless driving labels over current frame"],
     ["k", "Toggle marking video for deletion"],
-    ["o", "Opens  window for collision location"],
+    ["o", "Opens  window for video location"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
     "car", "truck", "motorcycle", "van", "pedestrian", "bus"
 ]
 
-ACCIDENT_LOCATION_DEFAULT_OPTIONS = [
+VIDEO_LOCATION_DEFAULT_OPTIONS = [
     "North America",
     "Asia",
     "Europe",
@@ -157,8 +157,8 @@ class InternaSelectionMode(InternalMode):
             par.context.mark_to_be_deleted(not par.context.to_be_deleted)
             self.log("Marked video to {0}".format("be deleted" if par.context.to_be_deleted else "not be deleted"))
         elif key_mapper.consume("o"):
-            new_location = SelectPopup("Enter location of accident", "accident_locations", 10, ACCIDENT_LOCATION_DEFAULT_OPTIONS).run()
-            par.context.set_accident_location(new_location)
+            new_location = SelectPopup("Enter location of accident", "video_locations", 10, VIDEO_LOCATION_DEFAULT_OPTIONS).run()
+            par.context.set_location(new_location)
             self.log(f"Updated Location to {new_location}")
 
 

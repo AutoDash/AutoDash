@@ -29,7 +29,7 @@ def tag_file(file_loc, mdi: MetaDataItem):
                 end_index=mdi.end_i,
                 enum_tags=mdi.enum_tags,
                 to_be_deleted=mdi.to_be_deleted,
-                accident_location=mdi.location
+                location=mdi.location
             )
             gui = BBGUIManager(context)
             gui.WINDOW_NAME = mdi.title
@@ -38,7 +38,7 @@ def tag_file(file_loc, mdi: MetaDataItem):
             mdi.bb_fields = context.get_bbox_fields()
             mdi.enum_tags = context.enum_tags
             mdi.reckless_intervals = context.reckless_intervals
-            mdi.location = context.accident_location
+            mdi.location = context.location
 
             for key, val in context.additional_tags:
                 mdi.add_tag(key, val)
