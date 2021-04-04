@@ -10,12 +10,14 @@ class BBContext(GUIContext):
                  start_index=None,
                  end_index=None,
                  enum_tags=None,
+                 accident_location="",
                  to_be_deleted=False):
         super(BBContext, self).__init__(file_loc, start_index, end_index,
                                         enum_tags, to_be_deleted)
         self.bbox_fields = bbox_fields
         self.reckless_intervals = []
         self.additional_tags = {}
+        self.accident_location = accident_location
 
     def get_bbox_fields(self):
         return self.bbox_fields
@@ -25,3 +27,6 @@ class BBContext(GUIContext):
 
     def set_additional_tags(self, tags):
         self.additional_tags = tags
+    
+    def set_accident_location(self, accident_location):
+        self.accident_location = accident_location
