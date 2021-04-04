@@ -42,12 +42,3 @@ elif [ "$(expr substr "$(uname -s)" 1 10)" == "MINGW64_NT" ]; then
     # Do something under 64 bits Windows NT platform
     echo "Windows unsupported"
 fi
-
-# Download model
-if [[ -z "${CI}" ]] ; then
-  mkdir "${BASEDIR}/../model"
-  cd "${BASEDIR}/../model"
-  curl -O http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_kitti_2018_01_28.tar.gz
-  tar -xvf faster_rcnn_resnet101_kitti_2018_01_28.tar.gz
-  rm faster_rcnn_resnet101_kitti_2018_01_28.tar.gz
-fi 
