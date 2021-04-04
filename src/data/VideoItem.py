@@ -1,6 +1,5 @@
 from .MetaDataItem import MetaDataItem
 import hashlib
-import numpy as np
 import skvideo.io
 
 class VideoItem:
