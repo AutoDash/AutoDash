@@ -71,16 +71,19 @@ def main():
     # Set up pipeline configuration
     config = PipelineConfiguration()
     config.read(f"{get_project_root()}/{args['config']}")
-    run(config, **args)
+
+    #set up database
+    database = get_database(database_arg_mapper.get(args['storage'], None))
+
+    run(config, database, **args)
 
 
 paused_queue = []
 
-def run(pipeline, **args):
+def run(pipeline, database, **args):
 
     # Set up services
     source_executors, output_executor = pipeline.generate_graph()
-    database = get_database(database_arg_mapper.get(args['storage'], None))
     dataUpdater = DataUpdater()
     dataUpdater.set_database(database)
     print(f"database: {database}")

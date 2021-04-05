@@ -9,6 +9,8 @@ from src.data.MetaDataItem import MetaDataItem
 
 events = Queue()
 
+# TODO: UPDATE WITH MOCK DB
+
 class TestExecutor(iExecutor):
     def __init__(self, event_num, parents=[]):
         super().__init__(parents=parents)
