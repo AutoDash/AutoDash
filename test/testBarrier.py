@@ -8,6 +8,8 @@ from src.executor.iExecutor import iExecutor
 from src.pipeline import run as administrator
 from test.mock.MockDataAccessor import MockDataAccessor
 
+class testCountExecutor(iExecutor):
+    count = 0
 
 class testExecutorSource(iExecutor):
     def run(self, ignore):
@@ -16,14 +18,16 @@ class testExecutorSource(iExecutor):
             items.append(MetaDataItem(title=None, url=None, download_src=None))
         return items
 
-class testExecutorBeforeBarrier(iExecutor):
+class testExecutorBeforeBarrier(testCountExecutor):
     def run(self, item):
         print("Before Barrier")
+        testCountExecutor.count += 1
         return item
 
-class testExecutorAfterBarrier(iExecutor):
+class testExecutorAfterBarrier(testCountExecutor):
     def run(self, item):
         print("After Barrier")
+        assert(testCountExecutor.count == 5)
         return item
 
 class TestExecutorFactory:
