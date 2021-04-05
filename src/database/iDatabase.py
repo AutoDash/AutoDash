@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
+from collections.abc import Iterator
 
 from ..data.FilterCondition import FilterCondition
 from ..data.MetaDataItem import MetaDataItem
@@ -35,6 +36,14 @@ class iReadOnlyDatabase(ABC):
     @abstractmethod
     def fetch_newest_videos(self, last_id: str = None,
                                   filter_cond: FilterCondition = None) -> List[MetaDataItem]:
+        pass
+
+    @abstractmethod
+    def metadata_exists(self, id: str) -> bool:
+        pass
+
+    @abstractmethod
+    def url_exists(self, url: str) -> bool:
         pass
 
 

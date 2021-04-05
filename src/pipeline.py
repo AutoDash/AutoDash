@@ -15,7 +15,8 @@ import copy
 
 database_arg_mapper = {
     'firebase': DatabaseConfigOption.firebase,
-    'local': DatabaseConfigOption.local
+    'local': DatabaseConfigOption.local,
+    'firestore': DatabaseConfigOption.firestore,
 }
 
 # Needed for PyInstaller to work :(

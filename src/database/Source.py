@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterator
 
 from ..data.FilterCondition import FilterCondition
 from ..data.MetaDataItem import MetaDataItem
@@ -17,9 +17,9 @@ class Source(iDatabaseExecutor):
         else:
             self.cond = FilterCondition(filter_str)
 
-        self.data = []
+        self.data = None
 
-    def __load_data(self, cond) -> List[MetaDataItem]:
+    def __load_data(self, cond) -> Iterator[MetaDataItem]:
         # Prioritize passed-in filter condition over class cond
         if cond is None:
             cond = self.cond
@@ -28,7 +28,7 @@ class Source(iDatabaseExecutor):
     def run(self, cond: FilterCondition = None) -> MetaDataItem:
         if not self.data:
             self.data = self.__load_data(cond)
-        return self.data.pop(0)
+        return next(self.data)
 
     def register_shared(self, manager):
         manager.register_executor('Source', self)
