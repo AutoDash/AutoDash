@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Iterator, List
 
 import firebase_admin
 from firebase_admin import credentials, db
@@ -85,7 +85,7 @@ class FirebaseAccessor(iDatabase):
 
 
     def fetch_newest_videos(self, last_id: str = None,
-                                  filter_cond: FilterCondition = None) -> List[MetaDataItem]:
+                                  filter_cond: FilterCondition = None) -> Iterator[MetaDataItem]:
         metadata_ref = self.__metadata_reference()
 
         # Keys are timestamp based and therefore ordering them by key gets them in the order they were added
@@ -104,7 +104,7 @@ class FirebaseAccessor(iDatabase):
         if filter_cond is not None:
             result = filter_cond.filter(result)
 
-        return result
+        return iter(result)
 
 
     def publish_new_metadata(self, metadata: MetaDataItem) -> str:
@@ -124,8 +124,7 @@ class FirebaseAccessor(iDatabase):
     def update_metadata(self, metadata: MetaDataItem):
         ref = self.__metadata_reference()
 
-        existing_ids = self.__query_keys(ref)
-        if metadata.id not in existing_ids:
+        if not self.metadata_exists(metadata.id):
             raise NotExistingException()
 
         ref.child(metadata.id).update(metadata.to_json())
@@ -134,8 +133,8 @@ class FirebaseAccessor(iDatabase):
     def fetch_metadata(self, id: str) -> MetaDataItem:
         ref = self.__metadata_reference()
 
-        existing_ids = self.__query_keys(ref)
-        if id not in existing_ids:
+        
+        if not self.metadata_exists(id):
             raise NotExistingException()
 
         item_dict = ref.child(id).get()
@@ -145,8 +144,16 @@ class FirebaseAccessor(iDatabase):
     def delete_metadata(self, id: str):
         ref = self.__metadata_reference()
 
-        existing_ids = self.__query_keys(ref)
-        if id not in existing_ids:
+        if not self.metadata_exists(id):
             raise NotExistingException()
 
         ref.child(id).delete()
+
+    def metadata_exists(self, id:str) -> bool:
+        ref = self.__metadata_reference()
+
+        existing_ids = self.__query_keys(ref)
+        return id not in existing_ids
+    
+    def url_exists(self, url:str) -> bool:
+        return url in self.fetch_video_url_list()
