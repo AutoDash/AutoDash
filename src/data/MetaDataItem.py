@@ -13,7 +13,8 @@ class MetaDataItem:
         self.title = kwargs["title"]
         self.url = kwargs["url"]
         self.download_src = kwargs["download_src"]
-        self.date_created = kwargs.get("date_created", get_current_time_epoch_millis())
+        self.date_created = kwargs.get("date_created",
+                                       get_current_time_epoch_millis())
         self.id = kwargs.get("id")
         print(f'Parsing item {self.id}')
         self.collision_type = kwargs.get("collision_type")
@@ -23,7 +24,13 @@ class MetaDataItem:
         self.enum_tags = kwargs.get("enum_tags", [])
         self.is_cancelled = kwargs.get("is_cancelled", False)
         self.is_split_url = kwargs.get("is_split_url", False)
-        self.reckless_intervals = kwargs.get("reckless_intervals", [])
+
+        reckless_intervals = kwargs.get("reckless_intervals", [])
+        if reckless_intervals and isinstance(reckless_intervals[0], (dict)):
+            reckless_intervals = [(ri["start"], ri["end"])
+                                  for ri in reckless_intervals]
+
+        self.reckless_intervals = reckless_intervals
         self.to_be_deleted = kwargs.get("to_be_deleted", False)
 
         accident_locations = kwargs.get("accident_locations", [])
@@ -105,7 +112,7 @@ class MetaDataItem:
             'bb_fields': self.bb_fields.to_json(),
             'start_i': self.start_i,
             'end_i': self.end_i,
-            'reckless_intervals': self.reckless_intervals,
+            'reckless_intervals': [{"start": ri[0], "end": ri[1]} for ri in self.reckless_intervals],
             'to_be_deleted': self.to_be_deleted,
         }
 

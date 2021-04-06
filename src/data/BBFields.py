@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional, Callable
 
+
 @dataclass
 class BBox:
     frame: int
@@ -30,7 +31,13 @@ class BBox:
         return [self.x1, self.y1, self.x2, self.y2]
 
     def to_json(self):
-        return (self.frame, self.x1, self.y1, self.x2, self.y2)
+        return {
+            "frame": self.frame,
+            "x1": self.x1,
+            "y1": self.y1,
+            "x2": self.x2,
+            "y2": self.y2
+        }
 
     def shift(self, amount):
         new_frame = self.frame + amount
@@ -48,8 +55,12 @@ class BBox:
         )
 
     @staticmethod
-    def from_json(arr):
-        return BBox(*arr)
+    def from_json(data):
+        if (isinstance(data, (list, tuple))):
+            return BBox(*data)
+        else:
+            return BBox(data["frame"], data["x1"], data["y1"], data["x2"],
+                        data["y2"])
 
 
 @dataclass
@@ -206,16 +217,8 @@ class BBFields():
         data = []
         for obj in self.objects.values():
             for box in obj.bboxes.values():
-                data.append((
-                    box.frame,
-                    obj.id,
-                    obj.obj_class,
-                    box.x1,
-                    box.y1,
-                    box.x2,
-                    box.y2,
-                    obj.has_collision
-                ))
+                data.append((box.frame, obj.id, obj.obj_class, box.x1, box.y1,
+                             box.x2, box.y2, obj.has_collision))
         return data
 
     @staticmethod

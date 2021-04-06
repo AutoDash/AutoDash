@@ -1,0 +1,10 @@
+dataSources:
+  - executor: FirestoreSource
+    config:
+      filter_type: labelled
+processingStages:
+  - executor: UniversalDownloader
+  - executor: Printer
+  - executor: Labeler
+  - executor: FirestoreUpdater
+  - executor: Printer
