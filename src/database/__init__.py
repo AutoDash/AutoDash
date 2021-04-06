@@ -24,7 +24,7 @@ def get_firebase_access():
 def get_database(database_config: DatabaseConfigOption):
     if database_config is DatabaseConfigOption.local:
         database_access = LocalStorageAccessor()
-    elif database_config is DatabaseConfigOption.firebase:
+    elif database_config is DatabaseConfigOption.firestore:
         database_access = FirestoreAccessor()
     else:
         database_access = get_firebase_access()

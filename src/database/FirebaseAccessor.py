@@ -153,7 +153,7 @@ class FirebaseAccessor(iDatabase):
         ref = self.__metadata_reference()
 
         existing_ids = self.__query_keys(ref)
-        return id not in existing_ids
+        return id in existing_ids
     
     def url_exists(self, url:str) -> bool:
         return url in self.fetch_video_url_list()
