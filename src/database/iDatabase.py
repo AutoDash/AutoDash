@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
-from collections.abc import Iterator
+from typing import List, Iterator
 
 from ..data.FilterCondition import FilterCondition
 from ..data.MetaDataItem import MetaDataItem
@@ -35,7 +34,7 @@ class iReadOnlyDatabase(ABC):
 
     @abstractmethod
     def fetch_newest_videos(self, last_id: str = None,
-                                  filter_cond: FilterCondition = None) -> List[MetaDataItem]:
+                                  filter_cond: FilterCondition = None) -> Iterator[MetaDataItem]:
         pass
 
     @abstractmethod

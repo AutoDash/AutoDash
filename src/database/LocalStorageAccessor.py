@@ -83,3 +83,9 @@ class LocalStorageAccessor(iDatabase):
             result = filter_cond.filter(result)
 
         return result
+    
+    def metadata_exists(self, id: str) -> bool:
+        return id in self.fetch_video_id_list()
+    
+    def url_exists(self, url:str) -> bool:
+        return url in self.fetch_video_url_list()
