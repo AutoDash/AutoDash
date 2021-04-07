@@ -29,6 +29,7 @@ The following base configurations are specified
 | --- | --- |
 | backup_firebase_locally.yml  | Will copy the contents from the metadata storage in firebase so they can be modified locally. This is especially useful if you don't have write access to the firebase but want to add your own videos  |
 | download_videos.yml  | This will download all videos that have been added to the database to your local machine  |
+| localstorage.yml  | Will run the pipeline using the users local storage for storing metadata, and doesn't rely on firebase access  |
 | review_metadata_with_url.yml  | allows you to review a specific video's metadata (specified as the url in the configuration file)  |
 | review_processed_videos.yml  | Allows you to edit and update every video in the database that has been labeled with bounding boxes  |
 | review_unprocessed_videos.yml  | Allows you to edit and update every video in the database that has been NOT been labeled with bounding boxes  |
@@ -74,7 +75,7 @@ NOTE: we recommend using a python [virtual environment](https://virtualenvwrappe
 
 Now you can run the readonly configuration:
 ```bash
-./run --storage local --config custom_configs/review_processed_videos_readonly.yml
+./run --storage local --config custom_configs/localstorage.yml
 ```
 This will go though the database, and display in the GUI any video that has been processed.
 
