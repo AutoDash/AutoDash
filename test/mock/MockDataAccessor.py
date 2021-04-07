@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Iterator
 
 from src.data.FilterCondition import FilterCondition
 from src.data.MetaDataItem import MetaDataItem
@@ -44,7 +44,7 @@ class MockDataAccessor(iDatabase):
         return url_list
 
     def fetch_newest_videos(self, last_id: str = None,
-                                  filter_cond: FilterCondition = None) -> List[MetaDataItem]:
+                                  filter_cond: FilterCondition = None) -> Iterator[MetaDataItem]:
         if last_id is not None:
             metadata_list = self.metadata_list[int(last_id):]
         else:
@@ -52,6 +52,12 @@ class MockDataAccessor(iDatabase):
 
         metadata_list = list(filter(None, metadata_list))
         if filter_cond is not None:
-            return filter_cond.filter(metadata_list)
+            return iter(filter_cond.filter(metadata_list))
         else:
-            return metadata_list
+            return iter(metadata_list)
+    
+    def metadata_exists(self, id: str) -> bool:
+        return id in self.fetch_video_id_list()
+    
+    def url_exists(self, url:str) -> bool:
+        return url in self.fetch_video_url_list() 

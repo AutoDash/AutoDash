@@ -4,7 +4,6 @@ from enum import Enum
 
 import firebase_admin
 from firebase_admin import credentials
-from firebase_admin.firestore import client
 from google.cloud import firestore
 
 from ..data.FilterCondition import FilterCondition
@@ -52,14 +51,8 @@ class FirestoreAccessor(iDatabase):
         if not FirestoreAccessor.initialized and not FirebaseAccessor.initialized:
             self.initial_firebase()
             FirestoreAccessor.initialized = True
-        self.client = client(firebase_admin.get_app())
+        self.client = firebase_admin.firestore.client(firebase_admin.get_app())
         self.query_filter = filter if filter else QueryFilter.NONE
-
-    def fetch_next_metadata(self):
-        ref = self.__metadata_reference()
-        items = ref.stream()
-        for item in items:
-            yield self.create_metadata(item.to_dict())
 
     def __metadata_reference(self):
         return self.client.collection("metadata")
