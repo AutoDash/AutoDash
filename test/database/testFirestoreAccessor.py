@@ -4,7 +4,7 @@ from firebase_admin import credentials, firestore
 from unittest.mock import MagicMock, ANY
 from src.database.FirestoreAccessor import FirestoreAccessor, QueryFilter
 from src.database.iDatabase import NotExistingException
-from ..test_hepler import sample_mdi_dict, sample_mdi
+from ..test_helper import sample_mdi_dict, sample_mdi
 from src.data.MetaDataItem import MetaDataItem
 import os
 
