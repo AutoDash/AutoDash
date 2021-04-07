@@ -16,7 +16,7 @@ class DataUpdater(iDatabaseExecutor):
     def run(self, item: Union[MetaDataItem, VideoItem]) -> Union[MetaDataItem, VideoItem]:
         metadata = self.get_metadata(item)
 
-        if metadata.id is None or len(metadata.id) == 0 or self.database.metadata_exists(metadata.id):
+        if metadata.id is None or len(metadata.id) == 0 or not self.database.metadata_exists(metadata.id):
             if not metadata.is_split_url and self.database.url_exists(metadata.url):
                 # The video already exists in the database, with a different id, so don't re-add it to the database
                 raise StopSignal("Video already exists in the database with a different ID")
