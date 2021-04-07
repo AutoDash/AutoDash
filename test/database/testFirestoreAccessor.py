@@ -6,6 +6,7 @@ from src.database.FirestoreAccessor import FirestoreAccessor, QueryFilter
 from src.database.iDatabase import NotExistingException
 from ..test_hepler import sample_mdi_dict, sample_mdi
 from src.data.MetaDataItem import MetaDataItem
+import os
 
 
 @pytest.fixture()
@@ -15,6 +16,7 @@ def mock_app(monkeypatch):
     monkeypatch.setattr(credentials, "Certificate", lambda x: x)
     monkeypatch.setattr(firebase_admin, "initialize_app", init_app_mock)
     monkeypatch.setattr(firebase_admin, "get_app", lambda: app_mock)
+    monkeypatch.setattr(os.path, "exists", lambda x: True)
     return init_app_mock
 
 @pytest.fixture
