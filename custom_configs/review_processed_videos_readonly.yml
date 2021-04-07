@@ -1,0 +1,12 @@
+dataSources:
+  - executor: FirebaseSource
+processingStages:
+  - executor: Filterer
+    config:
+      filter_str: tags['state'] == 'processed'
+  - executor: Filterer
+    config:
+      filter_str: is_cancelled != 1
+  - executor: UniversalDownloader
+  - executor: Labeler
+  - executor: Printer

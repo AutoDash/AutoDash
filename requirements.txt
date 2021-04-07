@@ -6,10 +6,10 @@ youtube_dl==2020.11.12
 praw==6.4.0
 opencv-python>=4.2.0.34
 python-dotenv==0.10.3
-pyyaml==5.3.1
+pyyaml==5.4
 sk-video==1.1.10 
 tensorflow==2.2.1
 pymediainfo==4.2.1
-numpy>=1.18.5
+numpy==1.18.5
 ffmpeg-python==0.2.0
 pytest==6.2.2

@@ -39,14 +39,23 @@ SELECTION_MODE_INSTRUCTIONS = [
         "Pressing n the first time will mark the video as not dashcam"],
     ["t", "Opens window for user customizable key-value tags"],
     ["v", "Opens window for user customizable enum tags"],
-    ["l", "Mark collision location"],
+    ["l", "Mark collision location frame"],
     ["i", "Mark reckless driving start and end timestamps"],
     ["u", "Clear reckless driving labels over current frame"],
     ["k", "Toggle marking video for deletion"],
+    ["o", "Opens  window for video location"],
 ]
 
 BB_CLASS_DEFAULT_OPTIONS = [
     "car", "truck", "motorcycle", "van", "pedestrian", "bus"
+]
+
+VIDEO_LOCATION_DEFAULT_OPTIONS = [
+    "North America",
+    "Asia",
+    "Europe",
+    "Russia",
+    "Australia"
 ]
 
 class BBGUIManager(VideoPlayerGUIManager):
@@ -147,6 +156,11 @@ class InternaSelectionMode(InternalMode):
         elif key_mapper.consume("k"):
             par.context.mark_to_be_deleted(not par.context.to_be_deleted)
             self.log("Marked video to {0}".format("be deleted" if par.context.to_be_deleted else "not be deleted"))
+        elif key_mapper.consume("o"):
+            new_location = SelectPopup("Enter location of accident", "video_locations", 10, VIDEO_LOCATION_DEFAULT_OPTIONS).run()
+            if new_location is not None:
+                par.context.set_location(new_location)
+                self.log(f"Updated Location to {new_location}")
 
 
     def get_state_message(self):
