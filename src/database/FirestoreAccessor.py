@@ -109,10 +109,6 @@ class FirestoreAccessor(iDatabase):
         metadata.id = doc.id
         return doc.id
 
-    def metadata_exists(self, metadata: MetaDataItem) -> bool:
-        ref = self.__metadata_reference()
-        return ref.document(metadata.id).exists
-
     def update_metadata(self, metadata: MetaDataItem):
         ref = self.__metadata_reference()
 
