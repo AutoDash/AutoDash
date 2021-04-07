@@ -1,0 +1,24 @@
+dataSources:
+  - executor: YoutubeCrawler
+  - executor: RedditCrawler
+processingStages:
+  - executor: Filterer
+  - executor: Filterer
+    config:
+      filter_str: 'is_cancelled != 1'
+  - executor: Filterer
+    config:
+      filter_str: "tags['state'] != 'in-progress'"
+  - executor: AutoLabeler
+    config:
+      key: "state"
+      val: "in-progress"
+  - executor: UniversalDownloader
+  - executor: Printer
+  - executor: Splitter
+  - executor: Labeler
+  - executor: AutoLabeler
+  - executor: Printer
+    config:
+      msg: "labelling complete"
+  - executor: LocalStorageUpdater
