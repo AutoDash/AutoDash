@@ -86,11 +86,70 @@ For certain executors, additional software is required. Note that these are not 
 On linux, ffmpeg can simply be installed with `sudo apt-get install ffmpeg`
 
 # Usage
-
 Once the pipeline has been setup, you can get started by running the local storage configuration (or any other configurations as described above):
 ```bash
 ./run --storage local --config custom_configs/localstorage.yml
 ```
+
+With no options supplied, `./run` executes the default pipeline configuration which contains the following steps:
+1. Fetches a video URL from our database of dashcam videos
+2. Downloads the video to your local storage
+3. Opens the labelling tool with the now edited video so you can label video information
+
+## Labelling
+The Labeler executor allows you to manually annotate a video with metadata fields that require human inspection to fill in. It first opens a new GUI window with a video player and begins accepting a combination of mouse and keyboard shortcuts as input.
+
+An example of the GUI (in Selection mode) is shown below. There are 2 modes - Selection and Bounding Box mode - which will be elaborated on below. 
+The logs on the right of the black region show a history of past actions, and will state which frames, indexes, and bounding boxes are impacted by previous commands. It may also offer suggestions and warnings depending on user activity. 
+The left of the black region shows the current mode, along with mode-specific states. The information within will be elaborated on below.
+The bounding boxes of objects are drawn, along with their object ids. If an object is marked as part of an accident, its bounding box will be shown in blue. If it isn’t, it will be shown in white.
+
+The GUI in Selection mode. A blue bounding box means the object was involved in an accident
+
+**Labeller commands**:
+The 3 trackbar at the top are:
+- Progress: Shows the current frame. The user can jump to any frame by clicking on the trackbar
+- Frame delay: The number of milliseconds between frames, and corresponds to the frame rate. A lower frame delay results in a faster video
+- Pause: Shows whether the video player is paused. The GUI continues to accept commands while the video is paused
+The GUI has be following general and navigation controls:
+- <H>: Display the control mappings
+- <Esc>: Abort all changes and restart
+- <Enter>: Commit all changes, and exit
+- Exit [x] button: Abort all changes and exit
+- <T>: Open a separate window for attaching custom tags in the form of key-value pairs to the video, which can later be filtered or searched on
+- <W>, <S>, <A>, <D>: Fine-grained navigation commands, for traversing the video frame by frame. They correspond to moving 10 frames forward, 10 frames back, 1 frame back, and 1   frame forward respectively. It is recommended to use these commands while the video is paused
+- <Space>: Toggle pause
+- <Tab>: Toggle between the 2 GUI modes, as elaborated on below
+**Selection Mode**:
+In Selection mode, the GUI offers the general controls along with these additional controls:
+- Left click: Click on an object’s bounding box to toggle whether it is part of collision or not. Objects selected as part of a collision will have a blue bounding box
+- <N>: Toggle whether the video is taken from a dashcam. By default, videos are assumed to be dashcam videos. If a video is marked as not a dashcam video and the change is committed, it will not continue down the pipeline
+**Bounding Box Mode**:
+Bounding Box mode is for the manipulation of bounding boxes and object-specific properties. It offers the general controls along with these additional controls:
+- Left click and drag: Draw a bounding box. This will be used as input for other commands. While drawing, the box currently being drawn will be shown in green.
+- <I>: Open a separate window with 2 text inputs: object id and class. Any further changes in this mode will modify the selected object’s bounding boxes and properties
+  If the id corresponds to an existing object, further commands will modify the existing object. The class of the object will not be overwritten with this command, but the logs   will display a warning if the input class is different from the original
+  If the id does not exist, it will be added once its first bounding box is committed.
+- <U>: Update the class of the currently selected object, overwriting it with the class input set by <I>
+- <R>: Reset all bounding box inputs
+- <B>: Commit a bounding box update, based on the last 2 bounding box inputs. The User should draw bounding boxes at the starting and ending frames, and then press b. The     bounding box will be automatically interpolated in between, so it is not necessary to draw every frame.
+- <C>: Clear bounding boxes for the selected object with a range. The user should click on the starting and ending frames, and then press c.
+- <P>: Prune all object ids that have no bounding boxes. This situation occurs when the user clears all bounding boxes for the given object.
+
+
+The GUI in Bounding Box mode. The bounding box currently being drawn is in green
+GUI Mode Specific State Information
+
+
+In Selection mode,  the information displayed is 
+Number of objects selected as a participant in a collision
+The total number of objects
+Whether this video is marked as a dashcam video
+
+In Bounding Box mode, the information displayed is
+The target object and class, as set by <I>. Whether this id corresponds to a existing or new object is also shown
+The frames of the last 2 drawn bounding box inputs. It will display only 1 if there is only 1 available, or so “No Input” if none is set
+If the mouse is currently clicking and dragging, the “Drawing from” and “Drawing to” selection shows coordinates of bounding box currently being drawn
 
 # Troubleshooting
 ## Runtime Errors
