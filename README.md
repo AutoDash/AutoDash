@@ -142,18 +142,17 @@ Bounding Box mode is for the manipulation of bounding boxes and object-specific 
 
 
 The GUI in Bounding Box mode. The bounding box currently being drawn is in green
-GUI Mode Specific State Information
 
+**GUI Mode Specific State Information**
+In Selection mode, the information displayed is:
+- Number of objects selected as a participant in a collision
+- The total number of objects
+- Whether this video is marked as a dashcam video
 
-In Selection mode,  the information displayed is 
-Number of objects selected as a participant in a collision
-The total number of objects
-Whether this video is marked as a dashcam video
-
-In Bounding Box mode, the information displayed is
-The target object and class, as set by <I>. Whether this id corresponds to a existing or new object is also shown
-The frames of the last 2 drawn bounding box inputs. It will display only 1 if there is only 1 available, or so “No Input” if none is set
-If the mouse is currently clicking and dragging, the “Drawing from” and “Drawing to” selection shows coordinates of bounding box currently being drawn
+In Bounding Box mode, the information displayed is:
+- The target object and class, as set by `<I>`. Whether this id corresponds to a existing or new object is also shown
+- The frames of the last 2 drawn bounding box inputs. It will display only 1 if there is only 1 available, or so “No Input” if none is set
+- If the mouse is currently clicking and dragging, the “Drawing from” and “Drawing to” selection shows coordinates of bounding box currently being drawn
 
 # Troubleshooting
 ## Runtime Errors
