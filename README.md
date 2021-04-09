@@ -16,11 +16,15 @@ All Python dependencies can be found in [requirements.txt](./requirements.txt)
 
 # Tests
 
-You can run tests using the [run_tests.sh](./tools/run_tests.sh) file
+You can run tests using the [run_tests.sh](./tools/run_tests.sh) script:
+
+```bash
+./tools/run_tests.sh
+```
 
 # Pipeline Configurations
 All pipeline configurations can be found in the `custom_configs` folder.
-To run a specific configuration, add the argument `--config <configuration_path>` 
+To run a specific configuration, add the argument `--config <configuration_path>`. 
 
 e.g. `./run --config custom_configs/smallcorgi_exporter.yml`
 
