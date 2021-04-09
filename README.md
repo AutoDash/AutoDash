@@ -2,13 +2,13 @@
 
 [![Build Status](https://travis-ci.com/AutoDash/AutoDash.svg?branch=master)](https://travis-ci.com/AutoDash/AutoDash)
 
-AutoDash is semi-automated software Pipeline for assembling collision and near-collision dashcam footage datasets. The goal of this pipeline is to provide a standard dataset for studies involving car collisions from an egocentric perspective.
+AutoDash is a semi-automated software Pipeline for assembling collision and near-collision dashcam footage datasets. The goal of this pipeline is to provide a standard dataset for studies involving car collisions from an egocentric perspective.
 
 # Requirements
 
 You will need Python 3.7. It's also possible to use package binaries from our release builds.
 
-In order to use most of the out of the box configs, write access to the AutoDash firebase is required. Please contact us for more info.
+In order to use most of the out-of-the-box configs, write access to our Firebase instance is required. Please contact us for more info.
 
 # Dependencies
 
