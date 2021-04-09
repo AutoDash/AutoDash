@@ -145,6 +145,7 @@ The GUI in Bounding Box mode. The bounding box currently being drawn is in green
 
 **GUI Mode Specific State Information**
 In Selection mode, the information displayed is:
+
 - Number of objects selected as a participant in a collision
 - The total number of objects
 - Whether this video is marked as a dashcam video
