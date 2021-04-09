@@ -104,6 +104,9 @@ The logs on the right of the black region show a history of past actions, and wi
 The left of the black region shows the current mode, along with mode-specific states. The information within will be elaborated on below.
 The bounding boxes of objects are drawn, along with their object ids. If an object is marked as part of an accident, its bounding box will be shown in blue. If it isn’t, it will be shown in white.
 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/16710726/114127731-cd4a1e80-98c8-11eb-86e0-b23c6366a480.png" width="600" title="hover text">
+</p>
 The GUI in Selection mode. A blue bounding box means the object was involved in an accident.
 
 **Trackbars**:
@@ -140,8 +143,10 @@ Bounding Box mode is for the manipulation of bounding boxes and object-specific 
 - `<C>`: Clear bounding boxes for the selected object with a range. The user should click on the starting and ending frames, and then press c.
 - `<P>`: Prune all object ids that have no bounding boxes. This situation occurs when the user clears all bounding boxes for the given object.
 
-
-The GUI in Bounding Box mode. The bounding box currently being drawn is in green
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/16710726/114127877-20bc6c80-98c9-11eb-9ffc-eedbb9ac63e3.png" width="600" title="hover text">
+</p>
+The GUI in Bounding Box mode. The bounding box currently being drawn is in green.
 
 **GUI Mode Specific State Information**
 In Selection mode, the information displayed is:
