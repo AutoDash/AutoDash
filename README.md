@@ -24,7 +24,7 @@ To run a specific configuration, add the argument `--config <configuration_path>
 
 e.g. `./run --config custom_configs/smallcorgi_exporter.yml`
 
-The following base configurations are specified
+The following base configurations are specified:
 | Configuration  | Description |
 | --- | --- |
 | backup_firebase_locally.yml  | Will copy the contents from the metadata storage in firebase so they can be modified locally. This is especially useful if you don't have write access to the firebase but want to add your own videos  |
@@ -65,7 +65,7 @@ pip3 install --upgrade pip
 ```
 to ensure newer versions of packages can be fetched by pip.
 
-NOTE: we recommend using a python [virtual environment](https://virtualenvwrapper.readthedocs.io/en/latest/) for installing the python code so the packages don't conflict with any other python projects
+NOTE: we recommend using a python [virtual environment](https://virtualenvwrapper.readthedocs.io/en/latest/) for installing the python dependencies so that the packages don't conflict with any other python projects.
 
 
 Now you can run the readonly configuration:
@@ -85,7 +85,7 @@ on Linux, can be installed with `sudo apt-get install python3-tk`
 
 ### Additional Software
 For certain executors, additional software is required. Note that these are not required for the default configuration and only for some custom configurations.
-- ffmpeg is only required for the SegmentSplitter(docs on how to install can be [found here](https://ffmpeg.org/download.html))  
+- FFMPEG is only required for the SegmentSplitter(docs on how to install can be [found here](https://ffmpeg.org/download.html))  
 On linux, ffmpeg can simply be installed with `sudo apt-get install ffmpeg`
 
 # Troubleshooting
