@@ -104,7 +104,7 @@ The logs on the right of the black region show a history of past actions, and wi
 The left of the black region shows the current mode, along with mode-specific states. The information within will be elaborated on below.
 The bounding boxes of objects are drawn, along with their object ids. If an object is marked as part of an accident, its bounding box will be shown in blue. If it isn’t, it will be shown in white.
 
-The GUI in Selection mode. A blue bounding box means the object was involved in an accident
+The GUI in Selection mode. A blue bounding box means the object was involved in an accident.
 
 **Labeller commands**:
 The 3 trackbar at the top are:
