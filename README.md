@@ -31,7 +31,7 @@ e.g. `./run --config custom_configs/smallcorgi_exporter.yml`
 The following base configurations are specified:
 | Configuration  | Description |
 | --- | --- |
-| backup_firebase_locally.yml  | Will copy the contents from the metadata storage in firebase so they can be modified locally. This is especially useful if you don't have write access to our Firebase instance but want to add your own videos.  |
+| backup_firebase_locally.yml  | Will copy the contents from the metadata storage in our Firebase instance so they can be modified locally. This is especially useful if you don't have write access to our Firebase instance but want to add your own videos.  |
 | download_videos.yml  | This will download all videos that have been added to the database to your local machine.  |
 | localstorage.yml  | Will run the pipeline using your own local storage for storing metadata, and doesn't rely on Firebase access.  |
 | review_metadata_with_url.yml  | Allows you to review a specific video's metadata (specified as the url in the configuration file).  |
