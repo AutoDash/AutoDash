@@ -106,11 +106,13 @@ The bounding boxes of objects are drawn, along with their object ids. If an obje
 
 The GUI in Selection mode. A blue bounding box means the object was involved in an accident.
 
-**Labeller commands**:
-The 3 trackbar at the top are:
+**Trackbars**:
+The 3 trackbars at the top are:
 - Progress: Shows the current frame. The user can jump to any frame by clicking on the trackbar
 - Frame delay: The number of milliseconds between frames, and corresponds to the frame rate. A lower frame delay results in a faster video
 - Pause: Shows whether the video player is paused. The GUI continues to accept commands while the video is paused
+
+**Labeller commands**
 The GUI has be following general and navigation controls:
 - `<H>`: Display the control mappings
 - `<Esc>`: Abort all changes and restart
@@ -119,11 +121,13 @@ The GUI has be following general and navigation controls:
 - `<T>`: Open a separate window for attaching custom tags in the form of key-value pairs to the video, which can later be filtered or searched on
 - `<W>, <S>, <A>, <D>`: Fine-grained navigation commands, for traversing the video frame by frame. They correspond to moving 10 frames forward, 10 frames back, 1 frame back, and 1   frame forward respectively. It is recommended to use these commands while the video is paused
 - `<Space>`: Toggle pause
-- `<Tab>`: Toggle between the 2 GUI modes, as elaborated on below
+- `<Tab>`: Toggle between the 2 GUI modes, as elaborated below
+
 **Selection Mode**:
 In Selection mode, the GUI offers the general controls along with these additional controls:
 - `<Left click>`: Click on an object’s bounding box to toggle whether it is part of collision or not. Objects selected as part of a collision will have a blue bounding box
 - `<N>`: Toggle whether the video is taken from a dashcam. By default, videos are assumed to be dashcam videos. If a video is marked as not a dashcam video and the change is committed, it will not continue down the pipeline
+
 **Bounding Box Mode**:
 Bounding Box mode is for the manipulation of bounding boxes and object-specific properties. It offers the general controls along with these additional controls:
 - `<Left click and drag>`: Draw a bounding box. This will be used as input for other commands. While drawing, the box currently being drawn will be shown in green.
