@@ -73,7 +73,7 @@ NOTE: we recommend using a Python [virtual environment](https://virtualenvwrappe
 
 ### Usage
 
-Once the pipeline has been setup, you can run the local storage configuration:
+Once the pipeline has been setup, you can get started by running the local storage configuration:
 ```bash
 ./run --storage local --config custom_configs/localstorage.yml
 ```
