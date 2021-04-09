@@ -42,7 +42,7 @@ The following base configurations are specified:
 | split_only_config.yml  | will run a configuration that downloads new videos from the Internet to be split into collision videos. |
 # Installation
 
-## User Setup and Usage
+## User Setup
 
 ### Automatic Setup
 We provide a script, `tools/setup.sh`, which automatically configures the pipeline for you. Simply clone the repo with `git clone https://github.com/AutoDash/AutoDash.git` and run the following:
@@ -71,13 +71,6 @@ to ensure newer versions of packages can be fetched by pip.
 
 NOTE: we recommend using a Python [virtual environment](https://virtualenvwrapper.readthedocs.io/en/latest/) for installing the Python dependencies so that the packages don't conflict with any other Python projects.
 
-### Usage
-
-Once the pipeline has been setup, you can get started by running the local storage configuration:
-```bash
-./run --storage local --config custom_configs/localstorage.yml
-```
-
 ## Developer Installation
 
 ### Required Software
@@ -91,6 +84,13 @@ on Linux, can be installed with `sudo apt-get install python3-tk`
 For certain executors, additional software is required. Note that these are not required for the default configuration and only for some custom configurations.
 - FFMPEG is only required for the SegmentSplitter(docs on how to install can be [found here](https://ffmpeg.org/download.html))  
 On linux, ffmpeg can simply be installed with `sudo apt-get install ffmpeg`
+
+# Usage
+
+Once the pipeline has been setup, you can get started by running the local storage configuration (or any other configurations as described above):
+```bash
+./run --storage local --config custom_configs/localstorage.yml
+```
 
 # Troubleshooting
 ## Runtime Errors
