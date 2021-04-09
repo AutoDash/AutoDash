@@ -107,7 +107,8 @@ The bounding boxes of objects are drawn, along with their object ids. If an obje
 <p align="center">
   <img src="https://user-images.githubusercontent.com/16710726/114127731-cd4a1e80-98c8-11eb-86e0-b23c6366a480.png" width="600" title="hover text">
 </p>
-The GUI in Selection mode. A blue bounding box means the object was involved in an accident.
+*The GUI in Selection mode. A blue bounding box means the object was involved in an accident.*
+
 
 **Trackbars**:
 The 3 trackbars at the top are:
@@ -146,7 +147,8 @@ Bounding Box mode is for the manipulation of bounding boxes and object-specific 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/16710726/114127877-20bc6c80-98c9-11eb-9ffc-eedbb9ac63e3.png" width="600" title="hover text">
 </p>
-The GUI in Bounding Box mode. The bounding box currently being drawn is in green.
+*The GUI in Bounding Box mode. The bounding box currently being drawn is in green.*
+
 
 **GUI Mode Specific State Information**
 In Selection mode, the information displayed is:
