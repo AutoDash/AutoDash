@@ -1,4 +1,4 @@
-﻿# AutoDash
+# AutoDash
 
 [![Build Status](https://travis-ci.com/AutoDash/AutoDash.svg?branch=master)](https://travis-ci.com/AutoDash/AutoDash)
 
@@ -12,7 +12,7 @@ In order to use most of the out-of-the-box configs, write access to our Firebase
 
 # Dependencies
 
-All dependencies can be found in [requirements.txt](./requirements.txt)
+All Python dependencies can be found in [requirements.txt](./requirements.txt)
 
 # Tests
 
@@ -55,17 +55,17 @@ git clone https://github.com/AutoDash/AutoDash.git
 cd AutoDash
 git submodule update --init --recursive
 ```
-Then install the required python packages
+Then install the required Python packages:
 ```bash
 pip3 install -r requirements.txt
 ```
-If the pip install fails, it may be becasue your version of pip is outdated, first try
+If the pip install fails, it may be becasue your version of pip is outdated, first try:
 ```bash
 pip3 install --upgrade pip
 ```
 to ensure newer versions of packages can be fetched by pip.
 
-NOTE: we recommend using a python [virtual environment](https://virtualenvwrapper.readthedocs.io/en/latest/) for installing the python dependencies so that the packages don't conflict with any other python projects.
+NOTE: we recommend using a Python [virtual environment](https://virtualenvwrapper.readthedocs.io/en/latest/) for installing the Python dependencies so that the packages don't conflict with any other Python projects.
 
 
 Now you can run the readonly configuration:
