@@ -38,22 +38,17 @@ The following base configurations are specified
 | split_only_config.yml  | will run a configuration that downloads new videos from the internet to be split into collision videos |
 # Installation
 
-## Developer Installation
+## User Setup
 
-### Required Software
-First you must have the following required software:
+### Automatic Setup
+We provide a script, `tools/setup.sh`, which automatically configures the pipeline for you. Simply clone the repo with `git clone https://github.com/AutoDash/AutoDash.git` and run the following:
 
-- Python3.7 (with Pip)
-- tkinter-py (genral docs on how to install can be [found here](https://tkdocs.com/tutorial/install.html))  
-for Linux, can be installed with `sudo apt-get install python3-tk`
+```bash
+./tools/setup.sh
+```
 
-### Additional Software
-For certain executors, additional software is required. Note that these are more unique use cases and don't have to be installed for the default configuration.
-- ffmpeg is only required for the SegmentSplitter(docs on how to install can be [found here](https://ffmpeg.org/download.html))  
-On linux, ffmpeg can simply be installed with `sudo apt-get install ffmpeg`
-
-### Setup
-To start seup, clone The repo as well as the submodules:
+### Manual Setup
+If you encounter problems with automatic setup, the following steps may help you. First clone the repo as well as the submodules:
 
 ```bash
 git clone https://github.com/AutoDash/AutoDash.git
@@ -78,6 +73,20 @@ Now you can run the readonly configuration:
 ./run --storage local --config custom_configs/localstorage.yml
 ```
 This will go though the database, and display in the GUI any video that has been processed.
+
+## Developer Installation
+
+### Required Software
+First you must have the following required software:
+
+- Python3.7 (with Pip)
+- tkinter-py (install instructions can be [found here](https://tkdocs.com/tutorial/install.html))  
+on Linux, can be installed with `sudo apt-get install python3-tk`
+
+### Additional Software
+For certain executors, additional software is required. Note that these are not required for the default configuration and only for some custom configurations.
+- ffmpeg is only required for the SegmentSplitter(docs on how to install can be [found here](https://ffmpeg.org/download.html))  
+On linux, ffmpeg can simply be installed with `sudo apt-get install ffmpeg`
 
 # Troubleshooting
 ## Runtime Errors
