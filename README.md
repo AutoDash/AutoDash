@@ -42,7 +42,7 @@ The following base configurations are specified:
 | split_only_config.yml  | will run a configuration that downloads new videos from the internet to be split into collision videos |
 # Installation
 
-## User Setup
+## User Setup and Usage
 
 ### Automatic Setup
 We provide a script, `tools/setup.sh`, which automatically configures the pipeline for you. Simply clone the repo with `git clone https://github.com/AutoDash/AutoDash.git` and run the following:
@@ -71,12 +71,12 @@ to ensure newer versions of packages can be fetched by pip.
 
 NOTE: we recommend using a Python [virtual environment](https://virtualenvwrapper.readthedocs.io/en/latest/) for installing the Python dependencies so that the packages don't conflict with any other Python projects.
 
+### Usage
 
-Now you can run the readonly configuration:
+Once the pipeline has been setup, you can run the local storage configuration:
 ```bash
 ./run --storage local --config custom_configs/localstorage.yml
 ```
-This will go though the database, and display in the GUI any video that has been processed.
 
 ## Developer Installation
 
