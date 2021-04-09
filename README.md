@@ -31,15 +31,15 @@ e.g. `./run --config custom_configs/smallcorgi_exporter.yml`
 The following base configurations are specified:
 | Configuration  | Description |
 | --- | --- |
-| backup_firebase_locally.yml  | Will copy the contents from the metadata storage in firebase so they can be modified locally. This is especially useful if you don't have write access to the firebase but want to add your own videos  |
-| download_videos.yml  | This will download all videos that have been added to the database to your local machine  |
-| localstorage.yml  | Will run the pipeline using the users local storage for storing metadata, and doesn't rely on firebase access  |
-| review_metadata_with_url.yml  | allows you to review a specific video's metadata (specified as the url in the configuration file)  |
-| review_processed_videos.yml  | Allows you to edit and update every video in the database that has been labeled with bounding boxes  |
-| review_unprocessed_videos.yml  | Allows you to edit and update every video in the database that has been NOT been labeled with bounding boxes  |
-| review_split_videos.yml  | will run a configuration that downloads videos from the database that have been `split` but not `labelled` with bounding boxes (to be used in conjunction with `split_only_config.yml`) |
-| smallcorgi_exporter.yml  | will produce a folder with csv files that contain all metadatas with 5s clips of collisions  |
-| split_only_config.yml  | will run a configuration that downloads new videos from the internet to be split into collision videos |
+| backup_firebase_locally.yml  | Will copy the contents from the metadata storage in firebase so they can be modified locally. This is especially useful if you don't have write access to our Firebase instance but want to add your own videos.  |
+| download_videos.yml  | This will download all videos that have been added to the database to your local machine.  |
+| localstorage.yml  | Will run the pipeline using your own local storage for storing metadata, and doesn't rely on Firebase access.  |
+| review_metadata_with_url.yml  | Allows you to review a specific video's metadata (specified as the url in the configuration file).  |
+| review_processed_videos.yml  | Allows you to edit and update every video in the database that has been labeled with bounding boxes.  |
+| review_unprocessed_videos.yml  | Allows you to edit and update every video in the database that has been NOT been labeled with bounding boxes.  |
+| review_split_videos.yml  | Will run a configuration that downloads videos from the database that have been `split` but not `labelled` with bounding boxes (to be used in conjunction with `split_only_config.yml`). |
+| smallcorgi_exporter.yml  | This will produce a folder with CSV files that contain all metadata of clips 5s in length.  |
+| split_only_config.yml  | will run a configuration that downloads new videos from the Internet to be split into collision videos. |
 # Installation
 
 ## User Setup and Usage
