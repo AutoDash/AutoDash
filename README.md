@@ -164,6 +164,42 @@ In Bounding Box mode, the information displayed is:
 - The frames of the last 2 drawn bounding box inputs. It will display only 1 if there is only 1 available, or so “No Input” if none is set
 - If the mouse is currently clicking and dragging, the “Drawing from” and “Drawing to” selection shows coordinates of bounding box currently being drawn
 
+
+# MetadataItem
+The following is a sample MetaDataItem for a video:
+```json
+{
+  "description":"", //Description of the video as scraped from the video hosting website
+  "download_src":"YouTube", //The site that the video was sourced from (e.g. YouTube)
+  "tags": {  // Object that contains custom user-defined tags on videos and additional data that is site- specific
+    "reddit_post_info":{
+      "id":"<post_id>"
+      "title":"title"
+    },
+    "state": "processed" //String that describes the current labelling state of the video. One of processed, in-progress, NULL
+  },
+  "title":"Title of the Video", //The title of the video from the video hosting website
+  "url":"http://www.myvideo.com", //URL that the video was fetched from
+  "is_split_url": false, //Boolean that is true if the video has been segmented into multiple MetaDataItem objects during labelling, false otherwise
+  "enum_tags": ["NoCollision"], //List of tags identifying the content of the video. New tags can be added while labelling and can identify anything important in the vi
+  "start_i": 0, //The start frame of the video segment that the bounding boxes are created for (if is_split_url is true)
+  "end_i": 60, //The end frame of the video segment that the bounding boxes are created for (if is_split_url is true)
+  "bb_fields": { //All bounding-box specific data
+    "collision_locations": [50], //List of frame numbers indicating the collision start frames
+    "objects": [ //List of all of the relevant metadata pertaining to each agent in the video (either participant or bystander)
+      {
+        "id": "1", //Unique numerical identifier that represents this object
+        "bboxes": [ //List of bounding boxes for this specific object.
+          [0, 1096, 377, 1279, 634] //Each bounding box is represented as a 1x5 array with elements: frame number, x1, y1, x2, y2
+        ],
+        "class": "car", // The class of the object (eg. "car", "pedestrian")
+        "has_collision": false, //Boolean that is true if the object is in a collision, false otherwise
+      }
+    ],
+    "resolution": [1280, 720] //List with 2 elements (width, height) representing the resolution in pixels of the video the bounding boxes were created for
+  }
+}
+```
 # Troubleshooting
 ## Runtime Errors
    - If you encounter an exception `google.auth.exceptions.RefreshError` with the payload
