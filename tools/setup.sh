@@ -10,8 +10,8 @@ cd - || exit
 cd "${BASEDIR}/.." || exit
 
 # Install requirements
-python3 -m pip install --upgrade pip
-pip3 install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 
 # Install additional dependencies
 if [ "$(uname)" == "Darwin" ]; then
