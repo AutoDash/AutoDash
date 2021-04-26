@@ -24,6 +24,8 @@ processingStages:
   #     confidence_threshold: 0.85
   # - executor: FaceBlurrer
   - executor: Splitter
+  - executor: FirebaseUpdater
+  - executor: Barrier
   - executor: Labeler
   - executor: AutoLabeler
   - executor: Printer

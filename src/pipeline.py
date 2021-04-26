@@ -7,7 +7,7 @@ from .PipelineConfiguration import PipelineConfiguration
 from .database import get_database, DatabaseConfigOption
 from .data.FilterCondition import FilterCondition
 from .utils import get_project_root
-from .signals import CancelSignal, StopSignal, SkipSignal, DeleteSignal, DriedSourceSignal
+from .signals import CancelSignal, StopSignal, SkipSignal, DeleteSignal, DriedSourceSignal, BarrierSignal
 from .database.DataUpdater import DataUpdater
 from collections.abc import Iterable
 
@@ -61,6 +61,10 @@ class PipelineCLIParser(ArgumentParser):
             raise ArgumentTypeError("%s is not a positive integer" % val)
         return intval
 
+class PausedExecutor:
+    def __init__(self, executor, item):
+        self.executor = executor
+        self.item = item
 
 def main():
     args = {**vars(PipelineCLIParser().parse_args())}
@@ -68,14 +72,19 @@ def main():
     # Set up pipeline configuration
     config = PipelineConfiguration()
     config.read(f"{get_project_root()}/{args['config']}")
-    run(config, **args)
+
+    #set up database
+    database = get_database(database_arg_mapper.get(args['storage'], None))
+
+    run(config, database, **args)
 
 
-def run(pipeline, **args):
+paused_queue = []
+
+def run(pipeline, database, **args):
 
     # Set up services
     source_executors, output_executor = pipeline.generate_graph()
-    database = get_database(database_arg_mapper.get(args['storage'], None))
     dataUpdater = DataUpdater()
     dataUpdater.set_database(database)
     print(f"database: {database}")
@@ -96,7 +105,14 @@ def run(pipeline, **args):
         executor = source_executors[i % len(source_executors)]
         item = filter_cond
         try:
-            run_recur(executor, item, dataUpdater)
+            while True:
+                run_recur(executor, item, dataUpdater)
+                if len(paused_queue) == 0:
+                    break
+                restart = paused_queue.pop(0)
+                executor = restart.executor
+                item = restart.item
+
         except DriedSourceSignal:
             # source executor has specified that it will return no more data
             source_executors.pop(i % len(source_executors))
@@ -129,6 +145,10 @@ def run_recur(source_executor, item, dataUpdater):
     except DeleteSignal:
         metadata = iExecutor.get_metadata(item)
         dataUpdater.database.delete_metadata(metadata.id)
+        return
+    except BarrierSignal:
+        pause_exec = PausedExecutor(source_executor.get_next(), item)
+        paused_queue.append(pause_exec)
         return
 
     except RuntimeError as e:
