@@ -123,7 +123,7 @@ class CsvExporter(iExecutor):
             fmt='%d,%d,%s,%d,%d,%d,%d,%d',
             comments='')
         stream = ffmpeg.input(item.filepath)
-        stream = stream.trim(start_frame=begin, end_frame=end, duration=5)
+        stream = stream.trim(start_frame=begin, end_frame=end)
         stream = ffmpeg.filter(stream, 'fps', fps=self.target_fps, round='near')
         stream = ffmpeg.setpts(stream, expr='PTS-STARTPTS')
         stream = stream.output(str(STORAGE_DIR_VIDEOS / (str(metadata.id) + '.mp4')))
